@@ -1,0 +1,101 @@
+%\begin{tikzpicture}[node distance=1.1cm,>=stealth',bend
+%angle=45,auto,scale=0.50,transform shape]
+
+\begin{tikzpicture}[node distance=1.1cm,>=stealth',bend
+  angle=45,auto,scale=1,transform shape]
+
+  \tikzstyle{place}=[circle,thick,draw=red!75,fill=red!20,minimum size=5mm]
+  \tikzstyle{transition}=[rectangle,thick,draw=blue!75,
+  			  fill=blue!20,minimum size=4mm]
+
+  \tikzstyle{every label}=[black]
+
+  \begin{scope}
+    % Petri net root
+    \node [place] (ppr1) [tokens=1]{};%,xshift=14.5cm]{};
+
+    %\node at (ppr1.west) [inner sep=1mm,label=above:{$p_{ready}$},xshift=-2mm] {};
+    \node at (ppr1.north) [above, inner sep=2.5mm] {\textbf{P$_{root}$}};
+
+    \node [transition] (tpr1) [below of=ppr1] {}
+      edge [pre]  (ppr1)
+    ;
+
+    \node [place] (ppr2) [below of=tpr1] {}
+      edge [pre] (tpr1)
+    ;
+
+    \node [transition] (tpr2) [below of=ppr2] {}
+      edge [pre]  (ppr2)
+    ;
+
+    \node [place] (ppr3) [below of=tpr2] {}
+      edge [pre] (tpr2)
+    ;
+
+    % Petri net A
+    %%\node [place] (p1) [tokens=0,label=right:{$p_{ready}$}] [xshift=-12cm]{}
+    \node [place] (pa1) [tokens=0,xshift=3cm]{} %[xshift=12.2cm] {};
+      edge [pre,bend right,dash pattern=on 2pt off 2pt,black!50!black] (tpr1);
+    \node at (pa1.north) [above, inner sep=3mm] {\textbf{A}};
+
+    \node [transition] (ta1) [below of=pa1] {}
+      edge [pre]  (pa1)
+    ;
+
+    %%in order to center tstart transition
+    \node [place] (p) [below of=ta1,circle,draw=white,fill=white] {};
+
+    \node [place] (pa2) [left of=p] {}
+      edge [pre] (ta1)
+    ;
+    \node [place] (pa3)  [right of=p] {}
+      edge [pre] (ta1)
+    ;
+    \node at (pa3.west) [left] {{$p_{started}$}};
+
+    \node [transition] (ta2) [below of=pa2] {}
+      edge [pre]  (pa2)
+    ;
+
+    \node [place] (pa4) [below of=ta2] {}
+      edge [post,bend left,dash pattern=on 2pt off 2pt,black!50!black] (tpr2)
+      edge [pre] (ta2)
+    ;
+
+
+    % Petri net B
+    \node [place] (pb1) [tokens=0,xshift=7cm]{}% [xshift=8.9cm]{};
+      edge [pre,bend right,dash pattern=on 2pt off 2pt,black!50!black] (tpr1);
+    \node at (pb1.north) [above, inner sep=3mm] {\textbf{B}};
+
+    \node [transition] (tb1) [below of=pb1] {}
+      edge [pre] (pb1);
+
+    %%in order to center tstart transition
+    \node [place] (pp) [below of=tb1,circle,draw=white,fill=white] {};
+    \node [place] (pb2) [left of=pp] {}
+      edge [pre] (tb1)
+    ;
+    \node [place] (pb3) [right of=pp] {}
+      edge [pre] (tb1)
+    ;
+
+    \node [transition] (tb2) [below of=pb2] {}
+      edge [pre]  (pb2) ;
+    \node at (tb2.east) [right] {{$t_{finish}$}};
+    \path (pa3) edge [post,bend left,green!50!black,thick] node
+    [xshift=-0.5cm,yshift=-0.5cm,green!50!black]{s2f} (tb2);
+
+    \node [place] (pb4) [below of=tb2] {}
+      edge [post,bend left,dash pattern=on 2pt off 2pt,black!50!black] (tpr2)
+      edge [pre] (tb2)
+    ;
+
+
+
+%\node[draw,rectangle,inner sep=0.8cm,fit=(pb4) (ppr1) (ppr3)] (proot) {};
+  \end{scope}
+
+\end{tikzpicture}
+%\caption{Complete Process described in the use case}

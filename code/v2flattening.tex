@@ -1,0 +1,31 @@
+\begin{codesource}[label=code:v2flattening,caption=Version 2 : Implémentation de la transformation d'aplatissement de hiérarchie de classes en Tom+Java.]
+public static VirtualRoot v2_processClass(VirtualRoot root) {
+  EList<Class> children = root.getChildren();
+  EList<Class> newChildren = `cfClassEList();
+  %match(children) {
+    cfClassEList(_*,cl@cfClass(_,_,_,cfClassEList(),_),_*) -> {
+      newChildren = `cfClassEList(flattening(cl),newChildren*); 
+    }
+  }
+  return `cfVirtualRoot(newChildren);
+}
+
+public static Class flattening(Class toFlatten) {
+  Class parent = toFlatten.getSuperclass();
+  if(parent==null) {
+    return toFlatten;
+  } else {
+    Class flattenedParent = flattening(parent);
+    EList<Attribute> head = toFlatten.getAttributes();
+    head.addAll(flattenedParent.getAttributes());
+    return `cfClass(flattenedParent.getName()+toFlatten.getName(), head, flattenedParent.getSuperclass(), 
+                                                                                           cfClassEList(), virtR);
+  }
+}
+...
+public static void main(String[] args) {
+  ...
+  VirtualRoot translator.virtR = v2_processClass(source_root);
+  ...
+}
+\end{codesource}

@@ -1,0 +1,291 @@
+% arydshln.sty		v1.0 (April 1, 1993)
+% 	by Hiroshi NAKASHIMA (nakasima@kuis.kyoto-u.ac.jp)
+%
+% Dahsed horizontal/vertical line for LaTeX array/tabular environment.
+%
+%	\hdashline		dashed \hline
+%	\cdashline		dashed \cline
+%	`:' in preamble		dashed `|'
+%
+%	\hdashlinewidth		length of dash segment (default = 4pt)
+%	\hdashlinegap		gap between dash segments (default = 4pt)
+%
+% Ussage
+%
+%	\begin{array}{|l:c:r|}		% or \begin{tabular}/\begin{tabular*}
+%	    A&B&C\\\hdashline		% draw dashed \hline
+%	    AAA&BBB&CCC\\\cdashline{1-2}% draw dashed \cline
+%	    \multicolumn{2}{|l:}{AB}&C\\
+%	    	\\hdashline\hdashline	% draw dashed \hline\hline
+%	\end{array}
+%
+%		|
+%		V
+%
+%	| A   :  B  :   C |
+%	+ - - + - - + - - +
+%	| AAA : BBB : CCC |
+%	+ - - + - - +     |
+%	| AB        :   C |
+%	+ - - + - - + - - +
+%	+ - - + - - + - - +
+%
+% Bugs
+%
+% 1. Since this style file strongly depends on the coding for array/tabular
+%    of LaTeX Version 2.09, it may be in compatible with higher versions.
+%
+% 2. Processing speed for array/tabular will become slower, even if dashed
+%    lines are not included.
+%
+% 3. `:' in preamble should not be followed by `|' nor `@'.
+%
+% 4. Gap size varies depending on the dash line length.
+
+% Modification of LaTeX's array/tabular
+
+\def\endarray{\hdl@endarray \egroup\egroup \hdl@arrayrestore}
+\def\endtabular{\hdl@endarray \egroup\egroup \hdl@arrayrestore $\egroup}
+\expandafter\let\csname endtabular*\endcsname = \endtabular
+
+\def\@array[#1]#2{\setbox\@arstrutbox=\hbox{\vrule 
+		height\arraystretch \ht\strutbox
+		depth\arraystretch \dp\strutbox
+		width\z@}%
+	\hdl@arrayinit
+	\@mkpream{#2}\edef\@preamble{\halign \noexpand\@halignto
+		\bgroup \tabskip\z@ \@arstrut \@preamble \tabskip\z@ \cr}%
+	\let\@startpbox\@@startpbox \let\@endpbox\@@endpbox
+	\hdl@preaminit
+	\if #1t\vtop \else \if#1b\vbox \else \vcenter \fi\fi
+	\bgroup \let\par\relax
+	\let\@sharp##\let\protect\relax \lineskip\z@\baselineskip\z@\@preamble}
+
+\def\@xarraycr{\@ifnextchar[{\@argarraycr}{\ifnum0=`{\fi}${}\hdl@cr}}
+\def\@xtabularcr{\@ifnextchar[{\@argtabularcr}{\ifnum0=`{\fi}\hdl@cr}}
+\def\@xargarraycr#1{\@tempdima #1\advance\@tempdima \dp \@arstrutbox 
+	\vrule \@height\z@ \@depth\@tempdima \@width\z@
+	\hdl@argcr\@tempdima}
+\def\@yargarraycr#1{\hdl@argcr{-#1}\noalign{\vskip #1}}
+
+\def\multicolumn#1#2#3{\multispan{#1}\begingroup
+	\def\hdl@arraydashrule{\ifnum\@lastchclass=6\relax
+			\@addtopreamble{\hdl@vdashrule{\hdl@currentcolumn}}%
+		\else\@tempcnta#1\advance\@tempcnta\hdl@currentcolumn
+			\@addtopreamble{\hdl@vdashrule{\the\@tempcnta}}\fi}%
+	\@mkpream{#2}%
+	\def\@sharp{#3}\let\protect\relax
+	\let\@startpbox\@@startpbox\let\@endpbox\@@endpbox
+	\hdl@preaminit
+	\@arstrut \@preamble\endgroup
+	\global\advance\hdl@currentcolumn#1\ignorespaces}
+
+\def\@addamp{\if@firstamp\@firstampfalse \else
+	\edef\@preamble{\@preamble \global\advance\hdl@currentcolumn\@ne &}%
+	\advance\hdl@columns\@ne \fi}
+\let\hdl@mkpream\@mkpream
+
+\def\@mkpream{\hdl@columns\@ne \let\hdl@vdashrule\relax \let\hdl@colhtdp\relax
+	\hdl@mkpream}
+
+\def\@arrayclassz{\ifcase \@lastchclass \@acolampacol \or \@ampacol \or
+		\or \or \@addamp \or
+		\@acolampacol \or \@firstampfalse \@acol \fi
+	\edef\@preamble{\@preamble
+		\ifcase \@chnum 
+		\hfil\hdl@putcolumn{$\relax\@sharp$}\hfil
+		\or \hdl@putcolumn{$\relax\@sharp$}\hfil
+		\or \hfil\hdl@putcolumn{$\relax\@sharp$}\fi}}
+\def\@tabclassz{\ifcase \@lastchclass \@acolampacol \or \@ampacol \or
+		\or \or \@addamp \or
+		\@acolampacol \or \@firstampfalse \@acol \fi
+	\edef\@preamble{\@preamble
+	\ifcase \@chnum 
+		\hfil\hdl@putcolumn{\@sharp\unskip}\hfil 
+		\or \hdl@putcolumn{\@sharp\unskip}\hfil 
+		\or \hfil\hskip\z@ \hdl@putcolumn{\@sharp\unskip}\fi}}
+
+\def\@testpach#1{\@chclass \ifnum \@lastchclass=\tw@ 4 \else 
+	\ifnum \@lastchclass=3 5 \else
+		\z@ \if #1c\@chnum \z@ \else
+			\if #1l\@chnum \@ne \else
+			\if #1r\@chnum \tw@ \else
+		\@chclass \if #1|\@ne \let\@arrayrule\hdl@arrayrule \else
+			\if #1:\@ne \let\@arrayrule\hdl@arraydashrule \else
+			\if #1@\tw@ \else
+			\if #1p3 \else \z@ \@preamerr 0\fi
+	\fi  \fi  \fi  \fi  \fi  \fi  \fi \fi}
+
+\def\hline{\noalign{\ifnum0=`}\fi \hrule\@height\arrayrulewidth
+	\hdl@hline\arrayrulewidth
+	\let\@tempb\hline\futurelet\@tempa\hdl@xhline}
+
+\def\@@startpbox#1{\setbox\hdl@box\vtop\bgroup\hsize#1\@arrayparboxrestore}
+\def\@@endpbox{\par\vskip\dp\@arstrutbox\egroup\hdl@colhtdp\box\hdl@box\hfil}
+
+% Register declaration
+
+\newdimen\hdashlinewidth \hdashlinewidth4pt %
+\newdimen\hdashlinegap \hdashlinegap4pt %
+\newif\ifhdl@drawing
+\newif\ifhdl@doublerule
+\newcount\hdl@totalheight \newcount\hdl@totalheightsave
+\newcount\hdl@columns
+\newcount\hdl@currentcolumn \newcount\hdl@currentcolumnsave
+\newbox\hdl@box
+\newdimen\hdl@height \newdimen\hdl@heightsave
+\newdimen\hdl@depth \newdimen\hdl@depthsave
+
+\gdef\hdl@vdashcolumn{}
+\gdef\hdl@vdashcols{}
+
+% \hdashline and \cdashline
+
+\def\hdashline{\multispan{\hdl@columns}\unskip\hdl@hcline
+	\noalign{\ifnum0=`}\fi
+	\let\@tempb\hdashline\futurelet\@tempa\hdl@xhline}
+
+\def\hdl@xhline{\ifx\@tempa\hline \hdl@ixhline\fi
+	\ifx\@tempa\hdashline \hdl@ixhline\fi
+	\ifnum0=`{\fi}}
+\def\hdl@ixhline{\vskip\doublerulesep\hdl@hline\doublerulesep}
+
+\def\hdl@hline#1{\@tempcnta#1
+	\global\advance\hdl@totalheight\@tempcnta
+	\xdef\hdl@vdashcols{\hdl@vdashcols
+		(-1,-1,/\the\@tempcnta);}}
+
+\def\hdl@hcline{\vrule\@height\arrayrulewidth\@width\hdashlinewidth
+	\hskip.5\hdashlinegap
+	\xleaders\hbox{\hskip.5\hdashlinegap
+		\vrule\@height\arrayrulewidth\@width\hdashlinewidth
+		\hskip.5\hdashlinegap}\hfill
+	\hskip.5\hdashlinegap
+	\vrule\@height\arrayrulewidth\@width\hdashlinewidth\cr
+	\noalign{\vskip-\arrayrulewidth}}
+
+\def\cdashline#1{\hdl@cline[#1]}
+\def\hdl@cline[#1-#2]{\noalign{\global\@cla#1\relax
+		\global\advance\@cla\m@ne
+		\ifnum\@cla>0\global\let\@gtempa\hdl@clinea\else
+			\global\let\@gtempa\hdl@clineb\fi
+		\global\@clb#2\relax
+		\global\advance\@clb-\@cla}\@gtempa}
+
+\def\hdl@clinea{\multispan\@cla&\multispan\@clb\unskip\hdl@hcline}
+\def\hdl@clineb{\multispan\@clb\unskip\hdl@hcline}
+
+% Initiation and preamble
+
+\def\hdl@arrayinit{
+	\hdl@totalheightsave\hdl@totalheight \global\hdl@totalheight\z@
+	\hdl@currentcolumnsave\hdl@currentcolumn \global\hdl@currentcolumn\z@
+	\hdl@heightsave\hdl@height \global\hdl@height\z@
+	\hdl@depthsave\hdl@depth \global\hdl@depth\z@
+	\edef\hdl@vdashcolumnsave{\hdl@vdashcolumn}\gdef\hdl@vdashcolumn{}%
+	\edef\hdl@vdashcolssave{\hdl@vdashcols}\gdef\hdl@vdashcols{}}
+\def\hdl@preaminit{\let\hdl@vdashrule\hdl@@vdashrule
+	\let\hdl@colhtdp\hdl@@colhtdp}
+
+\def\hdl@putcolumn#1{\setbox\hdl@box\hbox{#1}\hdl@colhtdp \box\hdl@box}
+\def\hdl@@colhtdp{%
+	\ifdim\hdl@height<\ht\hdl@box \global\hdl@height\ht\hdl@box \fi
+	\ifdim\hdl@depth<\dp\hdl@box \global\hdl@depth\dp\hdl@box\fi}
+
+\let\hdl@arrayrule\@arrayrule
+\def\hdl@arraydashrule{\ifnum\@lastchclass=6\relax
+		\@addtopreamble{\hdl@vdashrule{0}}%
+	\else \@addtopreamble{\hdl@vdashrule{\the\hdl@columns}}\fi}
+
+\def\hdl@@vdashrule#1{\xdef\hdl@vdashcolumn{\hdl@vdashcolumn#1,}}
+
+% End of row
+
+\def\hdl@cr{\cr\noalign{\hdl@@cr\z@}}
+\def\hdl@argcr#1{\cr\noalign{\hdl@@cr{#1}}}
+\def\hdl@@cr#1{
+	\ifdim\hdl@height<\ht\@arstrutbox \hdl@height\ht\@arstrutbox\fi
+	\ifdim\hdl@depth<\dp\@arstrutbox \hdl@depth\dp\@arstrutbox\fi
+	\@tempcnta\hdl@height \advance\@tempcnta\hdl@depth
+	\@tempdima#1\advance\@tempcnta\@tempdima
+	\global\advance\hdl@totalheight\@tempcnta
+	\xdef\hdl@vdashcols{\hdl@vdashcols
+		(\hdl@vdashcolumn-1,-1,/\the\@tempcnta);}%
+	\gdef\hdl@vdashcolumn{}\global\hdl@currentcolumn\z@
+	\global\hdl@height\z@ \global\hdl@depth\z@}
+
+% End of array/tabular
+
+\def\hdl@endarray{\crcr \noalign{
+	\ifdim\hdl@height=\z@
+		\ifdim\hdl@depth=\z@ \else \hdl@@cr\z@ \fi
+	\else \hdl@@cr\z@ \fi}\omit
+	\def\hdl@vdrow{}\global\let\hdl@vd\relax
+	\global\let\hdl@amp\relax \global\let\hdl@omit\relax
+	\hdl@makevd
+	\global\let\hdl@vd\hdl@@vd
+	\global\let\hdl@amp\hdl@@amp \global\let\hdl@omit\hdl@@omit
+	\hdl@vdrow\cr}
+\def\hdl@arrayrestore{\global\hdl@totalheight\hdl@totalheightsave
+	\global\hdl@currentcolumn\hdl@currentcolumnsave
+	\global\hdl@height\hdl@heightsave
+	\global\hdl@depth\hdl@depthsave
+	\xdef\hdl@vdashcolumn{\hdl@vdashcolumnsave}%
+	\xdef\hdl@vdashcols{\hdl@vdashcolssave}}
+\def\hdl@@amp{&}
+\def\hdl@@omit{\omit}
+
+\def\hdl@makevd{\@tempcnta\hdl@totalheight \@tempcntb\hdl@totalheight
+	\hdl@drawingfalse \def\@tempb{}%
+	\hdl@doublerulefalse
+	\expandafter\hdl@imakevd\hdl@vdashcols\@nil;%
+	\ifhdl@drawing \hdl@drawvd \fi
+	\edef\hdl@vdashcols{\@tempb}%
+	\ifhdl@doublerule
+		\edef\hdl@vdrow{\hdl@vdrow\hskip\doublerulesep}%
+		\let\next\hdl@makevd
+	\else
+		\advance\hdl@currentcolumn\@ne
+		\ifnum\hdl@currentcolumn>\hdl@columns \let\next\relax
+		\else
+			\ifnum\hdl@currentcolumn=\@ne
+				\edef\hdl@vdrow{\hdl@vdrow\hfil}%
+			\else
+				\edef\hdl@vdrow{\hdl@vdrow
+					\hdl@amp \hdl@omit \hfil}%
+			\fi
+			\let\next\hdl@makevd
+	\fi\fi\next}
+\def\hdl@imakevd#1;{\def\@tempa{#1}\ifx\@tempa\@nnil \let\next\relax
+	\else \hdl@iimakevd#1\let\next\hdl@imakevd \fi \next}
+\def\hdl@iimakevd(#1/#2){\hdl@iiimakevd#1\@nil
+	\edef\@tempb{\@tempb(\@tempc/#2);}\advance\@tempcntb-#2}
+\def\hdl@iiimakevd#1,#2,#3\@nil{%
+	\ifnum#1<\z@\def\@tempc{-1,-1,}%
+		\ifhdl@drawing \hdl@drawvd \hdl@drawingfalse \fi
+	\else
+		\ifnum#1=\hdl@currentcolumn \relax
+			\ifhdl@drawing \else
+				\@tempcnta\@tempcntb \hdl@drawingtrue
+			\fi
+			\def\@tempc{#2,#3}%
+			\ifnum#1=#2\relax \hdl@doubleruletrue \fi
+		\else
+			\ifhdl@drawing \hdl@drawvd \hdl@drawingfalse \fi
+			\def\@tempc{#1,#2,#3}%
+	\fi\fi}
+\def\hdl@drawvd{\advance\@tempcnta-\@tempcntb
+	\edef\hdl@vdrow{\hdl@vdrow \hdl@vd{\the\@tempcntb}{\the\@tempcnta}}}
+
+\def\hdl@@vd#1#2{\vbox to\z@{\vss\hbox{\hskip-.5\arrayrulewidth
+	\raise#1sp\vbox to#2sp{
+		\hrule\@height.5\hdashlinewidth\@width\arrayrulewidth
+		\vskip.5\hdashlinegap
+		\xleaders\vbox{\vskip.5\hdashlinegap
+			\hrule\@height\hdashlinewidth\@width\arrayrulewidth
+			\vskip.5\hdashlinegap}\vfil
+		\vskip.5\hdashlinegap
+		\hrule\@height.5\hdashlinewidth\@width\arrayrulewidth}%
+	\hskip-.5\arrayrulewidth}}}
+
+

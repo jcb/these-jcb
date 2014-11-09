@@ -1,0 +1,18 @@
+\begin{tikzpicture}[node distance=1cm,>=stealth',scale=1,transform shape, on grid, auto]%>=latex 
+  \tikzstyle{every label}=[black]
+  \begin{scope}
+
+    \node (MM) {$MM$};
+    \node (t) [below of=MM, yshift=0.2cm] {\scriptsize{conforme à}};
+    \node (m) [below of=MM] {};
+
+    \node (ms) [left of=m, xshift=-0.3cm, yshift=-0.4cm] {$m_s$};
+    \path[->] (ms) edge [dash pattern=on 2pt off 2pt] (MM);
+
+    \node (mt) [right of=m, xshift=0.3cm, yshift=-0.4cm] {$m_t$};
+    \path[->] (mt) edge [dash pattern=on 2pt off 2pt] (MM);
+
+    \path[->,thick] (ms) edge node [below,yshift=-0.2cm] {\scriptsize{Transformation endogène}} (mt);
+
+  \end{scope}
+\end{tikzpicture}

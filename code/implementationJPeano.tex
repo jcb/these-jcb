@@ -1,0 +1,53 @@
+\begin{tomcode3}[label=code:implementationJPeano,caption=Implémentation Java utilisée]
+static class JNat { }
+
+static class Jsuc extends JNat {
+  public JNat n;
+  public Jsuc() { }
+  public Jsuc(JNat n) { this.n = n; }
+  public boolean equals(Object o) {
+    if(o instanceof Jsuc) {
+      Jsuc obj = (Jsuc) o;
+      return n.equals(obj.n);
+    }
+    return false;
+  }
+} 
+
+static class Jzero extends JNat {
+  public Jzero() {}
+  public boolean equals(Object o) {
+    if(o instanceof Jzero) {
+      return true;
+    }
+    return false;
+  }
+}
+
+static class JNatList { }
+
+static class JconcJNat extends JNatList {
+  public JNat head;
+  public JNatList tail;
+  public JconcJNat() { head = null; tail = null; }
+  public JconcJNat(JNat h, JNatList ntail) {
+    head = h;
+    tail = ntail;
+  }
+  public boolean isEmpty() {
+    return (head == null && tail == null);
+  }
+  public boolean equals(Object o) {
+    if (o instanceof JconcJNat) {
+      JconcJNat obj = (JconcJNat) o;
+      if (this.isEmpty() && obj.isEmpty()) {
+        return true;
+      } else if (!this.isEmpty() && !obj.isEmpty()) {
+        return 
+          head.equals(obj.head) && tail.equals(obj.tail);
+      }
+    }
+    return false;
+  }
+}
+\end{tomcode3}

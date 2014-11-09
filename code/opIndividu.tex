@@ -1,0 +1,17 @@
+%  %op Individu zombie() {
+%    is_fsym(s) { (s instanceof Jzombie) }
+%    make() { new Jzombie() }
+%  }
+%
+\begin{tomcode3}[label=code:opIndividu,caption=Constructeur \texttt{personne}.]
+  %op Individu personne(nom:String, prenom:String, age:int) {
+    is_fsym(s) { (s instanceof Jpersonne) }
+    get_slot(nom,s) { ((Jpersonne)s).nom }
+    get_slot(prenom,s) { ((Jpersonne)s).prenom }
+    get_slot(age,s) { ((Jpersonne)s).age }
+    get_default(nom) { ''Simpson'' }
+    get_default(prenom) { ''Pierre-Gilles'' }
+    get_default(age) { 42 }
+    make(t0,t1,t2) { new Jpersonne(t0,t1,t2) }
+  }
+\end{tomcode3}

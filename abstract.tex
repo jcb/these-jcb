@@ -1,0 +1,202 @@
+% vim:spell spelllang=fr
+%TODO
+%résumé de thèse FR + EN (4000 caract max)
+%\paragraph{FR}
+%\paragraph{EN}
+%résumé de thèse vulgarisé FR + EN (1000 caract max)
+%\paragraph{FR}
+%\paragraph{EN}
+
+
+\DontNumberAbstractPages
+
+\begin{ThesisAbstract}
+  \begin{FrenchAbstract}
+  \begin{spacing}{0.95}
+
+%La certification impose des contraintes de qualité forte pour les systèmes
+%critiques. Leurs chaînes de développement se complexifiant et intégrant de plus
+%en plus couramment l'Ingénierie Dirigée par les Modèles, il est nécessaire de
+%d'utiliser des outils fiables et de vérifier les transformations opérées. La
+%réécriture est un formalisme permettant d'écrire des transformations.
+%
+%Nous nous intéressons dans cette thèse à fournir des outils et des méthodes
+%utilisant ce formalisme pour écrire des transformations de modèles
+%qualifiables.
+%
+%Dans ce travail, nous nous appuyons sur le langage {\tom}, qui intègre filtrage
+%et réécriture dans les langage généralistes comme {\java}, C ou {\ada}. Nous
+%présentons une méthode hybride de transformation de modèles par réécriture, à
+%mi-chemin entre les méthodes utilisant des outils généralistes et celles
+%s'appuyant sur des langages dédiés. Nous proposons des outils construits à
+%partir de {\tom} pour implémenter cette méthode. Nous complétons ensuite ces
+%outils par l'ajout de la notion de traçabilité qui est une exigence pour la
+%qualification du logiciel. La trace fournie peut ainsi être réutilisée à des
+%fins de vérification \emph{a posteriori}. Nous détaillons l'utilisation de nos
+%outils sur des cas d'étude et nous les évaluons, en particulier du point de vue
+%des performances.
+%
+%Ces résultats constituent donc une avancée vers le développement de logiciels
+%critiques plus fiables.
+
+%v2
+%La certification est un processus durant lequel une autorité approuve un
+%logiciel. Elle impose des contraintes de qualité forte pour les systèmes
+%critiques. Leurs chaînes de développement se complexifient et intègrent de plus
+%en plus couramment des outils issus de l'Ingénierie Dirigée par les Modèles.
+%Ces derniers permettent de générer une partie du logiciel par transformations
+%successives de modèles jusqu'au code. Il est donc nécessaire d'utiliser des
+%outils fiables et de vérifier les transformations opérées. Ils doivent
+%cependant remplir des exigences imposées par la qualification pour pouvoir être
+%intégrés dans les chaînes de développement.
+%
+%Nous nous intéressons dans cette thèse à fournir des outils et des méthodes
+%utilisant le formalisme de la réécriture pour écrire des transformations de
+%modèles qualifiables.
+%
+%Dans ce travail, nous nous appuyons sur le langage {\tom}, qui intègre des
+%fonctionnalités telles que le filtrage et la réécriture dans les langages
+%généralistes comme {\java}, C ou {\ada}. Nous présentons une méthode hybride de
+%transformation de modèles par réécriture, à mi-chemin entre les méthodes
+%utilisant des outils généralistes et celles s'appuyant sur des langages dédiés.
+%Nous proposons un outil de représentation de modèles sous la forme de termes
+%algébriques ainsi qu'une nouvelle construction {\tom} pour implémenter cette
+%méthode. Nous complétons ensuite ces outils par l'ajout d'une construction
+%implémentant la notion de traçabilité. Cette dernière fait partie des exigences
+%de qualification. La trace fournie peut ainsi être réutilisée à des fins de
+%vérification \emph{a posteriori}. Nous détaillons l'utilisation de nos outils
+%sur des cas d'étude et nous les évaluons, en particulier du point de vue des
+%performances lors du passage à l'échelle.
+%
+%Ces résultats constituent ainsi une avancée vers le développement de logiciels
+%critiques plus fiables.
+
+%v3
+La certification est un processus durant lequel une autorité approuve un
+logiciel, imposant des contraintes de qualité strictes pour les systèmes
+critiques. Or leurs chaînes de développement se complexifient et intègrent de
+plus en plus couramment des outils issus de l'Ingénierie Dirigée par les
+Modèles. Ces derniers permettent de générer une partie du logiciel par
+transformations successives de modèles jusqu'au code. Il est donc nécessaire
+d'utiliser des outils fiables et de vérifier les transformations opérées. Ils
+doivent cependant remplir des exigences imposées par la qualification pour
+pouvoir être intégrés dans les chaînes de développement.
+
+Nous nous intéressons dans cette thèse à fournir des outils et des méthodes
+utilisant le formalisme de la réécriture pour écrire des transformations de
+modèles qualifiables.
+
+Dans ce travail, nous nous appuyons sur le langage {\tom}, qui intègre des
+fonctionnalités telles que le filtrage et la réécriture dans les langages
+généralistes comme {\java}, C ou {\ada}. Nous présentons une méthode hybride de
+transformation de modèles par réécriture, à mi-chemin entre les méthodes
+utilisant des outils généralistes et celles s'appuyant sur des langages dédiés.
+Nous proposons un outil de représentation de modèles sous la forme de termes
+algébriques ainsi qu'une nouvelle construction {\tom} pour implémenter cette
+méthode. Nous complétons ensuite ces outils par l'ajout d'une construction
+implémentant la notion de traçabilité. Cette dernière fait partie des exigences
+de qualification. La trace fournie peut ainsi être réutilisée à des fins de
+vérification \emph{a posteriori}. Nous détaillons l'utilisation de nos outils
+sur des cas d'étude et nous les évaluons, en particulier du point de vue des
+performances lors du passage à l'échelle.
+
+Ces résultats constituent ainsi une avancée vers le développement de logiciels
+critiques plus fiables.
+
+
+\KeyWords{réécriture, termes, transformation, modèles, traçabilité, qualification.}
+
+    \end{spacing}
+  \end{FrenchAbstract}
+  \begin{EnglishAbstract}
+  \begin{spacing}{0.95}
+
+%Software certification requires important quality constraints for critical
+%systems. Development chains are being more and more complex.  They integrate
+%more and more often Model Driven Engineering. It is necessary to use liable
+%tools and to verify transformations. Rewriting es a formalism enabling writing
+%of those transformations.
+%  
+%We interest in this thesis in providing tools and methods, based on this
+%formalism, to write qualifiable models transformations.
+%
+%In this work, we are relying on the {\tom} language which adds %provides
+%pattern-matching and rewriting in general purpose languages such as {\java}, C
+%or {\ada}. We are presenting an hybrid method of models transformation by
+%rewriting. It fills a gap between methods using general purpose tools and the
+%ones using domain specific languages. We propose tools we built by using {\tom}
+%to implement this hybrid method. Then, we complete these tools by adding the
+%notion of traceability which is a requirement for software qualification. The
+%provided trace can be reused for back verification. We also explain the
+%mechanisms on which our tools rely. We detail the use of our tools with
+%practical case study. Then, we evaluate them, particularly from the
+%performances point of view.
+%
+%Those results can be seen as an additional step towards more liable critical
+%software development.
+
+%v1
+%During the software certification process, a piece of software is approved by
+%an authority. It requires important quality constraints for critical systems.
+%Development chains are being more and more complex. They integrate more and
+%more often tools from Model Driven Engineering. The latter allow to generate a
+%part of software by successive transformations, from models to source code.
+%Therefore it is necessary to use liable tools and to verify transformations.
+%However, they have to fulfill qualification requirements in order to be
+%integrated within development chains.
+%
+%In this thesis we study how to provide tools and methods, based on the
+%rewriting formalism, to write qualifiable models transformations.
+%
+%In this work, we are relying on the {\tom} language which adds features such as
+%pattern-matching and rewriting capabilities in general purpose languages (for
+%instance in {\java}, C or {\ada}). We present an hybrid method of models
+%transformation by rewriting. It fills a gap between methods using general
+%purpose tools and the ones using domain specific languages. We propose tools to
+%represent models as algebraic terms and a new construct within {\tom} to
+%implement this hybrid method. Then, we complete these tools by adding another
+%construct that implements the notion of traceability. The latter is a
+%requirement for software qualification. The provided trace can be reused for
+%back verification. We also explain the mechanisms on which our tools rely. We
+%detail the use of our tools with practical case study. Then, we evaluate them,
+%particularly from the performances point of view during scaling. 
+%
+%Those results can be seen as an additional step towards more liable critical
+%software development.
+
+%v2
+During the software certification process, a piece of software is approved by
+an authority. It requires important quality constraints for critical systems.
+Development chains are getting increasingly complex and integrate more and more
+tools from Model Driven Engineering. The latter allow to generate a part of
+software doing successive transformations, from models to source code.
+Therefore it is necessary to use liable tools and to verify transformations.
+However, they have to fulfill qualification requirements in order to be
+integrated within development chains.
+
+In this thesis we study how to provide tools and methods, based on the
+rewriting formalism, to write qualifiable models transformations.
+
+In this work, we are relying on the {\tom} language which adds features such as
+pattern-matching and rewriting capabilities in general purpose languages (for
+instance in {\java}, C or {\ada}). We present an hybrid method of models
+transformation by rewriting. It fills a gap between methods using general
+purpose tools and the ones using domain specific languages. We propose tools to
+represent models as algebraic terms and a new construct within {\tom} to
+implement this hybrid method. Then, we complete these tools by adding another
+construct that implements the notion of traceability. The latter is a
+requirement for software qualification. The provided trace can be reused for
+back verification. We also explain the mechanisms on which our tools rely. We
+detail the use of our tools with practical case study. Then, we evaluate them,
+particularly from the performances point of view during scaling. 
+
+Those results can be seen as an additional step towards more liable critical
+software development.
+
+\KeyWords{rewriting, terms, transformation, models, traceability, qualification.}
+
+    \end{spacing}
+  \end{EnglishAbstract}
+\end{ThesisAbstract}
+
+% vim:spell spelllang=fr

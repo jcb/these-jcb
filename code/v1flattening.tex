@@ -1,0 +1,42 @@
+%\begin{tomcode3}
+\begin{codesource}[label=code:v1flattening,caption=Version 1 : Implémentation de la transformation d'aplatissement de hiérarchie de classes en Java.]
+public static VirtualRoot v1_processClass(VirtualRoot root) {
+  org.eclipse.emf.common.util.EList<Class> newChildren =
+    new org.eclipse.emf.common.util.BasicEList<Class>();
+  for(Class cl : root.getChildren()) {
+    if(cl.getSubclass().isEmpty()) {
+      newChildren.add(flattening(cl));
+    }
+  }
+  VirtualRoot result = (VirtualRoot) ClassflatteningFactory.eINSTANCE.create(
+                          (EClass)ClassflatteningPackage.eINSTANCE.getEClassifier("VirtualRoot"));
+  result.eSet(result.eClass().getEStructuralFeature("children"), newChildren);
+  return result;
+}
+
+public static Class flattening(Class toFlatten) {
+  Class parent = toFlatten.getSuperclass();
+  if(parent==null) {
+    return toFlatten;
+  } else {
+    Class flattenedParent = flattening(parent);
+    EList<Attribute> head = toFlatten.getAttributes();
+    head.addAll(flattenedParent.getAttributes());
+    Class result = (Class)ClassflatteningFactory.eINSTANCE.
+                      create((EClass)ClassflatteningPackage.eINSTANCE.getEClassifier("Class"));
+    result.eSet(result.eClass().getEStructuralFeature("name"), flattenedParent.getName()+toFlatten.getName());
+    result.eSet(result.eClass().getEStructuralFeature("attributes"), head);
+    result.eSet(result.eClass().getEStructuralFeature("superclass"), flattenedParent.getSuperclass());
+    result.eSet(result.eClass().getEStructuralFeature("subclass"), (new BasicEList<Class>()) );
+    result.eSet(result.eClass().getEStructuralFeature("root"), virtR);
+    return result;
+  }
+}
+...
+public static void main(String[] args) {
+  ...
+  VirtualRoot translator.virtR = v1_processClass(source_root);
+  ...
+}
+\end{codesource}
+%\end{tomcode3}

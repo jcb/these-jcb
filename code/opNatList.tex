@@ -1,0 +1,19 @@
+%\begin{tomcode}[label=code:opNatList,caption=Constructeur variadique pour
+\begin{tomcode3}[label=code:opNatList,caption=Opérateur de liste d'entiers de Peano]
+%oplist NatList concNat(Nat*) {
+  is_fsym(s)         { (s instanceof JconcJNat) }
+  get_head(l)        { ((JconcJNat)l).head }
+  get_tail(l)        { ((JconcJNat)l).tail }
+  is_empty(l)        { ((JconcJNat)l).isEmpty() }
+  make_empty()       { new JconcJNat() }
+  make_insert(t,l)   { new JconcJNat(t,l) }
+}
+\end{tomcode3}
+%%oplist Nat plus(Nat*) {
+%  is_fsym(s)         { (s instanceof JconcJNat) }
+%  get_head(l)        { ((JconcJNat)l).head }
+%  get_tail(l)        { ((JconcJNat)l).tail }
+%  is_empty(l)        { ((JconcJNat)l).isEmpty() }
+%  make_empty()       { new JconcJNat() }
+%  make_insert(t,l)   { new JconcJNat(t,l) }
+%}

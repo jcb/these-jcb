@@ -1,0 +1,36 @@
+%\begin{tomcode3}[label=code:matchPeanoPlus,caption=Exemple d'utilisation du filtrage avec l'addition des entiers de Peano]
+%JNat peanoPlus(JNat t1, JNat t2) {
+%  #\tomgray{\%match(Nat t1, Nat t2) \{}#
+%    #\tomgray{x,zero() -> \{}# return #\tomgray{`x}#; #\tomgray{\}}#
+%    #\tomgray{x,suc(y) -> \{}# return #\tomgray{`suc(}#peanoPlus(#\tomgray{x}#,#\tomgray{y}#)#\tomgray{)}#; #\tomgray{\}}#
+%  #\tomgray{\}}#
+%}
+%\end{tomcode3}
+\begin{tomcode3}[label=code:matchPeanoPlus,caption=Exemple d'utilisation du filtrage avec l'addition des entiers de Peano.]
+Nat peanoPlus(Nat t1, Nat t2) {
+  #\tomgray{\%match(t1, t2) \{}#
+    #\tomgray{x, zero() -> \{}# return #\tomgray{`x}#; #\tomgray{\}}#
+    #\tomgray{x, suc(y) -> \{}# return #\tomgray{`suc(}#peanoPlus(#\tomgray{x}#,#\tomgray{y}#)#\tomgray{)}#; #\tomgray{\}}#
+  #\tomgray{\}}#
+}
+\end{tomcode3}
+%JNat plus(JNat t1, JNat t2) {
+%  %match(Nat t1, Nat t2) {
+%    x,zero() -> { return `x;}
+%    x,suc(y) -> { return `suc(plus(x,y));}
+%  }
+%}
+%%
+%Nat plus(Nat t1, Nat t2) {
+%  #\tomgray{\%match(t1, t2) \{}#
+%    #\tomgray{x,zero() -> \{}# return #\tomgray{`x}#; #\tomgray{\}}#
+%    #\tomgray{x,suc(y) -> \{}# return #\tomgray{`suc(plus(x,y))}#; #\tomgray{\}}#
+%  #\tomgray{\}}#
+%}
+%%
+%Nat plus(Nat t1, Nat t2) {
+%  %match(t1, t2) {
+%    x,zero() -> { return `x;}
+%    x,suc(y) -> { return `suc(plus(x,y));}
+%  }
+%}

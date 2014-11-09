@@ -1,0 +1,213 @@
+@INPROCEEDINGS{DRBBBCEEJK10,
+  author = {Dur\'{a}n, Francisco and Rold\'{a}n, Manuel and Bach, Jean-Christophe
+	and Balland, Emilie and Van Den Brand, Mark and Cordy, James R. and
+	Eker, Steven and Engelen, Luc and De Jonge, Maartje and Kalleberg,
+	Karl Trygve and Kats, Lennart C. L. and Moreau, Pierre-Etienne and
+	Visser, Eelco},
+  title = {The Third Rewrite Engines Competition},
+  booktitle = {Proceedings of the 8th international conference on Rewriting logic
+	and its applications},
+  year = {2010},
+  series = {WRLA'10},
+  pages = {243-261},
+  publisher = {Springer-Verlag},
+  abstract = {This paper presents the main results and conclusions of the Third
+	Rewrite Engines Competition (REC III). This edition of the competition
+	took place as part of the 8th Workshop on Rewriting Logic and its
+	Applications (WRLA 2010), and the systems ASF+SDF, Maude, Stratego/XT,
+	Tom, and TXL participated in it.},
+  acmid = {1927829},
+  isbn = {978-3-642-16309-8},
+  address = {Paphos, Cyprus},
+  location = {Paphos, Cyprus},
+  numpages = {19},
+  url = {http://dl.acm.org/citation.cfm?id=1927806.1927829}
+}
+
+@INPROCEEDINGS{Afroozeh2012,
+  author = {Afroozeh, Ali and Bach, Jean-Christophe and Brand, Mark and Johnstone,
+	Adrian and Manders, Maarten and Moreau, Pierre-Etienne and Scott,
+	Elizabeth},
+  title = {{Island Grammar-Based Parsing Using GLL and Tom}},
+  booktitle = {Software Language Engineering},
+  publisher = {Springer Berlin Heidelberg},
+  year = {2012},
+  editor = {Czarnecki, Krzysztof and Hedin, Görel},
+  volume = {7745},
+  series = {Lecture Notes in Computer Science},
+  pages = {224-243},
+  address = {Dresden, Germany},
+  crossref = {sle2012},
+  abstract = {{Extending a language by embedding within it another language presents
+	significant parsing challenges, especially if the embedding is recursive.
+	The composite grammar is likely to be nondeterministic as a result
+	of tokens that are valid in both the host and the embedded language.
+	In this paper we examine the challenges of embedding the Tom language
+	into a variety of general-purpose high level languages. Tom provides
+	syntax and semantics for advanced pattern matching and tree rewriting
+	facilities. Embedded Tom constructs are translated into the host
+	language by a preprocessor, the output of which is a composite program
+	written purely in the host language. Tom implementations exist for
+	Java, C, C#, Python and Caml. The current parser is complex and difficult
+	to maintain. In this paper, we describe how Tom can be parsed using
+	island grammars implemented with the Generalised LL (GLL) parsing
+	algorithm. The grammar is, as might be expected, ambiguous. Extracting
+	the correct derivation relies on our disambiguation strategy which
+	is based on pattern matching within the parse forest. We describe
+	different classes of ambiguity and propose patterns for resolving
+	them.}},
+  doi = {10.1007/978-3-642-36089-3_13},
+  isbn = {978-3-642-36088-6},
+  keywords = {GLL; Tom; island grammars; parsing; disambiguation},
+  url = {http://dx.doi.org/10.1007/978-3-642-36089-3_13}
+}
+
+@TECHREPORT{BACH:2009:INRIA-00121885:4,
+  author = {Bach, Jean-Christophe and Balland, Emilie and Brauner, Paul and Kopetz,
+	Radu and Moreau, Pierre-Etienne and Reilles, Antoine},
+  title = {{Tom Manual}},
+  institution = {PAREO - INRIA Lorraine - LORIA - INRIA - CNRS : UMR7503 - Universit{\'e}
+	Henri Poincar{\'e} - Nancy I - Universit{\'e} Nancy II - Institut
+	National Polytechnique de Lorraine},
+  year = {2009},
+  type = {Rapport Technique},
+  abstract = {This manual contains information for Tom version 2.7. Tom is a language
+	extension which adds new matching primitives to languages like C,
+	Java, and Caml. Although rich and complex, Tom is not a stand-alone
+	language: like a preprocessor, it strongly relies on the underlying
+	language (C, Java, or Caml), called host-language in the following.
+	To this language, Tom adds several constructs. The main construct,
+	\%match, is similar to the match primitive found in functional languages:
+	given an object (called subject) and a list of patterns-actions,
+	the match primitive selects the first pattern that matches the subject
+	and performs the associated action. The sub ject against which we
+	match can be any object, but in practice, this ob ject is usually
+	a tree-based data-structure, also called term in the algebraic programming
+	community. The match construct may be seen as an extension of the
+	classical switch/case construct. The main difference is that the
+	discrimination occurs on a term and not on atomic values like characters
+	or integers: the patterns are used to discriminate and retrieve information
+	from an algebraic data structure. There- fore, Tom is a good language
+	for programming by pattern matching, and it is particularly well-suited
+	for programming various transformations on trees/terms or Xml data-structures.},
+  affiliation = {PAREO - INRIA Lorraine - LORIA - INRIA - CNRS : UMR7503 - Universit{\'e}
+	Henri Poincar{\'e} - Nancy I - Universit{\'e} Nancy II - Institut
+	National Polytechnique de Lorraine},
+  hal_id = {inria-00121885},
+  language = {Anglais},
+  pages = {155},
+  pdf = {http://hal.inria.fr/inria-00121885/PDF/manual-2.7.pdf},
+  url = {http://hal.inria.fr/inria-00121885/en/}
+}
+
+@INPROCEEDINGS{Bach2012,
+  author = {Jean-Christophe Bach and Xavier Crégut and Pierre-Etienne Moreau and Marc Pantel},
+  title = {{Model transformations with Tom}},
+  booktitle = {Proceedings of the 12th Workshop on Language Descriptions,
+    Tools, and Applications},
+  series = {LDTA '12},
+  address = {Tallinn, Estonia},
+  location = {Tallinn, Estonia},
+  year = {2012},
+  articleno = {4},
+  pages = {4:1--4:9},
+  numpages = {9},
+  publisher = {ACM},
+  abstract = {Model Driven Engineering (MDE) advocates the use of Model Transformations
+	(MT) in order to automate repetitive development tasks. Many different
+	model transformation languages have been proposed with a significant
+	development cost as classical elements like expressions, statements,
+	. . . must be developed from scratch in each language. The Tom language
+	is a shallow extension of Java tailored to describe and implement
+	transformations of tree based data-structures. Expressions, statements
+	and many other elements rely directly on Java constructs and are
+	thus almost costless. A key feature of Tom allows to map any Java
+	data-structure to tree based data abstractions that can be accessed
+	by pattern matching. In this paper, we present how this approach
+	can be extended in order to describe model transformations, and in
+	particular EMF (Eclipse Modeling Framework) based model transformations.
+	This allows to provide a low cost transformation language both on
+	the language tool development and on the developpers training side.},
+  hal_id = {hal-00646350},
+  keywords = {model transformation;Tom;language;Java;EMF;term structure},
+  type = {inproceedings},
+  isbn = {978-1-4503-1536-4/12/03},
+  doi = {10.1145/2427048.2427052},
+  acmid = {2427052},
+  keywords = {EMF, Java, Tom, language, model transformation, term structure},
+  url = {http://doi.acm.org/10.1145/2427048.2427052}
+}
+
+@INPROCEEDINGS{Bach2012a,
+  author = {Bach, Jean-Christophe and Moreau, Pierre-Etienne and Pantel, Marc},
+  title = {{Tom-Based Tools to Transform EMF Models in Avionics Context}},
+  booktitle = {ITSLE},
+  address = {Dresden, Germany},
+  year = {2012},
+  address = {Dresden, Germany},
+  note = {To appear},
+  abstract = {{Model Driven Engineering (MDE) is now widely used in many industrial
+	contexts such as the AeroSpace domain which requires a high level
+	of system safety. Model-checking is one of the formal techniques
+	which are considered to ensure a system compliance to its requirements.
+	It relies on verification dedicated languages to model the system
+	under verification. In order to ease the use of these tools, model
+	transformations are provided that translate the end user provided
+	input model of the system to the formal languages than can be verified.
+	In order to rely on these activities for system certification, the
+	correctness of these transformation steps must be assessed (qualification
+	of the development and verification tools). One of the goal of our
+	work is to provide tools to implement the transformation steps between
+	the end user source languages used for the system development and
+	the target languages used for formal verification. In this paper,
+	we present a Tom rule-based approach which is used in a research
+	project involving industrial partners: Airbus and Ellidiss.}},
+  keywords = {model transformation, language, Tom, Java, EMF, Domain Specific Language,
+	DSL, AADL, Fiacre},
+  type = {inproceedings}
+}
+
+@MISC{Bach2012b,
+  author = {Bach, Jean-Christophe and Moreau, Pierre-Etienne and Pantel, Marc},
+  title = {{EMF Models Transformations with Tom}},
+  howpublished = {poster},
+  address = {Dresden, Germany},
+  year = {2012}
+}
+
+@ARTICLE{Quinson2013,
+  author = {Quinson, Martin and Bach, Jean-Christophe},
+  title = {{L'informatique nomade, c'est la libert{\'e} !}},
+  journal = {Interstices},
+  year = {2013},
+  month = Feb,
+  affiliation = {ALGORILLE - INRIA Nancy - Grand Est / LORIA , PAREO - INRIA Nancy
+	- Grand Est / LORIA},
+  audience = {nationale },
+  hal_id = {hal-00794187},
+  keywords = {id{\'e}e re{\c c}ue, debunking, libert{\'e}, freedom, mobile, Turing,
+	Church},
+  language = {Fran{\c c}ais},
+  address = {France},
+  publisher = {INRIA},
+  url = {http://hal.inria.fr/hal-00794187},
+  note = {Article de vulgarisation scientifique}
+}
+
+%% hal-00786254, version 1
+%% http://hal.inria.fr/hal-00786254
+@article{bach:hal-00786254,
+    hal_id = {hal-00786254},
+    url = {http://hal.inria.fr/hal-00786254},
+    title = {{Une approche hybride GPL-DSL pour transformer des mod{\`e}les}},
+    author = {Bach, Jean-Christophe},
+    language = {Fran{\c c}ais},
+    affiliation = {PAREO - INRIA Nancy - Grand Est / LORIA},
+    pages = {1--26},
+    note = {{Soumis {\`a} Technique et Science Informatiques, TSI}},
+    year = {2013},
+    month = Jan,
+    address = {France},
+    pdf = {http://hal.inria.fr/hal-00786254/PDF/TSI-avant\_review.pdf}
+}
+

@@ -1,0 +1,39 @@
+%\begin{tomcode3}
+\begin{codesource2}[label=code:v0flattening,caption=Implémentation de la transformation d'aplatissement de hiérarchie de classes en Java]
+public static classflattening.VirtualRoot v0_processClass(classflattening.VirtualRoot root) {
+  org.eclipse.emf.common.util.EList<classflattening.Class> newChildren =
+    new org.eclipse.emf.common.util.BasicEList<classflattening.Class>();
+  for(classflattening.Class cl : root.getChildren()) {
+    if(cl.getSubclass().isEmpty()) {
+      newChildren.add(flattening(cl));
+    }
+  }
+  classflattening.VirtualRoot result = (classflattening.VirtualRoot)
+    classflattening.ClassflatteningFactory.eINSTANCE.create(
+        (EClass)classflattening.ClassflatteningPackage.eINSTANCE.getEClassifier("VirtualRoot"));
+  result.eSet(result.eClass().getEStructuralFeature("children"),(Object)newChildren);
+  return result;
+}
+
+public static classflattening.Class flattening(classflattening.Class toFlatten) {
+  classflattening.Class parent = toFlatten.getSuperclass();
+  if(parent==null) {
+    return toFlatten;
+  } else {
+    classflattening.Class flattenedParent = flattening(parent);
+    org.eclipse.emf.common.util.EList<classflattening.Attribute> head =
+      toFlatten.getAttributes();
+    head.addAll(flattenedParent.getAttributes());
+    classflattening.Class result = (classflattening.Class)classflattening.ClassflatteningFactory.eINSTANCE.
+      create((EClass)classflattening.ClassflatteningPackage.eINSTANCE.getEClassifier("Class"));
+    result.eSet(result.eClass().getEStructuralFeature("name"),(Object)flattenedParent.getName()+toFlatten.getName());
+    result.eSet(result.eClass().getEStructuralFeature("attributes"),(Object)head);
+    result.eSet(result.eClass().getEStructuralFeature("superclass"),(Object)flattenedParent.getSuperclass());
+    result.eSet(result.eClass().getEStructuralFeature("subclass"),
+        (Object)(new org.eclipse.emf.common.util.BasicEList<classflattening.Class>()) );
+    result.eSet(result.eClass().getEStructuralFeature("root"),(Object)virtR);
+    return result;
+  }
+}
+\end{codesource2}
+%\end{tomcode3}

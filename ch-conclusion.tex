@@ -1,0 +1,166 @@
+% vim:spell spelllang=fr
+\cleardoublepage
+\phantomsection
+\SpecialSection{Conclusion}
+\label{ch:conclusion}
+
+
+%\subsection{évolutions}
+%\begin{itemize}
+%
+%  \item[Modularité : ] cf. resolve modulaire, j'ai un proto qui est fait, mais
+%    pas tant de réflexion que ça
+%
+%  \item[Traçabilité : ] ici je ne parle pas trop de la traçabilité liée aux
+%    spéc mais plus la traçabilité technique/interne. Le "\%resolvelink" de
+%    \%tracelink, + éventuellement une traçabilité type "log complet"
+%
+%  \item[Expressivité : ] simplification de syntaxe (traversal, arguments,
+%    patterns, multi sources et cibles), lien avec le travail de Christophe ?
+%
+%\end{itemize}
+
+La qualification d'outil est une étape fondamentale dans le processus de
+certification du logiciel. L'objectif principal de cette thèse était de
+contribuer à l'élaboration de méthodes et outils pour améliorer la confiance
+dans les outils intégrés dans les chaînes de développement critiques. Le
+langage {\tom} développé dans l'équipe a été le support de ces travaux.
+
+\section*{Contributions}
+
+\subsection*{Une méthode de transformation de modèles par réécriture}
+
+Dans cette thèse, nous avons présenté une méthode pour transformer des modèles
+en nous appuyant sur des stratégies de réécriture. Cette méthode nous permet
+d'exprimer aisément une transformation à partir de règles, sans aucune notion
+d'ordre d'application.En nous plaçant dans le cadre du langage {\tom}, nous
+avons fait le choix d'être à la frontière entre les langages dédiés et les
+langages généralistes, afin d'en tirer le meilleur des deux mondes. Nous avons
+donc proposé un îlot formel dédié aux transformations de modèles qui s'intègre
+au sein du langage généraliste {\java}. Du fait du fonctionnement de notre
+méthode hybride, nos transformations sont modulaires. Cette qualité est
+fondamentale en ingénierie du logiciel, que ce soit pour la maintenance ou la
+création de nouveaux outils.
+
+%Afin de rendre cette méthode accessible au plus grand nombre, nous avons exclus 
+%L'un des objectifs était de rendre cette méthode accessible au plus grand nombre, 
+
+\subsection*{Une représentation de modèles sous la forme de termes algébriques}
+
+Pour transformer des modèles selon notre méthode hybride, il est nécessaire
+d'opérer un changement d'espace technologique entre le monde des modèles et
+celui des termes. Nous avons donc établi une représentation des modèles sous la
+forme de termes algébriques. Cette dernière repose sur l'obtention d'un arbre
+de recouvrement du modèle par la relation de composition. Un outil implémente
+cette représentation par la génération de la signature algébrique correspondant
+à un métamodèle donné. Cela permet d'instancier des modèles et de les manipuler
+en tant que termes algébriques.
+
+
+\subsection*{Une traçabilité des transformations}
+
+L'exigence de traçabilité qu'impose le processus de qualification nous a
+conduits à proposer un îlot formel permettant de lier un élément source à
+des éléments cibles. Cette construction dédiée permet d'ajouter une traçabilité
+au sein d'une transformation écrite dans un langage généraliste tel que
+{\java}.
+
+
+\subsection*{Des outils accessibles pour améliorer la confiance dans le logiciel}
+
+Tout au long de ce travail, nous nous sommes appliqués à mettre en œuvre des
+outils implémentant nos travaux. Nos choix ont aussi été guidés par notre souci
+d'accessibilité et de diffusion. C'est pourquoi nous nous sommes appuyés sur
+les langages et \emph{frameworks} très utilisés et ayant déjà percé dans
+l'industrie. Si certains choix ont pu être remis en cause suite à nos
+évaluations et aux tests de performance, il n'en demeure pas moins qu'ils nous
+ont été très utiles pour obtenir un premier prototype opérationnel. Les outils
+développés doivent faciliter le développement logiciel en limitant le code
+écrit manuellement et en maximisant le code généré. 
+
+De plus, dans cette optique d'amélioration de la confiance dans le logiciel, il
+est très important de diffuser des outils de production dont le code source est
+librement consultable, modifiable et rediffusable afin de pouvoir les vérifier,
+corriger, améliorer et utiliser.
+Par conséquent, tous nos outils sont diffusés sous licence libre. %FIXME\ttodo{??? je
+%laisse ?}
+
+
+\section*{Perspectives}
+
+Les perspectives qu'ouvre ce travail sont multiples, les chaînes de
+développement de systèmes critiques ayant de besoins forts pour la
+qualification d'outils. Différents travaux peuvent être entrepris pour
+étendre et prolonger les contributions de cette thèse, que ce soit au niveau de
+la représentation et du parcours de modèles, de l'expression et de la
+traçabilité des transformations ou de la généralisation des méthodes et outils.
+
+\subsection*{Stratégies paramétrées}
+
+L'une des pistes de recherche consiste à travailler sur les stratégies. Dans le
+chapitre~\ref{ch:usecase}, nous avons mis en avant un cas d'étude qui ne permet
+pas de donner la pleine mesure de nos outils. Cela s'explique par le principe
+de notre représentation de modèles sous la forme de termes ainsi que par leur
+parcours. Nous construisons un arbre de recouvrement par la relation de
+composition pour obtenir une vue arborescente du modèle. Ensuite, les
+stratégies les parcourent en suivant ces liens de composition. Bien que ce type
+d'utilisation couvre la majeure partie des cas, il existe des situations où la
+relation de composition n'est pas la relation d'intérêt de l'utilisateur, comme
+nous l'avons montré. Afin de remédier à ce problème, il faudrait pouvoir
+définir une alternative pour les stratégies de parcours en offrant la
+possibilité de les paramétrer par les types de liens à suivre. Un second
+prolongement serait alors de pouvoir paramétrer localement un parcours, en
+fonction d'un contexte donné.
+
+\subsection*{Modularité des transformations et réutilisation}
+
+Un aspect récurrent en génie logiciel est la modularité et la réutilisation du
+code. Du fait de notre approche construite sur les stratégies de réécriture,
+nous offrons déjà une certaine modularité des transformations et permettons la
+réutilisation du code de chaque transformation élémentaire. Cependant, les
+\emph{définitions} écrites pour une transformation donnée peuvent rarement être
+réutilisées directement, sans aucune modification. Un axe de travail serait
+donc de réfléchir à l'expression des \emph{définitions} les rendant plus
+génériques. Ensuite, le prototype modulaire de la phase de résolution de notre
+approche pourrait être affiné, étendu et simplifié afin d'accompagner chaque
+\emph{définition} par une \emph{stratégie de résolution élémentaire}.
+
+\subsection*{Généralisation et ouverture à d'autres technologies}
+
+Nous nous sommes appuyés sur la technologie {\emf} et le langage {\java} pour
+développer des outils et tester nos travaux. À terme, il serait intéressant de
+généraliser notre méthode de représentation et de transformation de modèles en
+ouvrant nos outils à d'autres langages généralistes et à d'autres technologies.
+%Se poserait notamment des problèmes liés au t
+Nous pensons notamment au langage {\ada} pour lequel nous avons mené quelques
+expérimentations et dont un \emph{backend} est maintenant présent dans {\tom}.
+Les stratégies ont été implémentées et peuvent être utilisées dans un programme
+{\ada}. Ce langage étant utilisé pour le développement de systèmes temps réel
+et embarqués pour son haut niveau de fiabilité et de sécurité, nous pourrions
+nous concentre sur ce langage. L'une des difficultés de la gestion de {\ada}
+réside dans l'absence de \emph{garbage collector}. On ne peut donc aisément
+implémenter toutes les fonctionnalités de {\tom} (notamment le partage maximal)
+qui existent avec le langage {\java}. La généralisation de nos outils nous
+permettrait aussi de nous ouvrir à d'autres technologies que {\emf}. Nous
+pensons notamment à {\kevoree} qui semble être un bon candidat, tant du point
+de vue fonctionnalités que performances.
+
+
+%pas de titre en fin de page
+%\clearpage
+
+\subsection*{Traçabilité : extension et usage}
+
+Nous avons fourni une traçabilité qui pourrait être étendue, d'une part à des
+transformations comprenant des sources multiples, d'autre part à des objectifs
+de détection et récupération d'erreurs. Cela demanderait de réfléchir à
+l'évolution du métamodèle de trace. Ensuite, cette traçabilité fournie par
+{\tom} pourrait être généralisée afin de dépasser le cadre de l'îlot formel
+dédié aux transformations de modèles. Enfin, de manière pragmatique et à court
+terme, nous envisageons de modifier le langage pour séparer la construction de
+traçabilité en deux constructions distinctes, l'une dédiée à la traçabilité
+interne, l'autre à la traçabilité de spécification.
+
+
+
+% vim:spell spelllang=fr

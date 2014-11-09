@@ -1,0 +1,19 @@
+2 propr. :
+
+- correction partielle : « tout procédé terminé est dans son état final » <-> square (dead => finished)
+[] <> => 
+
+- terminaison :  « toute exécution se termine » <-> square diamond dead
+
+rappel LTL-SE :
+- variante de LTL pour traiter de façon homogène les propositions d'états et
+  propositions de transitions
+- structures de kripke
+
+P                : P vraie au départ de chemin (pour l'état initial)
+square P         : P vraie tout le long du chemin
+diamond P        : P vraie une fois au moins le long du chemin
+P U Q            : Q sera vraie dans le futur et P est vraie jusqu'à cet instant
+square diamond P : P vraie infiniment souvent
+
+

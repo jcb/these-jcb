@@ -1,0 +1,31 @@
+%\lstinputlisting[name=wd2pn,numberstyle=\tiny,numbers=left,numberblanklines=true,frame=tb,firstnumber=1,firstline=89,lastline=118,caption=TODO,label=code:wd2pn,captionpos=b]{code/simplepdltopetrinet/SimplePDLToPetriNet.t}%style=codesource,
+%
+\begin{tomcode3}[caption=\texttt{WD2PN :} Code de la définition \emph{WorkDefinitionToPetriNet},label=code:wd2pn]
+definition WD2PN traversal `TopDown(WD2PN(tom__linkClass,pn)) {
+  wd@WorkDefinition[name=name] -> {
+    Place WDp_ready  = `Place(name+"_ready", pn, 1);
+    %tracelink(WDp_started:Place, `Place(name+"_started", pn, 0));
+    Place WDp_running  = `Place(name+"_running", pn, 0);
+    %tracelink(WDp_finished:Place, `Place(name+"_finished", pn, 0));
+    %tracelink(WDt_start:Transition, `Transition(name+"_start", pn, 1, 1));
+    %tracelink(WDt_finish:Transition, `Transition(name+"_finish", pn, 1, 1));
+
+    `Arc(WDt_start, WDp_ready, pn, ArcKindnormal(), 1);
+    `Arc(WDp_started, WDt_start, pn, ArcKindnormal(), 1);
+    `Arc(WDp_running, WDt_start, pn, ArcKindnormal(), 1);
+    `Arc(WDt_finish, WDp_running, pn, ArcKindnormal(), 1);
+    `Arc(WDp_finished, WDt_finish, pn, ArcKindnormal(), 1);
+
+    SimplePDLSemantics.DDMMSimplePDL.Process parent = `wd.getParent();
+    /* Pt_start et Pt_finish : transitions de l'image d'un processus, par 
+    exemple P#\colcode{black}{$_{root}$}# dans la figure#\colcode{black}{~\ref{fig:petrinetusecase}}# */
+    Transition source = %resolve(parent:Process, Pt_start:Transition);
+    source.setNet(pn);
+    Arc tmpDistribute = `Arc(WDp_ready, source, pn, ArcKindnormal(), 1);
+
+    Transition target = %resolve(parent:Process, Pt_finish:Transition);
+    target.setNet(pn);
+    Arc tmpRejoin = `Arc(target, WDp_finished, pn, ArcKindread_arc(), 1);
+  }
+}
+\end{tomcode3}

@@ -1,0 +1,17 @@
+\definecolor{myred}{HTML}{d01e1e}
+\definecolor{myblue}{HTML}{0000FF}
+\definecolor{mygreen}{HTML}{129d1c}
+\begin{tikzpicture}[>=latex, node distance=1cm, on grid, auto]
+%, scale=0.6, transform shape]
+
+%Seq
+\node (S1) [draw, regular polygon, regular polygon sides=3, minimum size=1cm, shape border rotate=180, color=mygreen] {};
+\path (S1.east)+(0.5,-1) node (S2) [draw, rectangle, minimum size=0.5mm, color=mygreen] {};
+\path[-,color=mygreen] (S1) edge (S2);
+
+%B
+\node (B1) [draw, regular polygon, regular polygon sides=5, minimum size=1cm, color=myblue, right of=S2,xshift=0.5cm] {};
+\path (B1.west)+(-0.25,1) node (B2) [draw, rectangle, minimum size=0.5mm, color=mygreen, dashed] {};
+\path[-,color=myblue] (B2) edge (B1);
+
+\end{tikzpicture}

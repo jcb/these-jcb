@@ -1,0 +1,94 @@
+\begin{figure}[h!]
+
+  % Define the layers to draw the diagram
+  \pgfdeclarelayer{tomgombackground}
+  \pgfdeclarelayer{tombackground}
+  \pgfsetlayers{tomgombackground,tombackground,main}
+
+  % Define a new shape: page with a folded corner 
+  \makeatletter
+  \pgfdeclareshape{flippedpage}{
+    \inheritsavedanchors[from=rectangle] % this is nearly a rectangle
+    \inheritanchorborder[from=rectangle]
+    \inheritanchor[from=rectangle]{center}
+    \inheritanchor[from=rectangle]{north}
+    \inheritanchor[from=rectangle]{south}
+    \inheritanchor[from=rectangle]{west}
+    \inheritanchor[from=rectangle]{east}
+    % ... and possibly more
+    \backgroundpath{% this is new
+    % store lower left in xa/ya and upper right in xb/yb
+    \southwest \pgf@xa=\pgf@x \pgf@ya=\pgf@y
+    \northeast \pgf@xb=\pgf@x \pgf@yb=\pgf@y
+    % compute corner of ``flipped page''
+    \pgf@xc=\pgf@xb \advance\pgf@xc by-5pt % this should be a parameter
+    \pgf@yc=\pgf@yb \advance\pgf@yc by-5pt
+    % diagonal path of the corner 
+    \pgfpathmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    \pgfpathlineto{\pgfpoint{\pgf@xa}{\pgf@yb}}
+    \pgfpathlineto{\pgfpoint{\pgf@xc}{\pgf@yb}}
+    \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@yc}}
+    \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@ya}}
+    \pgfpathclose
+    % add little corner
+    \pgfpathmoveto{\pgfpoint{\pgf@xc}{\pgf@yb}}
+    \pgfpathlineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+    \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@yc}}
+    \pgfpathlineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+    }
+  }
+
+  % Define block styles
+  \tikzstyle{compiler}=[draw, fill=blue!20, text width=6em, text centered, minimum height=2.5em, rounded corners]
+  %\tikzstyle{compiler}=[diamond, aspect=2, draw, fill=blue!20, text centered, rounded corners=1]
+  \tikzstyle{compiler2}=[diamond, aspect=2, draw, text centered, rounded corners=1]
+  %\tikzstyle{code}=[draw,shape=flippedpage,text width=2.7em, text centered, minimum height=3.7em,fill=white]
+  \tikzstyle{code}=[draw,shape=flippedpage,text width=3em, text centered,
+  minimum height=4.2em,fill=white]
+  \tikzstyle{texttitle}=[fill=white, rounded corners, draw=black!50, dashed]
+  \tikzstyle{background}=[fill=yellow!20, rounded corners, draw=black!50, dashed]
+
+  \begin{center}
+  \begin{tikzpicture}
+    % Draw diagram elements
+    
+    \node (mapping) [code, dashed] {\figcode{Ancrages algébriques}};
+
+    \path (mapping.east)+(3,-2.5) node (datastruct)[code] 
+    {\figcode{Java EMF (MM)}};
+    \path (mapping.west)+(-3,2.5) node (tomcode)[code, dashed] 
+      {\figcode{Tom \\ + \\ Java}};
+    \path (tomcode.east)+(3,0) node (tomcomp)[compiler2, dashed] 
+    {\figcode{Compilateur {\tom}}};
+    \path (mapping.east)+(3,2.5) node (javacode)[code] 
+      {\figcode{Code Java}};
+    \path (mapping.east)+(6,2.5) node (javacomp)[compiler2] 
+    {\figcode{Compilateur Java}};
+    \path (mapping.east)+(9,2.5) node (bytecode)[code]
+      {\figcode{110010}\\\figcode{101110}\\\figcode{010100}};
+    \path (mapping.east)+(3,0.5) node (trace)[code, dashed] 
+      {\figcode{MM de\\ lien}};
+
+    % Draw gom side
+    \path (datastruct.west)+(-3,0) node (emfcomp)[compiler2, dashed] 
+    {\figcode{Tom-EMF}};
+
+    % Draw arrows between elements
+    \path [draw, ->] (emfcomp.north) -- node [below] {} (mapping);
+    \path [draw, ->] (mapping.north) -- node [below] {} (tomcomp);
+    \path [draw, ->] (datastruct.west) -- node [right] {} (emfcomp);
+    \path [draw, ->] (datastruct) -- ++(3.0,0) -- node [below] {} (javacomp);
+    \path [draw, ->] (tomcode.east) -- node [left] {} (tomcomp);
+    \path [draw, ->] (tomcomp.east) -- node [left] {} (javacode);
+    \path [draw, ->] (javacode.east) -- node [left] {} (javacomp);
+    \path [draw, ->] (javacomp.east) -- node [left] {} (bytecode);
+
+    \path [draw, dashed, ->] (tomcomp) -- node [left] {} (trace);
+    \path [draw, ->] (trace) -- node [left] {} (javacomp);
+
+  \end{tikzpicture}
+  \end{center}
+  \caption{Contributions au système {\tom}}
+\label{fig:tomSystemContrib}
+\end{figure}
+

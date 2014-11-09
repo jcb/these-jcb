@@ -1,0 +1,27 @@
+%\begin{tikzpicture}[>=latex, node distance=1cm, on grid, auto,level/.style={sibling distance=60mm/#1}]
+\begin{tikzpicture}[>=latex, node distance=1cm, on grid,
+auto,composition/.style={yshift=11mm,scale=0.6,diamond,very
+thin,draw,fill=black}]
+
+\node [rectangle,draw] (root){$VirtualRoot$}
+child{node[composition] (rc) {}
+  child {
+    node [rectangle,draw] (d) {$D$}
+  }
+  child {
+    node [rectangle,draw] (a) {$A$}
+  }
+  child {
+    node [rectangle,draw] (b) {$B$}
+  }
+  child {
+    node [rectangle,draw] (c) {$C$}
+  }
+};
+
+%\node[composition] at (root.south) [label=] {};
+
+\path (d) edge [red,pre,open triangle 45-] (a)
+      (a) edge [red,pre,open triangle 45-] (b) ;
+
+\end{tikzpicture}

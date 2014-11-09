@@ -1,0 +1,18 @@
+\begin{tomcode3}[label=code:opIndividuList,caption=Opérateur de liste d'Individus.]
+%oplist IndividuList concIndividu(Individu*) {
+  is_fsym(s)         { (s instanceof JconcJIndividu) }
+  get_head(l)        { ((JconcJIndividu)l).list.getFirst() }
+  get_tail(l)        { ((JconcJIndividu)l).getTail() }
+  is_empty(l)        { ((JconcJIndividu)l).isEmpty() }
+  make_empty()       { new JconcJIndividu() }
+  make_insert(t,l)   { new JconcJIndividu(t,l) }
+}
+\end{tomcode3}
+%%oplist IndividuList concIndividu(Individu*) {
+%  is_fsym(s)         { (s instanceof JconcJIndividu) }
+%  get_head(l)        { ((JconcJIndividu)l).head }
+%  get_tail(l)        { ((JconcJIndividu)l).tail }
+%  is_empty(l)        { ((JconcJIndividu)l).isEmpty() }
+%  make_empty()       { new JconcJIndividu() }
+%  make_insert(t,l)   { new JconcJIndividu(t,l) }
+%}

@@ -1,0 +1,22 @@
+%\begin{itemize}
+%  \item $4N+3$ \emph{Places} normales et $N-1$ \emph{resolve} ;
+%  \item $2N+2$ \emph{Transitions} normales et $3N-1$ \emph{resolve} ;
+%  \item $8N+3$ \emph{Arcs}.
+%%    exemple \#1 : 1 processus composé de N WorkDefinitions, toutes chaînées
+%%    en f2s ; 2N éléments src (1 P + N WD + (N-1) WS ; 14N+8 éléments tgt (P :
+%%    3pl+2tr+4a ; WD : 4pl+2tr+5a ; WS : 1a ; arcs de synchro : 2/WD) ; 
+%%    4N-2 éléments resolve (WD : 2tr ; WS : 1pl+1tr)
+%%%  \item exemple \#2 : ???
+%\end{itemize}
+\begin{tabular}[h]{c|c|c|c|c|c|c}
+  \multicolumn{2}{c|}{Places} &
+  \multicolumn{2}{c|}{Transitions} & \multirow{2}{*}{Arcs} &
+  \multirow{2}{*}{T$_{resolve}$} &
+  \multirow{2}{*}{T$_{normal}$} \\
+  $n$ & $r$ & $n$ & $r$ & & & \\
+  \hline
+  $4N+3$ & $N-1$ & $2N+2$ & $3N-1$ & $8N+3$ & $4N-2$ & $14N+8$ \\
+\end{tabular}
+%\caption{Dénombrement des éléments cibles créés en fonction du nombre de
+%  \emph{WorkDefinitions} donné en entrée ($N$).}
+%\label{table:denombrementCibles}

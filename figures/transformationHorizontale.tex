@@ -1,0 +1,22 @@
+\begin{tikzpicture}[node distance=1cm,>=stealth',scale=1,transform shape, on grid, auto]%>=latex 
+  \tikzstyle{every label}=[black]
+  \begin{scope}
+
+    \draw[dotted] (-0.5,0.5) -- (2,0.5);
+    \node (ms) {$m_s$};
+    \node (mt) [right of=ms, xshift=0.5cm] {$m_t$};
+    \path[->,thick] (ms) edge (mt);
+    \draw[dotted] (-0.5,-0.5) -- (2,-0.5);
+
+%\node [xshift=-1cm,rotate=90,text width=1.5cm] {\begin{center} \scriptsize{niveaux \newline d'abstraction \newline x~~~~~y~~~~~z}\end{center}};
+
+    \node [xshift=-1.2cm,rotate=90,text width=1.5cm,align=center]
+    {\begin{center} \scriptsize{niveaux}  \newline \scriptsize{d'abstraction}\end{center}};
+    \node [yshift=-0.8cm,xshift=-0.5cm,rotate=90,align=center] {\scriptsize{x}};
+    \node [xshift=-0.5cm,rotate=90,align=center] {\scriptsize{y}};
+    \node [yshift=0.8cm,xshift=-0.5cm,rotate=90,align=center] {\scriptsize{z}};
+
+%\node [yshift=-1.2cm] {\scriptsize{Transformation horizontale}};
+
+  \end{scope}
+\end{tikzpicture}

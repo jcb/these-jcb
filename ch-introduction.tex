@@ -1,0 +1,356 @@
+% vim:spell spelllang=fr
+\cleardoublepage
+\phantomsection
+\SpecialSection{Introduction}
+\label{ch:introduction}
+
+
+%\todo{ plan de l'intro : \begin{itemize}
+%  \item résumé
+%  \item contexte
+%  \item langage ?
+%  \item contributions
+%  \item plan
+%\end{itemize}}
+%FIXME\ttodo{intro-résumé en une page max. bien calibré ou pas ?}
+
+\textit{Le sujet de cette thèse est l'élaboration de méthodes et outils pour le
+développement logiciel fiable s'appuyant sur des transformations de modèles.
+Plus précisément, la question est de savoir comment améliorer la confiance dans
+un logiciel et dans son processus de développement alors que les chaînes de
+développement se complexifient et que les outils se multiplient.}
+
+\textit{L'industrie adopte progressivement les techniques de l'Ingénierie Dirigée par
+les Modèles. L'un des intérêts de ce domaine est d'accélérer le développement
+logiciel à moindre coût par l'usage de langages dédiés et d'outils de
+génération de code. Dans ce contexte, les logiciels sont donc en partie issus
+de chaînes de transformations opérées sur des modèles jusqu'à la génération du
+code et sa compilation.}
+  
+\textit{Dans le cadre du développement de systèmes critiques, les logiciels doivent
+être vérifiés afin d'être certifiés. Se pose alors la question de la
+qualification des logiciels utilisés dans les chaînes de développement des
+systèmes critiques. Il faut s'assurer que les outils n'introduisent pas de
+bogue à chaque étape du processus de développement et qu'une trace puisse être
+conservée, de la spécification au code.}
+
+%La vérification d'un logiciel peut prendre plusieurs formes plus ou moins
+%formelles (de la relecture de code à la preuve mathématique)
+
+\textit{Le langage {\tom} repose sur le calcul de réécriture et fournit des
+fonctionnalités telles que le filtrage à des langages généralistes comme
+{\java} ou {\ada}. Des constructions de haut niveau permettent de décrire
+formellement des algorithmes. Il offre la possibilité d'établir des règles de
+transformation pour écrire des outils de transformation sûrs.}
+
+\textit{La finalité de cette thèse est donc de proposer des méthodes et outils pour
+exprimer des transformations de modèles qualifiables. On s'intéresse à fournir
+des constructions dédiées pour décrire une transformation de modèles et pour
+assurer la traçabilité entre le modèle source et le modèle cible. Le but étant
+alors de donner des éléments de confiance supplémentaires à l'utilisateur
+responsable de la vérification de la chaîne de développement.}
+
+\newpage
+%\pagebreak
+
+%\todo{TODO: introduction à la Luc Engelen, avec une section "research questions" +
+%publis liées. $\Rightarrow$ plus de publis…}
+
+\section*{Contexte et motivations}
+
+%FIXME\ttodo{faut-il faire apparaitre explicitement certaines question ? comme dans
+%la thèse de Luc Engelen ?}
+
+Les systèmes se complexifiant, l'ingénierie dirigée par les modèles ({\idm}) a
+apporté des solutions pour faciliter et accélérer le développement logiciel. Ce
+domaine a véritablement pris son essor à la fin du XX\up{ème} siècle avec la
+publication de l'initiative {\mda} (\emph{Model Driven Architecture}) par
+l'{\omg} (\emph{Object Management Group}). L'industrie a adopté les méthodes et
+technologies issues du monde des modèles, y compris dans le cadre du
+développement de systèmes critiques. Cependant, si la manière de développer un
+logiciel ainsi que les technologies utilisées ont changé depuis les débuts de
+l'informatique, les contraintes liées à la maintenance (évolution du logiciel,
+déboguage) ainsi qu'à la fiabilité (qualification, certification) persistent.
+Les technologies des domaines critiques tels que l'aéronautique, l'automobile
+et la médecine reposant de plus en plus sur l'informatique, il est
+particulièrement important de s'assurer du bon fonctionnement des logiciels
+avant leur mise en production. Pour cela, il est nécessaire de les vérifier.
+Plusieurs approches complémentaires sont disponibles pour augmenter la
+confiance en un logiciel : le test, la preuve, la simulation et le
+\emph{model-checking}. Chacune d'entre elles comporte ses spécificités, ses
+avantages et ses inconvénients. Dans le cadre de la qualification et de la
+certification, ces approches sont rarement suffisantes une à une et sont donc
+généralement combinées ou pratiquées en parallèle. Lors de la certification, il
+est nécessaire d'avoir une confiance forte dans les outils utilisés dans le
+processus de développement. Cette confiance est accordée par leur qualification
+qui exige une traçabilité entre la spécification et l'implémentation d'un
+logiciel. L'intégration de l'{\idm} dans les chaînes de développement de
+systèmes critiques tendant à se généraliser, il est fondamental de développer
+des méthodes et des outils pour aider au processus de qualification des
+nouveaux outils.
+
+Dans ce contexte, nous nous proposons de travailler à l'élaboration de méthodes
+et d'outils permettant d'apporter des éléments de confiance pour la
+qualification du logiciel.
+%Pour cela, nous souhaitons pousser l'utilisation des méthodes formelles dans
+%l'ingénierie du logiciel, que ce soit dans un cadre académique ou industriel. 
+Nous nous plaçons à la frontière de deux domaines : celui de l'Ingénierie
+Dirigée par les Modèles ainsi que celui de la réécriture de termes. L'industrie
+a vu l'intérêt pratique de l'{\idm} et a adopté les outils qui en sont issus.
+Les méthodes formelles, en particulier le domaine de la réécriture qui nous
+intéresse, sont quant à elles moins connues, mais indispensables pour un
+développement logiciel de qualité. Se placer à la frontière des deux domaines
+permet de tirer le meilleur des deux mondes et de pousser l'utilisation des
+méthodes formelles dans l'ingénierie du logiciel, que ce soit dans un cadre
+académique ou industriel. 
+
+L'un des piliers de l'{\idm} réside dans les transformations de modèles. Nous
+souhaitons leur apporter plus de fiabilité en fournissant des outils s'appuyant
+sur le langage {\tom}. Celui-ci repose sur la réécriture et le filtrage pour
+manipuler et transformer des structures complexes. Il s'intègre au sein de
+langages généralistes tels que {\java} et offre des constructions dédiées
+permettant à l'utilisateur d'appréhender et d'exprimer plus aisément des
+algorithmes complexes à mettre en œuvre dans un langage généraliste. Fournir
+des constructions de haut niveau est un moyen de donner plus de confiance à
+l'utilisateur dans le code résultant : les algorithmes sont exprimés plus
+formellement et il est donc plus facile de raisonner dessus à des fins de
+vérification du logiciel. Un autre avantage d'une approche reposant sur des
+constructions dédiées réside dans la réduction des coûts de développement :
+l'usage de générateurs de code permet de réduire la quantité de travail et le
+temps par rapport à un développement manuel. 
+
+
+\section*{Contributions}
+
+Dans ce contexte, la contribution de cette thèse comprend trois volets
+principaux :
+\begin{description}
+
+  \item[Transformation de modèles par réécriture : ] Nous avons développé une
+    méthode de transformation de modèles par réécriture de termes. Pour cela,
+    nous opérons une transformation permettant de manipuler un modèle sous la
+    forme d'un terme algébrique. Nous nous appuyons ensuite sur les stratégies
+    de réécriture du langage {\tom} pour mettre en œuvre la méthode de
+    transformation. Cette méthode se déroule en deux temps : nous effectuons
+    d'abord une transformation par parties qui fournit des résultats partiels,
+    puis nous résolvons ces résultats intermédiaires pour former le modèle
+    cible résultant. Nous avons donc étendu le langage {\tom} en proposant un
+    îlot formel dédié pour transformer les modèles. Ce nouvel îlot implémente
+    notre méthode de transformation par réécriture.
+
+  \item[Représentation algébrique de modèles : ] Pour transformer un modèle
+    dans notre con\-tex\-te de réécriture de termes, il est nécessaire d'opérer au
+    préalable un changement d'espace technologique. Pour ce faire, nous
+    proposons un outil permettant de donner une vue algébrique d'un modèle. Il
+    traduit un métamodèle donné en une signature algébrique intégrable dans
+    notre environnement {\tom}.
+
+  \item[Traçabilité d'une transformation de modèles : ] Afin de répondre aux
+    exigences du processus de qualification, nous avons travaillé sur la
+    traçabilité des transformations et avons proposé une traçabilité de
+    spécification. Nous l'avons implémentée par un îlot formel dédié permettant
+    d'ajouter une forme de traçabilité au sein d'un langage généraliste tel que
+    {\java}.
+
+\end{description}
+
+%FIXME\ttodo{Ce paragraphe a-t-il sa place ici ?}
+
+Durant ce travail de thèse, nous nous sommes attelés à développer des outils
+opérationnels implémentant notre travail. Nous avons toujours gardé à l'esprit
+qu'ils doivent pouvoir être aussi utilisés par des utilisateurs extérieurs en
+vue d'un usage dans un cadre industriel. Nous avons donc expérimenté et
+amélioré nos outils afin de leur permettre un passage à l'échelle. De plus,
+tout ce que nous avons développé est disponible librement et gratuitement sur
+le site du projet {\tom}. L'ensemble de nos expériences reposant sur du code
+ouvert documenté ainsi que sur des modèles diffusés librement, cela assure leur
+reproductibilité par un utilisateur averti. Cet aspect d'ouverture et de
+diffusion libre des résultats et des données s'inscrit dans le mouvement de
+l'\emph{open science}, qui est indispensable à une recherche vérifiable et
+reproductible. Nous posons ainsi les conditions idéales pour tout utilisateur
+souhaitant tester, vérifier, utiliser, modifier et étendre nos travaux.
+
+%\section*{Questions de recherche}
+%
+%Des questions à trier et préciser, pour que ça devienne des questions de
+%recherche :
+%\begin{itemize}
+%  \item Comment augmenter la confiance dans un logiciel développé avec une
+%    approche {\idm} et destiné aux systèmes critiques ?
+%  \item Comment améliorer la qualité du logiciel tout en limitant les coûts de
+%    développement ? \todo{[outils accessibles, bien intégrés dans les
+%    environnements classiques ; code réutilisable et modulaire ; facilités de
+%    développement ; génération d'un maximum de code ; approche resolve + pas de
+%    notion d'ordre + constructions haut-niveau + langage qui se greffe aux langages
+%    généralistes]}
+%  \item Quelles méthodes et techniques peut-on apporter à l'{\idm} pour
+%    améliorer la qualité du logiciel ?
+%  \item Peut-on utiliser des méthodes et des outils éprouvés d'autres domaines
+%    pour ce domaine en plein essor qu'est l'{\idm} ? \todo{[s'appuyer sur Tom,
+%  outil de transformation venant de FM]}
+%  \item Est-il possible d'établir un pont entre le monde de la compilation et
+%    et des grammaires, et celui des modèles ? \todo{[Tom-EMF]}
+%  \item Comment représenter des modèles dans le monde des termes ? \todo{[Tom-EMF]}
+%  \item Comment développer des logiciels sûrs avec une approche orientée
+%    modèles ? \todo{[plusieurs leviers, faire de la vérification, faire des
+%    transfo qualifiables]}
+%  \item Les transformations étant au cœur de l'{\idm}, comment s'assurer
+%    qu'elles n'introduisent pas de \emph{bugs} ? \todo{[transfo qualifiables,
+%  traçabilité]}
+%  \item Comment assurer la traçabilité d'une transformation ? \todo{[modèle de
+%    lien]}
+%  \item 
+%  \item L'utilisation des méthodes formelles est-elle accessible dans un milieu
+%    non-académique qui n'est pas forcément spécialisé ? \todo{[question
+%    rhétorique]}
+%  \item Comment rendre les méthodes formelles utilisables en pratique dans le
+%    milieu non-académique sans faire peur ? Mauvaise formulation évidemment :)
+%    \todo{[pousser des outils accessibles reposant sur les MF, en restant
+%    pragmatique]}
+%  \item problème : outils de modélisation non qualifiés et non certifiés.
+%    Comment certifier des outils ou aider à certifier des outils ?
+%  \item pb MDE : 
+%    \begin{itemize}
+%      \item beaucoup d'outils dans les chaînes de développement =>
+%        Comment appréhender la complexité inhérente aux nouvelles chaînes de
+%        développement ? \todo{[MDE]}
+%      \item problématique de l'introduction d'outils "certifieurs" automatiques
+%    \end{itemize}
+%\end{itemize}
+
+\section*{Plan de la thèse}
+\label{sec:plan}
+
+La suite de ce document se décompose en huit chapitres répartis dans deux
+grandes parties. La première consiste en un état de l'art de trois chapitres,
+traitant trois thématiques liées au contexte de cette thèse. La seconde
+constitue les contributions de ce travail de thèse. Nous résumons brièvement
+chaque chapitre.
+
+%La suite de ce document se décompose en huit chapitres répartis dans deux
+%grandes parties. La première consiste en un état de l'art de trois chapitres,
+%traitant trois thématiques liées au contexte de cette thèse :
+%\compresslist
+%\begin{itemize}
+%%\compresslist
+%  \item[\textbf{Chapitre 1 --}] Un langage basé sur la réécriture : Tom
+%  \item[\textbf{Chapitre 2 --}] Transformations de modèles
+%  \item[\textbf{Chapitre 3 --}] Vérification du logiciel
+%\end{itemize}
+%La seconde partie regroupe les contributions de ce travail de thèse, découpées
+%en cinq chapitres :
+%\begin{itemize}
+%  \item[\textbf{Chapitre 4 --}] Transformations de modèles par réécriture
+%  \item[\textbf{Chapitre 5 --}] Spécification et traçabilité des transformations
+%  \item[\textbf{Chapitre 6 --}] Outils pour exprimer une transformation de modèles en {\tom}
+%  \item[\textbf{Chapitre 7 --}] Études de cas : illustration et utilisation du langage
+%  \item[\textbf{Chapitre 8 --}] Résultats expérimentaux
+%\end{itemize}
+
+
+\noindent \textbf{Conseils et guide de lecture :} Chaque chapitre de la
+première
+%\paragraph{ Conseils et guide de lecture} Chaque chapitre de la première
+partie peut être lu indépendamment des autres. Les chapitres~\ref{ch:approach}
+et~\ref{ch:traceability} expliquent le fond du travail de thèse, tandis que les
+chapitres~\ref{ch:outils},~\ref{ch:usecase} et~\ref{ch:evaluation} sont plus
+techniques. Le chapitre~\ref{ch:outils} décrit les travaux d'implémentation des
+deux chapitres précédents. Le chapitre~\ref{ch:usecase} illustre l'utilisation
+des outils appliqués sur deux cas d'étude. Le chapitre~\ref{ch:evaluation}
+comprend des résultats expérimentaux et donne des perspectives d'évolution
+technique de nos outils.
+
+
+\subsection*{Partie~\ref{part:sota} : État de l'art}
+
+Les trois chapitres composant l'état de l'art traitent de la réécriture et du
+langage {\tom}~\ref{ch:tom}, des transformations de modèles~\ref{ch:notions}
+ainsi que de la vérification du logiciel~\ref{ch:verification}.
+
+\subsubsection{Chapitre~\ref{ch:tom} -- Un langage basé sur la réécriture : Tom}
+
+Dans ce chapitre, nous donnons le cadre formel de la réécriture et définissons
+toutes les notions importantes sous-jacentes au langage {\tom}. Nous le
+décrivons ensuite et détaillons les différentes constructions le composant.
+Nous nous appuyons sur des exemples simples pour les illustrer. Ce chapitre
+peut constituer un manuel court du langage {\tom}.
+
+\subsubsection{Chapitre~\ref{ch:notions}  -- Transformations de modèles}
+
+Ce chapitre donne le cadre de la modélisation et des transformations de
+modèles. Nous donnons une taxonomie des transformations qui se répartissent
+selon les critères liés aux métamodèles et aux changements de niveau
+d'abstraction. Nous expliquons aussi quelles sont les approches principales
+pour transformer des modèles et quels sont les outils existants.
+%expliquons comment les classifier et quelles sont les différentes approches de
+%transformations. 
+
+\subsubsection{Chapitre~\ref{ch:verification} -- Vérification du logiciel}
+
+Ce chapitre décrit le contexte de la vérification du logiciel et plus
+particulièrement celui de la qualification et de la certification. C'est dans
+ce contexte que s'inscrit notre travail de thèse.
+
+\subsection*{Partie~\ref{part:contrib} : Contributions}
+
+La seconde partie regroupe les contributions de ce travail de thèse, découpées
+en cinq chapitres résumés ci-après.
+%\begin{itemize}
+%  \item[\textbf{Chapitre 4 --}] Transformations de modèles par réécriture
+%  \item[\textbf{Chapitre 5 --}] Spécification et traçabilité des transformations
+%  \item[\textbf{Chapitre 6 --}] Outils pour exprimer une transformation de modèles en {\tom}
+%  \item[\textbf{Chapitre 7 --}] Études de cas : illustration et utilisation du langage
+%  \item[\textbf{Chapitre 8 --}] Résultats expérimentaux
+%\end{itemize}
+
+
+\subsubsection{Chapitre~\ref{ch:approach} -- Transformations de modèles par réécriture}
+
+Dans ce chapitre, nous exposons notre approche de transformation de modèles
+dans notre environnement utilisant la réécriture. Elle consiste à représenter
+des modèles sous la forme de termes en opérant un changement d'espace
+technologique, puis à effectuer une transformation par parties du modèle
+source. Chaque partie est transformée sans notion d'ordre grâce à une stratégie
+de réécriture. L'ensemble des transformations partielles est suivi d'une
+phase de résolution du résultat partiel et produit le modèle cible.
+
+\subsubsection{Chapitre~\ref{ch:traceability} -- Spécification et traçabilité des transformations}
+
+Dans ce chapitre, nous exprimons la traçabilité d'une transformation de modèle
+exigée par le processus de qualification. Elle consiste à lier les sources aux
+cibles de la transformation en fonction de la spécification.
+
+\subsubsection{Chapitre~\ref{ch:outils} -- Outils pour exprimer une transformation de modèles en Tom}
+
+Dans ce chapitre, nous détaillons les outils développés durant cette thèse pour
+la mise en œuvre des mécanismes expliqués dans les chapitres 4 et 5. Nous
+expliquons donc comment nous opérons le changement d'espace technologique, en
+quoi consiste le nouvel îlot formel du langage {\tom} pour exprimer une
+transformation de modèles. Nous décrivons l'implémentation au sein du projet
+{\tom}.
+
+\subsubsection{Chapitre~\ref{ch:usecase} -- Études de cas : illustration et utilisation du langage}
+
+Dans ce chapitre, nous illustrons l'utilisation de nos outils sur deux études
+de cas : \emph{SimplePDLToPetriNet} et l'aplatissement d'une hiérarchie de
+classe. La première étude permet de détailler le processus complet d'écriture.
+L'étude de la seconde transformation a pour but de montrer les points
+d'amélioration de nos outils et d'ouvrir des perspectives de recherche et de
+développement suite à ce travail.
+
+\subsubsection{Chapitre~\ref{ch:evaluation} -- Résultats expérimentaux}
+
+Ce chapitre est composé de résultats expérimentaux pour donner une première
+évaluation de nos outils. Nous les avons testés sur des modèles de tailles
+importantes afin de les pousser à leurs limites en termes de performances et de
+valider leur potentiel usage dans un cadre industriel. Nous décrivons aussi
+l'évolution de nos outils suite aux premières expériences et nous tirons
+certaines conclusions.
+
+%test de citation pour voir si les .bib fonctionnent :
+%\begin{itemize}
+%\item dans bach.bib : ~\cite{Bach2012}
+%\item dans ref.bib : ~\cite{emf09}
+%\end{itemize}
+
+% vim:spell spelllang=fr

@@ -1,0 +1,104 @@
+%La table~\ref{table:tempsTomFull} donne les temps moyens 
+%%%%%%%%%%%%%%%%%%%%
+%old
+%\begin{table}[h]
+%\begin{center}
+%\begin{tabular}{rr|r|rrrr|r}
+%  N (nbr WD) & src(2N) & tgt(14N+8)&
+%  \multicolumn{2}{c}{phase\#1} & \multicolumn{2}{c}{phase\#2}  & total \\
+%          & & & temps & \% & temps & \% & \\
+%%  Exemple & N (nbr WD) & tot. src(2N) & tot. tgt(14N+8)& phase\#1 &  & total \\
+%  \hline
+%  10 & 20 & 148 & 15 & 18.52 & 66 & 81.48 & 81 \\
+%  100 & 200 & 1408 & 65 & 9.60 & 612 & 90.40 & 677 \\
+%  500 & 1000 & 7008 & 198 & 0.53 & 37470 & 99.47 & 37668 \\
+%  1000 & 2000 & 14008 & 343& 0.12 & 281482 & 99.88 & 281825 \\
+%       &      &       &     & & \multicolumn{2}{r|}{$\sim$4min 41s} & $\sim$4min 41s \\
+%  5000 & 10000 & 70008 & ?? & 0.?? & ?? & 99.?? & ?? \\
+%       &      &       &     & & \multicolumn{2}{r|}{$\sim$??min ??s} & $\sim$??min ??s \\
+%  10000 & 20000 & 140008 & ?? & 0.01 & ?? & 99.99 & ?? \\
+%        &       &        &    & & \multicolumn{2}{r|}{$\sim$??min ??s} & $\sim$??min ??s \\
+%\end{tabular}
+%\caption{Temps de transformation, exemple 1}
+%\label{table:tempsTomFull}
+%\end{center}
+%\end{table}
+%
+%%%%%%%%%%%%%%%%%%%%
+%%V1
+%\begin{tabular}{rr|r|rrrr|r}
+%%  N (nbr WD) & src(2N) & tgt(14N+8)&
+%  N (\#WD) & \#src & \#tgt&
+%  \multicolumn{2}{c}{phase 1} & \multicolumn{2}{c|}{phase 2} & \multicolumn{1}{c}{Total} \\
+%          & & & temps & \% & temps & \% & \\
+%%  Exemple & N (nbr WD) & tot. src(2N) & tot. tgt(14N+8)& phase\#1 &  & total \\
+%  \hline
+%  2       & 4       & 36       & \todo{0}         & \todo{\#DIV/0!} & \todo{0}        &
+%  \todo{\#DIV/0!} & \todo{0}        \\
+%\num{10}      & \num{20}      & \num{148}      & \num{16.7}      & \num{97.09}   & \num{0.5}      & \num{2.91}    & \num{17.2}     \\
+%\num{100}     & \num{200}     & \num{1408}     & \num{66}        & \num{90.66}   & \num{6.8}      & \num{9.34}    & \num{72.8}     \\
+%\num{500}     & \num{1000}    & \num{7008}     & \num{208.6}     & \num{87.91}   & \num{28.7}     & \num{12.09}   & \num{237.3}    \\
+%\num{1000}    & \num{2000}    & \num{14008}    & \num{359.6}     & \num{86.94}   & \num{54}       & \num{13.06}   & \num{413.6}    \\
+%\num{2000}    & \num{4000}    & \num{28008}    & \num{833.4}     & \num{85.38}   & \num{142.7}    & \num{14.62}   & \num{976.1}    \\
+%%        & & & \multicolumn{2}{|r}{$\sim$??min ??s} & \multicolumn{2}{r|}{$\sim$??min ??s} & $\sim$0min 1s \\
+%\num{3000}    & \num{6000}    & \num{42008}    & \num{1470}      & \num{86.79}   & \num{223.8}    & \num{13.21}   & \num{1693.8}   \\
+%%        & & & \multicolumn{2}{|r}{$\sim$??min ??s} & \multicolumn{2}{r|}{$\sim$??min ??s} & $\sim$0min 2s \\
+%\num{4000}    & \num{8000}    & \num{56008}    & \num{2409.4}    & \num{87.56}   & \num{342.4}    & \num{12.44}   & \num{2751.8}   \\
+%%        & & & \multicolumn{2}{|r}{$\sim$??min ??s} & \multicolumn{2}{r|}{$\sim$??min ??s} & $\sim$0min 3s \\
+%\num{5000}    & \num{10000}   & \num{70008}    & \num{3610.2}    & \num{88.02}   & \num{491.4}    & \num{11.98}   & \num{4101.6}   \\
+%%        & & & \multicolumn{2}{|r}{$\sim$??min ??s} & \multicolumn{2}{r|}{$\sim$??min ??s} & $\sim$0min 4s \\
+%\num{10000}   & \num{20000}   & \num{140008}   & \num{13436.8}   & \num{88.42}   & \num{1760}     & \num{11.58}   &
+%\num{15196.8}  \\
+%        & & & \multicolumn{2}{r}{$\sim$0min 13s} & \multicolumn{2}{r|}{$\sim$0min 2s} & $\sim$0min 15s \\
+%        \num{20000}   & \num{40000}   & \num{280008}   & \num{52300.5}   & \num{88.52}   & \num{6781.2}   & \num{11.48}   &
+%\num{59081.7}  \\
+%        & & & \multicolumn{2}{r}{$\sim$0min 52s} & \multicolumn{2}{r|}{$\sim$0min 7s} & $\sim$0min 59s \\
+%      \num{50000}   & \num{100000}  & \num{700008}   & \num{322164.1}  & \num{88.54}   & \num{41708.1}  & \num{11.46}   &
+%\num{363872.2} \\
+%        & & & \multicolumn{2}{r}{$\sim$5min 22s} & \multicolumn{2}{r|}{$\sim$0min 42s} & $\sim$6min 4s \\
+%      \num{100000}  & \num{200000}  & \num{1400008}  & \num{1250304.9} & \num{88.22}   & \num{166934.2} & \num{11.78}   &
+%\num{1417239.1}\\
+%        & & & \multicolumn{2}{r}{$\sim$20min 50s} & \multicolumn{2}{r|}{$\sim$2min 47s} & $\sim$23min 37s \\
+%        \num{1000000} & \num{2000000} & \num{14000008} & \todo{\num{126094099}}
+%        %& \todo{\num{83.86}} & \todo{\num{24262874}}        &
+%        & \todo{\num{86.91}} & \todo{\num{154815717}}        &
+%        %\todo{\num{16.14}} & \todo{\num{150356973}}      \\
+%        \todo{\num{13.09}} & \todo{\num{23323160}}      \\
+%        %& & & \multicolumn{2}{|r}{$\sim$35h} & \multicolumn{2}{r|}{$\sim$6h 45min} & $\sim$41h 45min \\
+%        & & & \multicolumn{2}{r}{$\sim$43h} & \multicolumn{2}{r|}{$\sim$6h 30min} & $\sim$49h 30min \\
+%\end{tabular}
+%%%%%%%%%%%%%%%%%%%%
+%%V2
+\begin{tabular}{r|r|rrrr|r}
+%  N (nbr WD) & src(2N) & tgt(14N+8)&
+   \#src (2N) & \#tgt& \multicolumn{2}{c}{phase 1} & \multicolumn{2}{c|}{phase 2} & \multicolumn{1}{c}{Total} \\
+          & & temps & \% & temps & \% & \\
+%  Exemple & N (nbr WD) & tot. src(2N) & tot. tgt(14N+8)& phase\#1 &  & total \\
+  \hline
+% 4       & 36       & \todo{0}         & \todo{\#DIV/0!} & \todo{0}        &  \todo{\#DIV/0!} & \todo{0}        \\
+ %\num{20}      & \num{148}      & \num{16.7}      & \num{97.09}   & \num{0.5}      & \num{2.91}    & \num{17.2}     \\
+ \num{20} & \num{148} & \num{16.7}ms & \num{97.09} & \num{0.5}ms & \num{2.91} &
+ \num{17.2}ms \\
+ \num{200} & \num{1408} & \num{66}ms & \num{90.66} & \num{6.8}ms & \num{9.34} &
+ \num{72.8}ms \\
+ \num{1000} & \num{7008} & \num{208}ms & \num{87.76} & \num{29}ms & \num{12.24} & \num{237}ms \\
+ \num{2000} & \num{14008} & \num{359}ms & \num{86.92} & \num{54}ms & \num{13.08} & \num{413}ms \\
+ \num{4000} & \num{28008} & \num{833}ms & \num{85.35} & \num{143}ms & \num{14.65} & \num{976}ms\\
+ \num{6000} & \num{42008} & $\sim$\num{1.47}s & \num{86.98} & \num{223}ms & \num{13.02}   & $\sim$\num{1.69}s \\
+ \num{8000} & \num{56008} & $\sim$\num{2.4}s & \num{87.27} & \num{342}ms & \num{12.73} & $\sim$\num{2.75}s \\
+ \num{10000} & \num{70008} & $\sim$\num{3.61}s & \num{88.03} & \num{491}ms & \num{11.97}   & \num{4.1}s \\
+ \num{20000} & \num{140008} & $\sim$\num{13.4}s & \num{88.16} & $\sim$\num{1.8}s & \num{11.84} & $\sim$\num{15.2}s \\
+ \num{40000} & \num{280008} & $\sim$0min 52s & \num{88.14} & $\sim$0min 7s & \num{11.86}   & $\sim$0min 59s \\
+ \num{100000} & \num{700008} & $\sim$5min 22s & \num{88.54} & $\sim$0min 42s & \num{11.46}   & $\sim$6min 4s \\
+ \num{200000} & \num{1400008} & $\sim$20min 50s & \num{88.22} & $\sim$2min 47s & \num{11.78}   & $\sim$23min 37s\\
+ \num{2000000} & \num{14000008} & $\sim$35h 40min
+        %& \todo{\num{83.86}} & \todo{\num{24262874}}        &
+        & \num{84.87} & $\sim$6h 30min       &
+        %\todo{\num{16.14}} & \todo{\num{150356973}}      \\
+        \num{11.78} &  $\sim$42h 10min     \\
+        %& & & \multicolumn{2}{|r}{$\sim$35h} & \multicolumn{2}{r|}{$\sim$6h 45min} & $\sim$41h 45min \\
+\end{tabular}
+%%%%%%%%%%%%%%%%%%%%
+%\caption{Mesures de durées de transformation en fonction des tailles des
+%modèles sources.}
+%\label{table:tempsTomFull}

@@ -1,0 +1,84 @@
+\begin{tikzpicture}[node distance=1.3cm,>=stealth',bend
+  angle=45,auto,scale=0.6,transform shape]
+
+  \tikzstyle{place}=[circle,thick,draw=red!75,fill=red!20,minimum size=5mm]
+  \tikzstyle{transition}=[rectangle,thick,draw=blue!75,
+  			  fill=blue!20,minimum size=4mm]
+  \tikzstyle{every label}=[black]
+
+  \begin{scope}
+    % Petri net A
+  
+    \node [place] (p1) [tokens=1] [xshift=-5cm]{};
+    \node at (p1.north) [above, inner sep=3mm] {\textbf{WD$_{A}$}};
+    \node at (p1.west) [left] {{$p_{ready}$}};
+
+    \node [transition] (tp1) [right of=p1,dash pattern=on 2pt off 2pt]  {}
+      edge [post,bend right,dash pattern=on 2pt off 2pt] (p1)
+    ;
+    \node at (tp1.south) [below] {{$parent_{start}$}};
+
+    \node [transition] (t1) [below of=p1] {}
+      edge [pre]  (p1)
+    ;
+    \node at (t1.west) [left] {{$t_{start}$}};
+
+    %%in order to center tstart transition
+    \node [place] (p) [below of=t1,circle,draw=white,fill=white] {};
+
+    \node [place] (p2) [left of=p] {}
+      edge [pre] (t1)
+    ;
+    \node at (p2.west) [left] {{$p_{running}$}};
+    \node [place] (p3)  [right of=p] {}
+      edge [pre] (t1)
+    ;
+    \node at (p3.west) [left] {{$p_{started}$}};
+
+    \node [transition] (t2) [below of=p2] {}
+      edge [pre]  (p2)
+    ;
+    \node at (t2.west) [left] {{$t_{finish}$}};
+
+    \node [place] (p4) [below of=t2] {}
+      edge [pre] (t2)
+    ;
+    \node at (p4.west) [left] {{$p_{finished}$}};
+    
+    \node [transition] (tp2) [right of=p4,dash pattern=on 2pt off 2pt] [xshift=0.5cm] {}
+      edge [pre,bend left,dash pattern=on 2pt off 2pt] (p4)
+    ;
+    \node at (tp2.north) [above] {{$parent_{finish}$}};
+
+%%%%%%%%%%%  
+    \node [place] (tmp) [right of=tp1,circle,draw=white,fill=white] [xshift=0cm]{};
+    % Petri net  Process
+    %\node [place] (ppc1) [tokens=1,label=left:{$p_{ready}$}] [xshift=0cm]{}
+    \node [place] (ppc1) [right of=tmp] [xshift=0cm]{};
+    \node at (ppc1.north) [above, inner sep=3mm] {\textbf{P$_{root}$}};
+    \node at (ppc1.east) [right] {{$p_{ready}$}};
+    
+    \node [transition] (tpc1) [below of=ppc1] {}
+      edge [pre]  (ppc1)
+    ;
+    \node at (tpc1.east) [right] {{$t_{start}$}};
+
+    \node [place] (ppc2) [below of=tpc1] {}
+      edge [pre] (tpc1)
+    ;
+    \node at (ppc2.east) [right] {{$p_{running}$}};
+
+    \node [transition] (tpc2) [below of=ppc2] {}
+      edge [pre]  (ppc2)
+%%      edge [pre,bend right,green!50!black] (pc4)
+    ;
+    \node at (tpc2.east) [right] {{$t_{finish}$}};
+
+    \node [place] (ppc3) [below of=tpc2] {}
+      edge [pre] (tpc2)
+    ;
+    \node at (ppc3.east) [right] {{$p_{finished}$}};
+    
+  \end{scope}
+
+\end{tikzpicture}

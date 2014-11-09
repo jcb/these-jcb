@@ -1,0 +1,78 @@
+%\documentclass{article}
+%\def\xcolorversion{2.00}
+%\def\xkeyvalversion{1.8}
+%
+%\usepackage[version=0.96]{pgf}
+%\usepackage{tikz}
+%\usetikzlibrary{arrows,shapes,shapes.arrows,snakes,backgrounds,positioning,shapes.multipart}
+%\usepackage[latin1]{inputenc}
+%\usepackage{verbatim}
+%
+%\begin{document}
+%
+%\begin{comment}
+%:Title: Architecture QVT
+%
+%\end{comment}
+%%[>=latex]
+%
+%
+\begin{tikzpicture}[on grid, auto, node distance=2.5cm, scale=1.0, every text node part/.style={align=center}]
+
+\node [name=r2c, 
+       minimum width=4cm,
+       minimum height=1cm,
+       arrow box, 
+       arrow box shaft width=0.5cm, 
+%       arrow box head indent=0.1cm, 
+%       arrow box head extend=0.1cm, 
+       inner sep=0.125cm/2, % should be half shaft width
+       draw,
+       fill=green!30!yellow!70,
+       arrow box arrows={south:0.5cm}] at (-1.0,0.0)
+       {\textbf{RelationsToCore}\\\textbf{Transformation}};
+
+\node[draw, 
+      minimum height=3.5cm, 
+      text width=2.5cm, 
+      left of=r2c,
+      fill=yellow!55,
+      xshift=-3cm,
+      yshift=-0.3cm] (opmappings){\large \textbf{Operational\\Mappings}};
+
+\node[draw, 
+      minimum height=1cm, 
+      minimum width=5.5cm, 
+      above of=r2c,
+      fill=yellow!55,
+      yshift=-1.5cm] (relations){\large \textbf{Relations}};
+
+\node[draw, 
+      minimum height=1cm, 
+      minimum width=5.5cm, 
+      below of=r2c,
+      fill=yellow!55,
+      yshift=0.98cm] (core){\large \textbf{Core}};
+
+\node[draw, 
+      minimum height=3.5cm, 
+      text width=2.5cm, 
+      right of=r2c, 
+      fill=black,
+      text=white,
+      xshift=3cm,
+      yshift=-0.3cm] (blackbox){\large \textbf{Black\\Box}};
+
+%\path[->] (opmappings) edge (relations);
+\draw[-triangle 60, thick] (opmappings)+(1.36,1.3) -- (relations) {};
+%\path[->] (opmappings) edge (core);
+\draw[-triangle 60, thick] (opmappings)+(1.36,-1.2) -- (core) {};
+
+%\path[->] (blackbox) edge (relations);
+\draw[-triangle 60, thick] (blackbox)+(-1.36,1.3) -- (relations) {};
+%\path[->] (blackbox) edge (core);
+\draw[-triangle 60, thick] (blackbox)+(-1.36,-1.2) -- (core) {};
+
+\end{tikzpicture}
+%
+%\end{document}

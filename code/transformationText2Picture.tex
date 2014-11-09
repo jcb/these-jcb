@@ -1,0 +1,37 @@
+%\begin{mycode}
+\begin{tomcode3}[caption=Extrait de code de la transformation \emph{Text2Picture} illustrant les nouvelles constructions {\tom} dédiées aux transformations de modèles et correspondant aux transformations présentées dans la figure~\ref{fig:approachSimpleRulesTrace},label=code:transformationText2Picture]
+#\colcode{blue}{\%transformation}# Text2Picture(link:LinkClass, gp:GeoPicture)#\colcode{blue}{:}#
+                                  "text.ecore" #\colcode{blue}{->}# "picture.ecore" #\colcode{blue}{\{}#
+
+  #\colcode{blue}{definition}# Letter2Shape #\colcode{blue}{traversal}# `TopDown(Letter2Shape(link,gp)) #\colcode{blue}{\{}#
+    source@BText() #\colcode{blue}{-> \{}#
+      //use target_right
+      Shape greenSquare = #\colcode{blue}{\%resolve}#(source:BText,#\colcode{black}{\myul{magenta}{target\_right}}#:Square);
+      Shape bluePentagon = `Pentagon(blue());
+      Segment segment = `Segment(bluePentagon, greenSquare);
+      ...
+    #\colcode{blue}{\}}#
+    AText() #\colcode{blue}{-> \{}#
+      #\colcode{blue}{\%tracelink}#(#\colcode{black}{\myul{black}{target\_left}}#:Circle,`Circle(red())); //define target_left
+      Shape redHexagon = `Hexagon(red());
+      Segment segment = `Segment(redHexagon, target_left);
+      ...
+    #\colcode{blue}{\}}#
+    ...
+  #\colcode{blue}{\}}#
+
+  #\colcode{blue}{definition}# Symbol2Shape #\colcode{blue}{traversal}# `BottomUp(Symbol2Shape(link,gp)) #\colcode{blue}{\{}#
+    SemiColon[left=l] #\colcode{blue}{-> \{}#
+      Shape greenTriangle = `Triangle(green());
+      #\colcode{blue}{\%tracelink}#(#\colcode{black}{\myul{magenta}{target\_right}}#:Square,`Square(green())); //define target_right
+      Segment right_segment = `Segment(greenTriangle, target_right);
+      Shape redCircle = #\colcode{blue}{\%resolve}#(l:AText,#\colcode{black}{\myul{black}{target\_left}}#:Circle);//use target_left
+      Segment left_segment = `Segment(redCircle, greenTriangle);
+      ...
+    #\colcode{blue}{\}}#
+    ...
+  #\colcode{blue}{\}}#
+  ...
+#\colcode{blue}{\}}#
+\end{tomcode3}
+%\end{mycode}

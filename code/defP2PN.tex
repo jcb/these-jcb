@@ -1,0 +1,30 @@
+%\lstinputlisting[name=p2pn,numberstyle=\tiny,numbers=left,numberblanklines=true,frame=tb,firstnumber=1,firstline=61,lastline=87,caption=TODO,label=code:p2pn,captionpos=b]{code/simplepdltopetrinet/SimplePDLToPetriNet.t}%style=codesource,
+\begin{tomcode3}[caption=\texttt{P2PN :} Code de la définition \emph{ProcessToPetriNet},label=code:p2pn]
+definition P2PN traversal `TopDown(P2PN(tom__linkClass,pn)) {
+  p@Process[name=name] -> {
+    Place Pp_ready    = `Place(name+"_ready", 1);
+    Place Pp_running   = `Place(name+"_running", 0);
+    Place Pp_finished  = `Place(name+"_finished", 0);
+    %tracelink(Pt_start:Transition, `Transition(name+"_start", pn, 1, 1));
+    %tracelink(Pt_finish:Transition, `Transition(name+"_finish", pn, 1, 1));
+    
+    `Arc(Pt_start, Pp_ready, pn, ArcKindnormal(), 1);
+    `Arc(Pp_running, Pt_start, pn, ArcKindnormal(), 1);
+    `Arc(Pt_finish, Pp_running, pn, ArcKindnormal(), 1);
+    `Arc(Pp_finished, Pt_finish, pn, ArcKindnormal(), 1);
+
+    WorkDefinition from = `p.getFrom();
+    if (from!=null) {
+      /* WDt_start et WDt_finish : transitions de l'image d'une activit#\colcode{black}{é}# que
+      d#\colcode{black}{é}#crit le processus, par exemple B dans la figure#\colcode{black}{~\ref{fig:petrinetusecase}}# */
+      Transition source = %resolve(from:WorkDefinition, WDt_start:Transition);
+      source.setNet(pn);
+      Arc tmpZoomIn = `Arc(Pp_ready, source, pn, ArcKindnormal(), 1);
+
+      Transition target = %resolve(from:WorkDefinition, WDt_finish:Transition);
+      target.setNet(pn);
+      Arc tmpZoomOut = `Arc(target, Pp_finished, pn, ArcKindread_arc(), 1);
+    }
+  }
+}
+\end{tomcode3}

@@ -1,0 +1,26 @@
+static class JNatList { }
+
+static class JconcJNat extends JNatList {
+  public JNat head;
+  public JNatList tail;
+  public JconcJNat() { head = null; tail = null; }
+  public JconcJNat(JNat h, JNatList ntail) {
+    head = h;
+    tail = ntail;
+  }
+  public boolean isEmpty() {
+    return (head == null && tail == null);
+  }
+  public boolean equals(Object o) {
+    if (o instanceof JconcJNat) {
+      JconcJNat obj = (JconcJNat) o;
+      if (this.isEmpty() && obj.isEmpty()) {
+        return true;
+      } else if (!this.isEmpty() && !obj.isEmpty()) {
+        return 
+          head.equals(obj.head) && tail.equals(obj.tail);
+      }
+    }
+    return false;
+  }
+}

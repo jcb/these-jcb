@@ -1,0 +1,37 @@
+\begin{tikzpicture}[node distance=1.1cm,>=stealth',bend angle=45,auto,scale=1,transform shape]
+  \tikzstyle{every label}=[black]
+  \begin{scope}
+
+    \node (MMS) {$MM_s$};
+
+    \node (MMSA) [right of=MMS] {} ;
+    \node (MMSC) [right of=MMS,xshift=-0.2cm] {} ;
+
+    %\node (MMRes) [right of=MMS,xshift=1cm] {$MM_{t_{resolve}}$};
+    \node (MMRes) [right of=MMSA] {$MM_{t_{resolve}}$};
+    
+    \node (MMTA) [right of=MMRes] {} ;
+    \node (MMTC) [right of=MMRes,xshift=0.2cm] {} ;
+    
+    %\node (MMT) [right of=MMRes,xshift=1cm] {$MM_t$};
+    \node (MMT) [right of=MMTA] {$MM_t$};
+    
+    \node[draw,rectangle,inner sep=0.1cm] (S) [below of=MMS] {$E_s^j$};
+    \node[draw,rectangle,inner sep=0.1cm] (TRes) [below of=MMRes] {$E_t^i$};
+    %\node[draw,rectangle,inner sep=0.1cm] (TResRes) [below of=TRes] {Resolve$E_s^jE_t^i$};
+    \node[draw,rectangle,inner sep=0.1cm] (TResRes) [below of=TRes] {$E_{t_{resolve}}^i$};
+    \path (TResRes) edge [post] (TRes);
+    \node[draw,rectangle,inner sep=0.1cm] (T) [below of=MMT] {$E_t^i$};
+
+    \node (MMSB) [left of=TResRes] {} ;
+    \node (MMSD) [left of=TResRes,xshift=-0.2cm] {} ;
+    \node (MMTB) [right of=TResRes] {} ;
+    \node (MMTD) [right of=TResRes,xshift=0.2cm] {} ;
+
+    \path (MMSA) edge [dash pattern=on 2pt off 2pt] (MMSB);
+    \path (MMTA) edge [dash pattern=on 2pt off 2pt] (MMTB);
+    %\path (MMSC) edge [dash pattern=on 2pt off 2pt] (MMSD);
+    %\path (MMTC) edge [dash pattern=on 2pt off 2pt] (MMTD);
+
+  \end{scope}
+\end{tikzpicture}

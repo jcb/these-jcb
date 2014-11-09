@@ -1,0 +1,211 @@
+%\begin{tikzpicture}[node distance=1.1cm,>=stealth',bend
+%angle=45,auto,scale=0.50,transform shape]
+
+%\begin{tikzpicture}[node distance=1.1cm,>=stealth',bend angle=45,auto,transform shape]
+%\begin{tikzpicture}[node distance=1.1cm,>=stealth',bend angle=45,auto,scale=0.9,transform shape]
+\begin{tikzpicture}[node distance=1.1cm,>=stealth',bend angle=45,auto,scale=1.0,transform shape]
+
+  \tikzstyle{place}=[circle,thick,draw=red!75,fill=red!20,minimum size=5mm]
+  \tikzstyle{transition}=[rectangle,thick,draw=blue!75,
+  			  fill=blue!20,minimum size=4mm]
+
+  \tikzstyle{every label}=[black]
+
+  \begin{scope}
+
+%%  \begin{scope}  %% at (5cm, 0) %%
+    % Petri net C
+    \node [place] (pc1) [tokens=0,draw=red!45,fill=red!10] [xshift=0cm]{}
+    ;
+    \node at (pc1.north) [above, inner sep=3mm] {\textbf{C}};
+
+    \node [transition] (tc1) [below of=pc1,draw=blue!45,fill=blue!10] {}
+      edge [pre,black!45]  (pc1)
+    ;
+
+    %%in order to center tstart transition
+    \node [place] (ppp) [below of=tc1,circle,draw=white,fill=white] {};
+    \node [place] (pc2) [left of=ppp,draw=red!45,fill=red!10] {}
+      edge [pre,black!45] (tc1)
+    ;
+    \node [place] (pc3)  [right of=ppp,draw=red!45,fill=red!10] {}
+      edge [pre,black!45] (tc1)
+    ;
+
+    \node [transition] (tc2) [below of=pc2,draw=blue!45,fill=blue!10] {}
+      edge [pre,black!45]  (pc2)
+    ;
+
+    %\node [place] (pc4) [below of=tc2,draw=red!45,fill=red!10,label=right:{$p_{finished}$}] {}
+    \node [place] (pc4) [below of=tc2,draw=red!45,fill=red!10] {}
+      edge [pre,black!45] (tc2)
+    ;
+    \node at (pc4.east) [right] {{$p_{finished}$}};
+%%  \end{scope}
+
+%%  \begin{scope}%% at (5cm, 0) %% [xshift=3cm]
+    % Petri netD 
+    \node [place] (pd1) [tokens=0,draw=red!45,fill=red!10] [xshift=3.3cm]{}
+    ;
+    \node at (pd1.north) [above, inner sep=3mm] {\textbf{D}};
+
+    \node [transition] (td1) [below of=pd1,draw=blue!45,fill=blue!10] {}
+      edge [pre,black!45] (pd1)
+%      edge [pre,bend right,green!45!black!45] (pc4)
+      ;
+    \node at (td1.east) [right] {{$t_{start}$}};
+    \path (td1) edge [pre,bend right,green!45!black!45,thick] node [below,green!45!black!45]{f2s} (pc4);
+
+    %%in order to center tstart transition
+    \node [place] (pppp) [below of=td1,circle,draw=white,fill=white] {};
+    \node [place] (pd2) [left of=pppp,draw=red!45,fill=red!10] {}
+      edge [pre,black!45] (td1)
+    ;
+    \node [place] (pd3) [right of=pppp,draw=red!45,fill=red!10] {}
+      edge [pre,black!45] (td1)
+    ;
+
+    \node [transition] (td2) [below of=pd2,draw=blue!45,fill=blue!10] {}
+      edge [pre,black!45]  (pd2)
+      ;
+
+    \node [place] (pd4) [below of=td2,draw=red!45,fill=red!10] {}
+      edge [pre,black!45] (td2)
+    ;
+
+    % Petri net child
+    \node [place] (ppc1) [tokens=0,draw=red!45,fill=red!10] [xshift=5.6cm]{}
+    %,label=left:{$p_{started}$}] 
+    ;
+    %\node at (ppc1.west) [inner sep=0.5mm,label=above:{$p_{ready}$},xshift=-3mm] {};
+    \node at (ppc1.west) [inner sep=0.5mm,above,xshift=-3mm,yshift=1mm] {{$p_{ready}$}};
+    
+    \node at (ppc1.north) [above, inner sep=3mm] {\textbf{P$_{child}$}};
+
+    \node [transition] (tpc1) [below of=ppc1,draw=blue!45,fill=blue!10] {}
+      edge [pre,black!45]  (ppc1)
+      edge [post,bend right,dash pattern=on 2pt off 2pt,black!50!black] (pc1)
+      edge [post,bend right,dash pattern=on 2pt off 2pt,black!50!black] (pd1)
+    ;
+
+    \node [place] (ppc2) [below of=tpc1,draw=red!45,fill=red!10] {}
+      edge [pre,black!45] (tpc1)
+    ;
+
+    \node [transition] (tpc2) [below of=ppc2,draw=blue!45,fill=blue!10] {}
+      edge [pre,black!45]  (ppc2)
+%%      edge [pre,bend right,green!50!black] (pc4)
+      edge [pre,bend right,dash pattern=on 2pt off 2pt,black!50!black] (pc4)
+      edge [pre,bend right,dash pattern=on 2pt off 2pt,black!50!black] (pd4)
+    ;
+
+    %\node [place] (ppc3) [below of=tpc2,draw=red!45,fill=red!10,label=left:{$p_{finished}$}] {}
+    \node [place] (ppc3) [below of=tpc2,draw=red!45,fill=red!10] {}
+      edge [pre,black!45] (tpc2)
+    ;
+    \node at (ppc3.west) [left] {$p_{finished}$};
+
+%%  \begin{scope}%% at (5cm, 0) %% [xshift=3cm]
+    % Petri net B
+    \node [place] (pb1) [tokens=0] [xshift=8.9cm]{}
+    ;
+    \node at (pb1.north) [above, inner sep=3mm] {\textbf{B}};
+
+    %\node [transition] (tb1) [below of=pb1,label=left:{$t_{start}$}] {}
+    \node [transition] (tb1) [below of=pb1] {}
+      edge [pre] (pb1)
+      edge [post,bend right,dash pattern=on 2pt off 2pt,black] (ppc1)
+      ;
+    \node at (tb1.west) [left] {{$t_{start}$}};
+
+    %%in order to center tstart transition
+    \node [place] (pp) [below of=tb1,circle,draw=white,fill=white] {};
+    \node [place] (pb2) [left of=pp] {}
+      edge [pre] (tb1)
+    ;
+    \node [place] (pb3) [right of=pp] {}
+      edge [pre] (tb1)
+    ;
+
+    %\node [transition] (tb2) [below of=pb2,label=right:{$t_{finish}$}] {}
+    \node [transition] (tb2) [below of=pb2] {}
+      edge [pre]  (pb2)
+      edge [pre,bend right,dash pattern=on 2pt off 2pt,black] (ppc3)
+      ;
+    \node at (tb2.east) [right] {{$t_{finish}$}};
+
+    \node [place] (pb4) [below of=tb2] {}
+      edge [pre] (tb2)
+    ;
+
+%%  \end{scope}
+
+    % Petri net A
+    %%\node [place] (p1) [tokens=0,label=right:{$p_{ready}$}] [xshift=-12cm]{}
+    \node [place] (pa1) [tokens=0] [xshift=12.2cm]{}
+    ;
+    \node at (pa1.north) [above, inner sep=3mm] {\textbf{A}};
+
+    \node [transition] (ta1) [below of=pa1] {}
+      edge [pre]  (pa1)
+    ;
+
+    %%in order to center tstart transition
+    \node [place] (p) [below of=ta1,circle,draw=white,fill=white] {};
+
+    \node [place] (pa2) [left of=p] {}
+      edge [pre] (ta1)
+    ;
+    %\node [place] (pa3)  [right of=p,label=left:{$p_{started}$}] {}
+    \node [place] (pa3)  [right of=p] {}
+      edge [pre] (ta1)
+%      edge [post,bend right,green!50!black] (tb1)
+    ;
+    \node at (pa3.west) [left] {{$p_{started}$}};
+    \path (pa3) edge [post,bend right,green!50!black,thick] node [green!50!black]{s2s} (tb1);
+
+    \node [transition] (ta2) [below of=pa2] {}
+      edge [pre]  (pa2)
+    ;
+
+    \node [place] (pa4) [below of=ta2] {}
+      edge [pre] (ta2)
+    ;
+
+%%  \end{scope}
+
+    % Petri net root
+    \node [place] (ppr1) [tokens=1,xshift=14.5cm]{}%label=right:{$p_{ready}$}] [
+    ;
+
+    %\node at (ppr1.west) [inner sep=1mm,label=above:{$p_{ready}$},xshift=-2mm] {};
+    \node at (ppr1.north) [above, inner sep=3mm] {\textbf{P$_{root}$}};
+
+    \node [transition] (tpr1) [below of=ppr1] {}
+      edge [pre]  (ppr1)
+      edge [post,bend right,dash pattern=on 2pt off 2pt,black!50!black] (pa1)
+      edge [post,bend right,dash pattern=on 2pt off 2pt,black!50!black] (pb1)
+    ;
+
+    \node [place] (ppr2) [below of=tpr1] {}
+      edge [pre] (tpr1)
+    ;
+
+    \node [transition] (tpr2) [below of=ppr2] {}
+      edge [pre]  (ppr2)
+      edge [pre,bend left,dash pattern=on 2pt off 2pt,black!50!black] (pb4)
+      edge [pre,bend left,dash pattern=on 2pt off 2pt,black!50!black] (pa4)
+    ;
+
+    \node [place] (ppr3) [below of=tpr2] {}
+      edge [pre] (tpr2)
+    ;
+
+\node[draw,rectangle,black!40!black!40,inner sep=0.2cm,fit=(ppc1) (ppc1) (pc4)] (pchild) {};
+\node[draw,rectangle,inner sep=0.6cm,fit=(pchild) (ppr1) (ppr3)] (proot) {};
+%%\node at (pchild.north west) [above, inner sep=1mm] [xshift=0.4cm] {P$_{child}$};
+%%\node at (proot.north east) [above, inner sep=1mm] [xshift=-0.4cm] {P$_{root}$};
+  \end{scope}
+
+\end{tikzpicture}
+%\caption{Complete Process described in the use case}

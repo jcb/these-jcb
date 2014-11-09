@@ -1,0 +1,15 @@
+%\begin{mycode}
+\begin{tomcode3}[caption=Exemple d'ancrage algébrique généré pour un élément \emph{resolve}.,label=code:resolveMappingA2Shape]
+  %typeterm ResolveATextCircle extends Circle {
+    implement { ResolveWorkATextCircle }
+    is_sort(t) { t instanceof ResolveATextCircle }
+  }
+
+  %op Circle ResolveATextCircle(o:AText,name:String) {
+    is_fsym(t) { t instanceof ResolveATextCircle }
+    get_slot(name, t)  { t.name }
+    get_slot(o, t)  { t.o }
+    make(o,name) { new ResolveATextCircle(o,name) }
+  }
+\end{tomcode3}
+%\end{mycode}

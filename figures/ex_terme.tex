@@ -1,0 +1,24 @@
+\begin{tikzpicture}[>=latex, node distance=1cm, on grid, auto]
+  \tikzstyle{node}=[fill=white, text centered]
+%  \begin{scope}
+    \node [node] (f) {$f$};
+    \path (f)+(-0.6,-1)  node (x) [node] {$x$};
+    \path (f)+(0.6,-1)  node (g) [node] {$g$};
+    \path (g)+(0.0,-1)  node (a) [node] {$a$};
+    %\path (g)+(0.7,-1)  node (z) [node] {$z$};
+%  \end{scope}
+  % Draw arrows between elements
+	  \path [draw, -] (f.south)+(-0.2,0.0) -- node	[above] {} (x);
+	  \path [draw, -] (f.south)+(0.2,0.0) -- node	[above] {} (g);
+	  \path [draw, -] (g.south)+(0.0,0.0)-- node 	[above] {} (a);
+	  %\path [draw, -] (g.south)+(0.2,0.0)-- node		[above] {} (z);
+\end{tikzpicture}
+%\caption{}
+%
+%f(x,g(y,z))
+%
+%  f
+% / \
+%x   g
+%   / \
+%  y   z

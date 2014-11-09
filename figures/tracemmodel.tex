@@ -1,0 +1,20 @@
+\begin{tikzpicture}%[scale=1,transform shape]
+
+  \begin{class}{Trace}{-5,0}
+  \end{class}
+  
+  \begin{class}{Relationship}{0,0}
+%  \attribute{name : String}
+  \end{class}
+  
+  \begin{class}{Attribute}{5,0}
+%    \attribute{name : String}
+  \end{class}
+  
+  \composition{Trace}{}{1..*}{Relationship}
+  \unidirectionalAssociation{Relationship}{}{1}{Trace}
+  
+  \composition{Relationship}{}{0..*}{Element}
+  \unidirectionalAssociation{Element}{}{1}{Relationship}
+
+\end{tikzpicture}

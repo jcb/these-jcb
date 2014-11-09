@@ -1,0 +1,915 @@
+% vim:spell spelllang=fr
+\chapter{Transformations de modèles par réécriture}
+\label{ch:approach}
+%15p
+
+%\todo{
+%\begin{itemize}
+%  \item Représentation de modèles dans le monde des grammaires. Il faut faire
+%  une petite partie de préambule pour expliquer que l'on amène les modèles dans
+%  le monde des grammaires pour utiliser des outils/techniques existant.
+%  Certains transposent les techniques dans le monde des modèles.  nous :
+%  \begin{itemize}
+%    \item métamodèle $\leftrightarrow$ signature ; 
+%    \item modèle $\leftrightarrow$ terme ;
+%    \item génération d'une signature à partir d'un MM
+%    \item création de termes représentant un modèle / ou chargement d'un modèle
+%    directement mappé comme un terme $\rightarrow technique, non ? dans l'autre
+%    partie ?$
+%    \item transformation d'un terme (représentant donc une transformation de
+%    modèle) $\rightarrow$ oui, c'est l'approche, trivial
+%    \item le terme résultant peut ensuite être utilisé comme tout modèle
+%    (mapping cible) $\rightarrow$ oui, trivial quand on a expliqué l'approche
+%  \end{itemize}
+%  \item Décomposition = approche compositionnelle
+%  \item Résolution - réconciliation
+%  \item Outil pour exprimer une transformation de modèle en Tom
+%  \begin{itemize}
+%    \item Extension du langage Tom
+%      \begin{itemize}
+%        \item syntaxe : \lex{\%transformation}, \lex{\%resolve}, \lex{\%tracelink}
+%        \item illustration :??? ou alors on met le cas d'utilisation ici pour
+%        expliquer ?
+%      \end{itemize}
+%    \item{Évolutions}
+%    \begin{itemize}
+%      \item[Modularité : ] cf. resolve modulaire, j'ai un proto qui est fait,
+%      mais pas tant de réflexion que ça
+%      \item[Traçabilité : ] ici je ne parle pas trop de la traçabilité liée aux
+%      spéc mais plus la traçabilité technique/interne. Le "\%resolvelink" de
+%      \%tracelink, + éventuellement une traçabilité type "log complet"
+%      \item[Expressivité : ] simplification de syntaxe (traversal, arguments,
+%      patterns, multi sources et cibles), lien avec le travail de Christophe ?
+%    \end{itemize}
+%  \end{itemize}
+%  \item Travaux connexes : approche classique en MDE, outils, différences
+%\end{itemize}}
+
+%\todo{approche classique, à la QVT (resolve) ; à mettre ; Mais ce qui est moins classique : côté hybride 1. entre DSL et GPL ; 2. usages
+%d'outils d'un espace technologique pour appliquer des transformations de
+%modèles d'un autre espace technologique.}
+
+Dans ce chapitre, nous expliquons l'approche que nous avons adoptée pour mettre
+en œuvre les transformations de modèles. Dans la
+section~\ref{approach:sec:hybride}, nous présentons l'aspect hybride de notre
+approche, les choix liés ainsi que son intérêt. Nous abordons ensuite la
+problématique de la représentation des modèles dans notre approche dans la
+section~\ref{approach:sec:representation}. Nous expliquons dans la
+section~\ref{approach:sec:approche} les mécanismes en jeu pour notre approche
+de transformation de modèles par réécriture.
+
+%\ttodo{
+%  \begin{itemize}
+%    \item approche hybride : avantages + transfo par réécriture changement
+%      d'espace technique ; hybride car GPL+DSL, changement d'espace technique,
+%      non lié à une techno même si la première implém' l'est (extensible)
+%    \item représentation de modèles
+%    \item explication de l'approche classique décomposition+réconciliation avec
+%      les \emph{placeholders}
+%    \item avantages : modularité, traçabilité, expressivité
+%  \end{itemize}
+%}
+
+\section{Choix et intérêt d'une approche hybride}
+\label{approach:sec:hybride}
+
+Si le principe de la transformation elle-même est un principe qui peut sembler
+classique, car adopté par d'autres outils tels que {\qvt} ou {\atl}, notre
+environnement de travail est très différent de celui des autres outils, ce qui
+fait l'originalité de notre approche. %En effet, nous nous plaçons dans un
+%environnement technique au croisement de plusieurs langages et technologies.
+
+Comme nous l'avons vu dans le chapitre~\ref{ch:notions}, il existe de multiples
+approches pour implémenter des transformations de modèles. L'un des choix
+possibles est d'opter pour une approche par programmation en utilisant un
+langage généraliste tel que {\java}. On lui adjoint un \emph{framework} et un
+ensemble de bibliothèques pour faciliter la représentation et la manipulation
+de modèles, notamment {\emf}. Ensuite, la transformation revient à l'écriture
+d'un programme qui charge un modèle en entrée et produit un modèle en sortie.
+Cette approche présente certains avantages. Les langages généralistes sont
+habituellement plus accessibles à la plupart des développeurs tant par le fait
+qu'une formation d'informaticien comprend généralement l'apprentissage de
+langages généralistes que par le fait que ces langages suivent des paradigmes
+de programmation bien identifiés. En outre, cette plus grande accessibilité a
+aussi pour effet de faciliter le développement de communautés, ainsi que
+d'outils d'aide au développement (IDE, bibliothèques, etc.) et de
+documentation. Ces effets entretiennent alors le cercle vertueux de la facilité
+d'accès. À l'opposé, il peut être difficile ou long d'implémenter une
+transformation complexe alors qu'un langage dédié proposerait les constructions
+adéquates pour ce type de tâche.
+
+Une deuxième possibilité est de suivre les recommandations {\mda} qui
+encouragent l'utilisation de {\dsl}. Cela a l'avantage d'être exactement adapté
+à la tâche visée. L'inconvénient est que les {\dsl} ont généralement une
+visibilité plus limitée, avec des communautés plus petites et un outillage
+moins étoffé. De plus, la compétence est plus difficile à trouver ou induit des
+coûts de formation plus élevés.
+
+Notre approche est une approche hybride, pour combler le fossé entre les
+langages généralistes et dédiés, afin de bénéficier du meilleur des deux
+mondes. Nous proposons d'utiliser le langage {\tom} pour exprimer des
+transformations de modèles, ce qui nous permet de nous intégrer dans des
+langages généralistes tout en apportant des fonctionnalités supplémentaires par
+ses constructions. Comme présenté dans le chapitre~\ref{ch:tom}, {\tom} repose
+sur le calcul de réécriture et implémente la fonctionnalité de \emph{stratégie
+de réécriture}, ce qui permet de découpler les règles métier du parcours des
+structures de données. Nous proposons donc de transformer des modèles par
+réécriture, en nous appuyant sur les stratégies. Manipulant des termes, il nous
+faut représenter les modèles sous cette forme pour pouvoir les transformer.
+Nous avons aussi fait le choix d'une intégration dans un environnement de
+production pouvant être considéré comme typique, à savoir l'écosystème {\java}.
+De plus, nous avons choisi de travailler dans un premier temps avec une
+technologie courante et très utilisée ---~{\emf}~--- qui devient un standard
+\emph{de fait}.
+
+Partant de ces choix et de nos contraintes, notre approche consiste à exprimer
+un modèle {\emf} sous la forme d'un terme puis à le transformer par réécriture.
+Nous opérons donc des transformations de modèles en changeant d'espace
+technologique pour pouvoir nous appuyer sur nos méthodes et outils déjà
+éprouvés. Nous décrivons le premier aspect de notre approche ---~la
+représentation des modèles~--- dans la
+section~\ref{approach:sec:representation}, puis nous détaillons les principes
+mis en œuvre dans une transformation dans la
+section~\ref{approach:sec:approche}.
+
+%Notre approche consi
+%
+%En effet, dans un contexte industriel
+%contexte économique, réduction des coûts
+%et la représentation choisie pour les modèles porte à conséquences sur les outils.
+
+\section{Représentation de modèles par une signature algébrique}
+\label{approach:sec:representation}
+
+%\ttodo{ici on explique l'on représente les modèles sous forme de termes. On a
+%donc aussi des MM, mais cela se présente sous la forme d'une signature (ex :
+%gom vs .ecore}
+
+Réécrivant des termes, la première étape de notre approche est d'élaborer une
+représentation adéquate des modèles. Compte tenu de ce besoin et de notre
+approche, nous procédons en premier lieu par à un changement d'espace
+technologique. Un métamodèle dans le monde des modèles correspond à une
+signature dans celui des termes, tandis qu'un modèle ---~conforme à son
+métamodèle~--- correspond à un terme ---~conforme à sa signature
+algébrique~---. Lors de ce changement, un aspect \emph{a priori} problématique
+de notre représentation sous forme de terme d'un modèle vient du fait qu'un
+terme est une structure arborescente tandis qu'un modèle est généralement vu
+comme un graphe (un ensemble de nœuds et d'arcs). Une transformation de modèle
+est donc une fonction de transformation de graphe qu'il faut encoder dans notre
+contexte. L'un des aspects de notre approche est d'opérer une transformation
+préalable permettant de considérer une transformation de modèles comme une
+transformation de termes. Cela est possible étant donné que l'on obtient un
+arbre de recouvrement par la relation de composition, ce qui nous permet
+d'établir une vue adéquate des modèles sous la forme d'un terme.
+
+Nous avons donc développé un outil ---~appelé {\tomemf}~--- que nous décrivons
+techniquement dans le chapitre~\ref{ch:outils}, et qui, pour un métamodèle
+{\emf} {\ecore} donné, produit sa signature algébrique {\tom} correspondante,
+utilisable dans un programme {\tomjava}. Bien que cet outil repose pour le
+moment sur une technologie particulière, il est tout à fait possible de
+l'étendre ou d'écrire un outil similaire adapté à d'autres technologies.
+
+Dans notre représentation, pour chaque métaclasse, une sorte lui correspond,
+ainsi qu'un opérateur. Une métaclasse pouvant avoir des attributs et des
+opérations, l'opérateur a les champs correspondants. Les relations sont
+représentées par des attributs simples dans le cas d'associations. Dans le cas
+de relations de composition, des sortes et opérateurs variadiques additionnels
+sont créés, et un attribut de ce type est ajouté à l'opérateur ayant la
+relation de composition.
+
+Pour illustrer notre propos, considérons un métamodèle simple permettant de
+décrire des graphes (figure~\ref{fig:graphmm}). Un graphe (\emph{Graph}) est
+composé de \emph{Nodes} et d'\emph{Arcs}. Chaque arc a un poids, une source et
+une cible. Ces extrémités sont de type \emph{Node}, un \emph{Node} pouvant
+avoir plusieurs arcs entrants et sortants.
+\begin{figure}[h]%[fig:graphmm]{Métamodèle de graphe.}%[H] %[!h]
+  \begin{center}
+    \input{figures/graphmm}
+    \caption{Métamodèle des graphes.}
+    \label{fig:graphmm}
+  \end{center}
+\end{figure}
+La représentation sous forme de signature algébrique de ce métamodèle est alors
+donnée par le listing~\ref{code:signalgGraph}. Les métaclasses \emph{Graph},
+\emph{Node} et \emph{Arc} ont chacune une sorte qui lui correspond (nous avons
+conservé les même noms). Un opérateur ---~préfixé par \texttt{op} dans
+l'exemple~--- est associé à chacune d'entre elles. Les attributs présents dans
+les métaclasses sont bien reportés au niveau des opérateurs (\texttt{name} et
+\texttt{weight}). Les relations d'association sont traduites par des paramètres
+additionnels : l'opérateur \texttt{opArc} possède ainsi deux paramètres
+supplémentaires \texttt{source} et \texttt{target}. Le cas des relations de
+composition (relations \texttt{nodes} et \texttt{arcs}) est traité par la
+création d'opérateurs variadiques (\texttt{opNodeList} et \texttt{opArcList}
+dans notre exemple) ainsi que de leurs sortes associées (\texttt{NodeList} et
+\texttt{ArcList}).
+
+\begin{figure}[H]
+  \centering
+  \input{code/signalgGraph}
+%  \caption{}
+%  \label{code:signalgGraph}
+\end{figure}
+
+
+Grâce à ce changement d'espace technologique, nous encodons la fonction qui
+transforme un modèle non plus comme une fonction de réécriture de graphe, mais
+comme une fonction de réécriture de termes.
+
+
+%Dans notre approche de transformation par réécriture, nous représentons les
+%métamodèles sous la forme de signature algébrique. Plutôt que de parler de
+%métaclasses et de métarelations, nous parlons 
+%
+%\ttodo{signature $\leftrightarrow$ métamodèle ; terme $\leftrightarrow$ modèle
+%; métaclasses contiennent des operations et des attributs ; peuvent être liées
+%par des métarelations (association ou composition)}
+
+\FloatBarrier
+
+\section{Transformation de modèles par réécriture}
+\label{approach:sec:approche}
+
+%\todo{à bouger}
+
+%Étant en mesure de représenter des modèles sous forme de termes ---~et donc de
+%voir une transformation de modèles non plus comme de la réécriture de graphe
+%mais comme de la réécriture de terme, nous pouvons
+Étant en mesure de représenter des modèles sous forme de termes, nous pouvons
+décrire notre approche pour les transformer. Son principe est similaire à celui
+de l'approche de {\qvt} et {\atl} et peut sembler classique dans le domaine des
+modèles. Toutefois, ce n'est pas le cas dans l'environnement dans lequel nous
+évoluons, et plus généralement dans le domaine des outils de transformation
+généralistes dédiés aux arbres. Habituellement, à l'instar d'un compilateur, les
+outils de transformation d'arbres procèdent à des parcours et à des
+modifications successives sur un arbre qui est passé de phase en phase de
+l'outil.
+
+Dans notre approche, nous décomposons les transformations en deux phases
+distinctes. La première est une transformation par parties qui consiste à créer
+les éléments cibles du modèle résultant ainsi que des éléments additionnels que
+nous appelons \emph{éléments resolve}, en référence au \emph{resolve} de {\qvt}
+et au \emph{resolveTemp} d'{\atl}. Ces éléments permettent de faire référence à
+des éléments qui n'ont pas encore été créés par la transformation. La seconde
+phase, quant à elle, a pour objectif de rendre le modèle cible résultat
+cohérent, c'est-à-dire conforme au métamodèle cible en éliminant les éléments
+\emph{resolve} et en les remplaçant par des références vers les éléments
+effectivement créés par la transformation. Cette seconde phase n'ajoute aucun
+nouvel élément cible au résultat.
+
+Pour illustrer notre propos dans ce chapitre, nous nous appuierons sur un
+exemple visuel permettant de bien comprendre le mécanisme de
+\emph{décomposition-résolution}. Supposons que nous souhaitons transformer une
+séquence \texttt{A;B} textuelle en sa forme graphique correspondante comme
+décrit par la Figure~\ref{fig:simpleApproachExample}. Dans cet exemple, le
+choix des couleurs des connecteurs est arbitraire : nous aurions très bien pu
+choisir de colorer le cercle en vert et le carré en bleu. Supposons donc que ce
+découpage est spécifié et imposé.
+
+\begin{figure}[h]
+  \begin{center}
+   \input{figures/simpleApproachExample}
+   \caption{Transformation du modèle source \texttt{A;B} en un modèle cible graphique.}
+    \label{fig:simpleApproachExample}
+  \end{center}
+\end{figure}
+
+%Chacune de ces phases peut être vue comme une fonction que nous composons par
+%la suite pour former une transformation. 
+
+%\noindent En instanciant notre approche avec le cas d'étude SimplePDLToPetriNet, nous
+%obtenons : %$SimplePDLToPetriNet$ comme la composée de $Transformer$ et de
+%%$Resolve$, avec $MM_{SimplePDL}$, $MM_{PetriNet_{resolve}}$ et $MM_{PetriNet}$
+%%respectivement les métamodèles source, étendu et cible :
+%\begin{tabbing}
+%  $SimplePDLToPetriNet$ \= $ : MM_{SimplePDL} \rightarrow MM_{PetriNet}$\\
+%  $Transformer$ \> $ : MM_{SimplePDL} \rightarrow MM_{PetriNet_{resolve}}$\\
+%  $Resolve$ \> $ : MM_{PetriNet_{resolve}} \rightarrow MM_{PetriNet}$\\
+%  $SimplePDLToPetriNet $ \> $ = Resolve \circ Transformer$\\
+%\end{tabbing}
+%Appliquée au processus $p_{root}$ (illustré Figure~\ref{fig:simplepdlusecase})
+%conforme à $MM_{SimplePDL}$ (Figure~\ref{fig:simplepdlmmodel}), cette
+%transformation produira un réseau de Petri $pn$ (illustré
+%Figure~\ref{fig:petrinetusecase}) conforme à $MM_{PetriNet}$
+%(Figure~\ref{fig:petrinetmmodel}), en passant par le résultat intermédiaire
+%$pn_{resolve}$ conforme au métamodèle $MM_{PetriNet_{resolve}}$. On obtient
+%donc :
+%\begin{flushleft}
+%  $SimplePDLToPetriNet(p_{root}) = Resolve(Transformer(p_{root}))$, avec\\
+%  $Transformer(p_{root}) = pn_{resolve}$ et\\ 
+%  $Resolve(p_{resolve}) = pn$
+%\end{flushleft}
+%La Figure~\ref{fig:mmresolveinst} instancie le schéma d'extension du
+%métamodèle cible au cas d'étude : le métamodèle cible est enrichi
+%d'une métaclasse \emph{ResolvePT} pour pouvoir créer des éléments
+%intermédiaires \emph{resolve} qui jouent temporairement le role d'une
+%\emph{Transition} obtenue à partir d'une source \emph{Process}.
+%\begin{figure}[h]
+%  \begin{center}
+%    \input{figures/mmresolveinst}
+%    \caption{Instanciation du schéma d'extension du métamodèle cible pour le cas d'étude SimplePDLToPetriNetPetriNet.}
+%    \label{fig:mmresolveinst}
+%  \end{center}
+%\end{figure}
+
+
+
+
+\subsection{Approche compositionnelle}%\todo{Transformations élémentaires} vs \todo{(OLD) Approche compositionnelle}}
+\label{approach:subsec:composition}
+
+%\todo{Note : Décomposition en transformations élémentaires == définitions,
+%ajouter la description de  l'exemple "A ; B" ?}
+
+Une fois le problème de la représentation des modèles résolu, il est possible
+d'instancier un modèle (création d'un terme conforme à la signature algébrique)
+et d'opérer une transformation sur le terme le représentant.
+
+L'écriture d'une transformation de modèles peut se faire par une approche
+procédurale \emph{monolithique}. L'utilisateur construit la transformation par
+étapes (\emph{transformation steps}), dont l'ordre s'impose naturellement
+%\ttodo{non, détailler, exemple à illustrer visuellement}
+en fonction des besoins des différents éléments : par exemple, la
+transformation décrite dans la Figure~\ref{fig:simpleApproachExample} peut se
+décomposer en trois étapes que nous illustrons dans la
+Figure~\ref{fig:approachSimpleRules}.
+
+\begin{figure}[h]
+  \centering
+\begin{tabular}{c|c|c}
+  %\begin{subfigure}[A]{0.30\textwidth}
+  \begin{subfigure}{0.30\textwidth}
+    \centering
+    \input{figures/approachRuleA}
+    \subcaption{}
+  \end{subfigure}
+  &
+  %\begin{subfigure}[seq]{0.30\textwidth}
+  \begin{subfigure}{0.30\textwidth}
+    \centering
+    \input{figures/approachRuleSeq}
+    \subcaption{}
+  \end{subfigure}
+  &
+  %\begin{subfigure}[B]{0.30\textwidth}
+  \begin{subfigure}{0.30\textwidth}
+    \centering
+    \input{figures/approachRuleB}
+    \subcaption{}
+  \end{subfigure}
+\end{tabular}
+  \caption{Règles de transformation de \texttt{A}, \texttt{;} et \texttt{B}.}
+  \label{fig:approachSimpleRules}
+\end{figure}
+
+La transformation de \texttt{A} (étape (a)) donne un hexagone et un cercle
+rouges connectés, celle de \texttt{B} (étape (c)) un pentagone et un
+connecteur bleus, celle de \texttt{;} (étape (b)) produit un triangle
+et un carré connectés verts, ainsi qu'un connecteur supplémentaire. Pour qu'un
+connecteur ou arc puisse être créé, il est nécessaire de connaître chaque
+extrémité. Ainsi, la transformation de \texttt{A} ne pose aucun souci
+particulier : un seul arc est créé entre deux éléments créés (hexagone et
+cercle) dans cette même étape de transformation. En revanche, la
+transformation de \texttt{B} en un pentagone est censée aussi construire un arc
+dont l'une des extrémités (petit carré) n'est pas créée dans cette étape de
+transformation. Il est donc nécessaire que l'étape de transformation
+construisant cette deuxième extrémité se déroule avant celle produisant l'arc
+(c). Le carré servant de seconde extrémité à l'arc est construit dans l'étape
+de transformation de \texttt{;} qui devra donc être exécutée avant (c). Nous
+notons que cette étape génère un autre arc dont l'une des extrémités n'est pas
+connue dans (b). L'étape de transformation produisant cette extrémité d'arc
+qui nous intéresse (petit cercle) est (a). Il est donc naturel d'exécuter (a)
+avant (b). Finalement, pour que cette transformation puisse être exécutée sans
+qu'il n'y ait de problème d'éléments manquant, l'utilisateur doit adopter les
+étapes de transformation dans l'ordre suivant : (a), puis (b), puis (c). S'il
+ne respecte pas cet ordre, il sera confronté au problème de création d'éléments
+avec des informations manquantes.
+
+Cependant, cette approche n'est pas toujours possible, notamment lorsque l'on
+manipule des structures cycliques. Lorsqu'elle est possible, elle nécessite une
+parfaite expertise ainsi qu'une connaissance globale de la transformation pour
+être capable d'organiser les différentes étapes. De plus, avec une telle
+méthode une transformation sera généralement monolithique. Elle sera donc peu
+générique et le code peu réutilisable, l'encodage du parcours du modèle ainsi
+que les transformations étant {\adhoc}. Généralement, le parcours du modèle
+sera encodé par des boucles et de la récursivité, et un traitement particulier
+sera déclenché lorsqu'un élément donné sera détecté. Parcours et traitement
+seront donc étroitement liés. La moindre modification du métamodèle source ou
+cible implique donc de repenser la transformation.
+
+Nous souhaitons au contraire faciliter le développement et la maintenance du
+code que l'utilisateur écrit pour une transformation, tout en le rendant
+réutilisable pour une autre transformation. Il est donc important d'adopter
+une méthode permettant une grande modularité du code.
+
+Notre approche est d'opérer une transformation par parties : il faut d'abord
+décomposer une transformation complexe en transformations les plus simples (ce
+que nous nommons \emph{transformations élémentaires} ou \emph{définitions}).
+Chacune d'entre elles est décrite par une règle ou un ensemble de règles. La
+transformation globale est ensuite construite en utilisant ces transformations
+élémentaires. Mais dans ce cas se pose le problème de la dépendance des
+définitions entre elles, ainsi que de l'utilisation d'éléments issus d'une
+transformation élémentaire dans une autre transformation élémentaire. Ce qui a
+des conséquences sur l'ordre d'application des définitions : il peut être
+absolument nécessaire qu'une partie de la transformation soit effectuée pour
+que les autres étapes puissent être appliquées. De plus, par souci
+d'utilisabilité, nous ne souhaitons pas que l'utilisateur ait besoin de se
+soucier de l'ordre d'application des transformations élémentaires. Nous
+souhaitons qu'il se concentre uniquement sur la partie métier de la
+transformation. Il faut donc mettre en œuvre un mécanisme permettant de
+résoudre les dépendances.
+
+Dans notre contexte, nous effectuons des transformations dites
+\emph{out-place}, ce qui signifie que le modèle source n'est pas modifié. Le
+modèle cible résultant est construit au fur et à mesure de la transformation,
+et n'est pas obtenu par modifications successives du modèle source
+---~transformation \emph{in-place}, comme le font les outils
+VIATRA~\cite{Varro2002} / VIATRA2~\cite{Varro2007} et
+GrGen.NET~\cite{Jakumeit2010} par exemple. Partant de ce constat, les
+transformations élémentaires composant notre transformation n'entretiennent
+aucune dépendance dans le sens où la sortie d'une transformation élémentaire
+n'est pas l'entrée d'une autre transformation élémentaire. Dans notre approche
+compositionnelle, chaque sortie d'une transformation élémentaire est une partie
+du résultat final.
+
+%\todo{[maintenant, faut parler des \emph{éléments resolve}}
+
+Dans l'exemple, nous conservons la décomposition proposée dans la
+Figure~\ref{fig:approachSimpleRules} en trois règles simples. Nous avons
+décomposé une transformation complexe en \emph{définitions} indépendantes et
+nous pouvons les appliquer. Subsiste cependant le problème de l'usage dans une
+\emph{définition} d'éléments créés dans une autre \emph{définition}. Comme
+l'ordre d'écriture et d'application des transformations élémentaires ne doit
+pas être une contrainte pour l'utilisateur, nous avons choisi de résoudre ce
+problème par l'introduction d'éléments temporaires ---~éléments dits
+\emph{resolve}~--- qui font office d'éléments cibles durant la transformation,
+et qui sont substitués en fin de transformation lors d'une seconde phase. Cette
+dénomination fait évidemment référence au \emph{resolve} de {\qvt} et au
+\emph{resolveTemp} de {\atl}.
+
+Partant du principe que toutes les transformations élémentaires peuvent être
+déclenchées indépendamment dans n'importe quel ordre (voire en parallèle), il
+faut être en mesure de fournir un élément cible lorsque le traitement d'une
+\emph{définition} le nécessite. Nous proposons donc de construire un terme
+temporaire représentant l'élément final qui a été ou qui sera construit lors de
+l'application d'une autre \emph{définition}. Ce terme doit pouvoir être intégré
+dans le modèle cible temporaire pour être manipulé en lieu et place du terme
+ciblé censé être construit dans une autre \emph{définition}. Il doit donc
+respecter les contraintes de types du métamodèle cible tout en portant des
+informations supplémentaires telles qu'un identifiant, une référence à
+l'élément source d'origine et une référence à l'élément cible. Nous étendons
+donc le métamodèle cible $MM_t$ afin que ces contraintes soient respectées et
+que le modèle intermédiaire résultant soit conforme à un métamodèle cible
+étendu, noté $MM_{t_{resolve}}$. Ainsi, tout élément \emph{resolve}
+$e_{t_{resolve}}^i$ du modèle intermédiaire enrichi $m_{t_{resolve}}$ sera de
+type un sous-type de l'élément ciblé $e_t^i$ du modèle cible $m_t$. Les
+éléments $e_{t_{resolve}}^i$ sont les éléments $e_t^i$ décorés d'une
+information sur le nom de l'élément cible représenté ainsi que d'une
+information sur l'élément source dont ils sont issus. En termes de métamodèle
+(Figure~\ref{fig:mmresolve}), pour tout élément cible $e_t^i$ ---~instance d'un
+élément $E_t^i$ du métamodèle cible $MM_t$~--- issu d'un élément source $e_s^j$
+---~instance du métamodèle source $MM_s$~--- et nécessitant un élément
+\emph{resolve} $e_{t_{resolve}}^i$ durant la transformation, un élément
+$E_{t_{resolve}}^i$ est créé dans le métamodèle étendu $MM_{t_{resolve}}$. Cet
+élément hérite de l'élément cible $E_t^i$.\\
+
+\begin{figure}[h]
+  \begin{center}
+    \input{figures/mmresolve}
+    \caption{Schéma d'extension du métamodèle cible par l'ajout d'éléments intermédiaires \emph{resolve}.}
+    \label{fig:mmresolve}
+  \end{center}
+\end{figure}
+Cette première phase produit donc un modèle cible non conforme au métamodèle
+cible $MM_t$ de la transformation globale, mais conforme au métamodèle cible
+étendu $MM_{t_{resolve}}$. Elle peut s'écrire sous la forme d'une fonction $c: MM_s
+\rightarrow MM_{t_{resolve}}$ qui crée des éléments cible à partir des éléments
+du modèle source.
+
+%\todo{[ici faut illustrer avec un cas concret tiré de l'exemple, comme pour
+%l'exemple TSI ; Figure~\ref{fig:approachSimpleRulesResolve}]}\\
+
+La Figure~\ref{fig:approachSimpleRulesResolve} permet d'illustrer le mécanisme
+des éléments \emph{resolve}. Nous reprenons la
+Figure~\ref{fig:approachSimpleRules} décrivant les trois \emph{définitions}
+composant notre transformation exemple, et nous intégrons les \emph{éléments
+resolve} (représentés par des formes en pointillés). Précédemment, nous avons
+vu que nous pouvions appliquer la \emph{définition} (a) complètement
+indépendamment étant donné qu'elle ne nécessite aucun résultat ou partie de
+résultat issu d'une autre \emph{définition}. Cette étape ne change donc pas et
+ne crée aucun \emph{élément résolve}. La \emph{définition} (b) nécessite en
+revanche un cercle rouge -- normalement créé dans la \emph{définition} (a) --
+pour pouvoir créer un arc. Un élément dont le type (\emph{cercle pointillé})
+est sous-type de l'élément cible (\emph{cercle}) est donc créé. Nous serons
+donc par la suite en mesure de manipuler le \emph{cercle pointillé} comme un
+\emph{cercle} classique et de filtrer sur tous les cercles, en pointillés ou
+non. La couleur donnée à un \emph{élément resolve} dans la
+Figure~\ref{fig:approachSimpleRulesResolve} permet de représenter l'information
+de la \emph{définition} d'origine de l'élément ciblé par l'\emph{élément
+resolve} et donc d'encoder le lien entre les deux éléments. Le même principe
+est appliqué à la \emph{définition} (c) qui nécessite un élément normalement
+créé dans la définition (b), d'où la génération d'un élément de type
+\emph{carré pointillé} vert.
+
+\begin{figure}[h]
+  \centering
+\begin{tabular}{c|c|c}
+  %\begin{subfigure}[A]{0.30\textwidth}
+  \begin{subfigure}{0.30\textwidth}
+    \centering
+    \input{figures/approachRuleA}
+    \subcaption{}
+  \end{subfigure}
+  &
+  %\begin{subfigure}[seq]{0.30\textwidth}
+  \begin{subfigure}{0.30\textwidth}
+    \centering
+    \input{figures/approachRuleSeqResolve}
+    \subcaption{}
+  \end{subfigure}
+  &
+  %\begin{subfigure}[B]{0.30\textwidth}
+  \begin{subfigure}{0.30\textwidth}
+    \centering
+    \input{figures/approachRuleBResolve}
+    \subcaption{}
+  \end{subfigure}
+\end{tabular}
+  \caption{Règles de transformation de \texttt{A}, \texttt{;} et \texttt{B}
+effectives avec la construction d'\emph{éléments resolve} (en pointillés
+colorés).}
+  \label{fig:approachSimpleRulesResolve}
+\end{figure}
+
+%\begin{figure}[h]
+%  \begin{center}
+%    \input{figures/resolvePWD}
+%  \end{center}
+%  \caption{Illustration du mécanisme \emph{resolve} avec les réseaux de Petri images d'une \texttt{WorkDefinition} et d'un \texttt{Process}.}
+%  \label{fig:resolveEx}
+%\end{figure} 
+
+Durant cette première phase de transformation par parties, chaque
+\emph{définition} a produit un ensemble d'éléments tous disjoints, les éléments
+censés provenir d'autres \emph{définitions} ayant été représentés par des
+éléments \emph{resolve}. %plusieurs de fonction {n,a} -> {n,a}
+
+Nous encodons les \emph{définitions} par des stratégies de réécriture que nous
+composons avec d'autres stratégies. Il en résulte une stratégie plus complexe
+qui encode cette première phase de transformation.  Dans notre exemple de
+transformation \emph{Text2Picture}, nous avons identifié trois
+\emph{définitions} ---~(a), (b) et (c)~--- qui seront encodées respectivement
+par les stratégies $S_a$, $S_b$ et $S_c$. Nous les combinons avec la séquence
+et une stratégie de parcours ---~\emph{TopDown} ici~--- pour former la
+stratégie $S_{phase1} = TopDown(Seq(S_a,S_b,S_c))$.
+
+
+
+
+\subsection{Résolution - réconciliation}
+%\todo{[on arrive à la phase \emph{resolve}]}
+\label{approach:subsec:reconciliation}
+
+L'application des transformations élémentaires sur le modèle source a produit
+un résultat intermédiaire non conforme au métamodèle cible $MM_t$, car composé
+de plusieurs résultats partiels incluant des \emph{éléments resolve}, comme
+illustré par la Figure~\ref{fig:approachIntermediateResult}.
+
+\begin{figure}[h]
+  \begin{center}
+   \input{figures/approachIntermediateResult}
+   \caption{Résultat intermédiaire de la transformation, avant phase de \emph{résolution}.}
+    \label{fig:approachIntermediateResult}
+  \end{center}
+\end{figure}
+
+
+Pour obtenir un résultat cohérent conforme au métamodèle cible, il est
+nécessaire d'effectuer un traitement sur ce résultat intermédiaire. C'est ce
+que nous appelons la phase de \emph{résolution} ou \emph{réconciliation}, dont
+le but est de fusionner des éléments disjoints pour les rendre identiques. Elle
+consiste à parcourir le terme résultant, à trouver les éléments temporaires
+\emph{resolve}, puis à reconstruire un terme résultat en remplaçant ces termes
+temporaires par les termes qu'ils étaient censés remplacer. Étant donné que
+toutes les \emph{définitions} ont été appliquées, nous sommes certains que
+l'élément final existe, et qu'il peut se substituer à l'élément temporaire
+examiné.
+
+%\ttodo{mettre le schéma de la phase de résolution :
+%Figure~\ref{fig:approachResolutionPhase} ou
+%Figure~\ref{fig:approachResolutionPhase2} ?}
+%\begin{figure}[h]
+%  \begin{center}
+%   \input{figures/approachResolutionPhase}
+%   \caption{Phase de \emph{résolution}.}
+%    \label{fig:approachResolutionPhase}
+%  \end{center}
+%\end{figure}
+
+\begin{figure}[h]
+  \begin{center}
+   \input{figures/approachResolutionPhase2}
+   \caption{Phase de \emph{résolution}.}
+    \label{fig:approachResolutionPhase2}
+  \end{center}
+\end{figure}
+
+Cette phase de résolution est elle-même encodée par une stratégie $S_{phase2}$
+qui réécrit un terme-\emph{resolve} (c'est-à-dire la représentation d'un modèle
+contenant des éléments intermédiaires \emph{resolve} sous la forme d'un terme)
+en terme cible, conforme à la signature cible.
+
+Ce remplacement est possible grâce aux informations supplémentaires qui
+enrichissent le type cible ainsi qu'aux informations que nous sauvegardons
+durant la transformation. Ces informations additionnelles sont des informations
+sur les relations existant entre les éléments cibles et les éléments sources
+dont ils sont issus. Elles sont obtenues par le biais d'actions explicites de
+la part de l'utilisateur : tout terme créé dans une transformation peut être
+tracé sur demande. C'est ce qu'illustre la
+Figure~\ref{fig:approachSimpleRulesTrace} : les jetons colorés correspondent à
+une action explicite de trace d'un terme qui a été créé dans la
+\emph{définition}. Ainsi, dans cet exemple, l'utilisateur a marqué un élément
+dans la \emph{définition} (a) qui correspond à l'élément ciblé par
+l'\emph{élément resolve} de la définition (b). Il en est de même avec l'élément
+de type \emph{carré} des \emph{définitions} (b) et (c).
+
+\begin{figure}[h]
+  \centering
+\begin{tabular}{c|c|c}
+  %\begin{subfigure}[A]{0.30\textwidth}
+  \begin{subfigure}{0.30\textwidth}
+    \centering
+    \input{figures/approachRuleATrace}
+    \subcaption{}
+  \end{subfigure}
+  &
+  %\begin{subfigure}[seq]{0.30\textwidth}
+  \begin{subfigure}{0.30\textwidth}
+    \centering
+    \input{figures/approachRuleSeqResolveTrace}
+    \subcaption{}
+  \end{subfigure}
+  &
+  %\begin{subfigure}[B]{0.30\textwidth}
+  \begin{subfigure}{0.30\textwidth}
+    \centering
+    \input{figures/approachRuleBResolve}
+    \subcaption{}
+  \end{subfigure}
+\end{tabular}
+  \caption{Règles de transformation de \texttt{A}, \texttt{;} et \texttt{B}
+effectives, avec traçage des éléments correspondant à un \emph{élément resolve}
+d'une autre \emph{définition} (token coloré de la couleur du résultat d'une
+\emph{définition)}.}
+  \label{fig:approachSimpleRulesTrace}
+\end{figure}
+
+Une autre approche possible eût été de tracer systématiquement tous les termes
+créés, mais nous avons fait ce choix dans le but d'améliorer la lisibilité de
+la trace. %\ttodo{revoir tout ça, ça va changer} 
+Toutes ces informations
+supplémentaires constituent ce que nous appelons le modèle de lien. Il
+maintient tout au long de la transformation des relations entre les éléments
+sources et les éléments cibles qui en sont issus. 
+Dans ce cas précis, le traçage des liens a eu un usage purement mécanique pour
+permettre la résolution de liens. Cependant, outre cet usage pour la phase de
+résolution, le construction dédiée au marquage de termes et le modèle de lien
+nous permettent d'assurer la traçabilité de la transformation à des fins de
+vérification \emph{a posteriori}. Nous traitons de ce sujet dans le
+chapitre~\ref{ch:traceability}.
+
+Ainsi, une transformation $T$ est la composée de deux fonctions $c : MM_s
+\rightarrow MM_{t_{resolve}}$ et $r : MM_{t_{resolve}} \rightarrow MM_t$. La
+transformation complète $T : MM_s \rightarrow MM_t$ est donc définie par $T = r
+\circ c$. L'encodage d'une telle fonction dans notre approche est une stratégie
+$S$ mettant en séquence les deux stratégies représentant chaque phase,  qui
+peut se résumer par $S = Seq(S_{phase1}, S_{phase2})$.
+
+Outre les avantages évoqués en début de chapitre, un des intérêts de cette
+approche compositionnelle reposant sur les stratégies de réécriture apparait
+immédiatement : reposant sur les stratégies de réécriture, nous bénéficions
+naturellement de la modularité intrinsèque à ce concept que le langage de
+stratégies de {\tom} implémente. Il est ainsi possible de réutiliser les
+\emph{définitions} dans une autre transformation, sans adaptation lourde du
+code. On pourrait imaginer que la phase de résolution devienne bloquante dans
+ce cas, cependant, comme nous le verrons dans la description de
+l'implémentation de notre approche (chapitre~\ref{ch:outils}), cette phase est
+générée et peut aussi être générée sous la forme de plusieurs stratégies
+distinctes ---~plus simples~--- réutilisables dans le cadre d'une autre
+transformation.
+
+
+%\begin{figure}[h]
+%  \begin{center}
+%    \input{figures/mmresolveinst}
+%    \caption{Instanciation du schéma d'extension du métamodèle cible pour
+%    l'exemple Text2Picture.}
+%    \label{fig:mmresolveinst}
+%  \end{center}
+%\end{figure}
+
+
+
+
+%\section{\todo{ici ? }Travail connexe}
+%\todo{QVT, ATL, scheduling, réconciliation de références, }
+%
+%Cette approche 
+
+
+
+
+%\section{\todo{FROM TSI}}
+%
+%\todo{Note : Reprendre \textbf{en gros} la section "approche" de TSI. MAIS,
+%séparer en deux parties, et dissoudre la formalisation dans l'explication.}
+%
+%
+%\subsection{Formalisation de l'approche \ttodo{à dissoudre}}
+%\label{sec:formalisation}
+%formalisation ?
+
+%Dans notre approche, une transformation $T$ est donc constituée de deux
+%phases distinctes qui peuvent être vues comme des fonctions. La première
+%phase $c: MM_s \rightarrow MM_{t_{resolve}}$ consiste à créer des
+%éléments cible à partir des éléments du modèle source. Des
+%éléments \emph{resolve} étant créés et intégrés au résultat
+%durant cette phase, le modèle résultant est conforme au métamodèle
+%cible étendu, noté $MM_{t_{resolve}}$.\\
+%Cette extension du métamodèle cible passe par un enrichissement du type
+%cible (ajout d'informations additionnelles). Ainsi, tout élément
+%\emph{resolve} $e_{t_{resolve}}^i$ du modèle intermédiaire enrichi
+%$m_{t_{resolve}}$ sera de type un sous-type de l'élément associé $e_t^i$
+%du modèle cible $m_t$. Les éléments $e_{t_{resolve}}^i$ sont les
+%éléments $e_t^i$ décorés d'une information sur le nom de l'élément
+%cible représenté ainsi que d'une information sur l'élément source dont
+%ils sont issus. En termes de métamodèle (Figure~\ref{fig:mmresolve}), pour
+%tout élément cible $e_t^i$ -- instance d'un élément $E_t^i$ du
+%métamodèle cible $MM_t$ -- issu d'un élément source $e_s^j$ -- instance
+%du métamodèle source $MM_s$ -- et nécessitant un élément
+%\emph{resolve} $e_{t_{resolve}}^i$ durant la transformation, un élément
+%$E_{t_{resolve}}^i$ est créé dans le métamodèle étendu
+%$MM_{t_{resolve}}$. Cet élément hérite de l'élément cible $E_t^i$.
+%
+%\begin{figure}[h]
+%  \begin{center}
+%    \input{figures/mmresolve}
+%    \caption{Schéma d'extension du métamodèle cible par l'ajout d'éléments intermédiaires \emph{resolve}.}
+%    \label{fig:mmresolve}
+%  \end{center}
+%\end{figure}
+%
+%\noindent La seconde phase $r : MM_{t_{resolve}} \rightarrow MM_t$ consiste à
+%éliminer ces éléments intermédiaires.\\
+%La transformation complète $T : MM_s \rightarrow MM_t$ est
+%définie par $T = r \circ c$.
+%
+%\noindent En instanciant notre approche avec le cas d'étude SimplePDLToPetriNet, nous
+%obtenons : %$SimplePDLToPetriNet$ comme la composée de $Transformer$ et de
+%%$Resolve$, avec $MM_{SimplePDL}$, $MM_{PetriNet_{resolve}}$ et $MM_{PetriNet}$
+%%respectivement les métamodèles source, étendu et cible :
+%\begin{tabbing}
+%  $SimplePDLToPetriNet$ \= $ : MM_{SimplePDL} \rightarrow MM_{PetriNet}$\\
+%  $Transformer$ \> $ : MM_{SimplePDL} \rightarrow MM_{PetriNet_{resolve}}$\\
+%  $Resolve$ \> $ : MM_{PetriNet_{resolve}} \rightarrow MM_{PetriNet}$\\
+%  $SimplePDLToPetriNet $ \> $ = Resolve \circ Transformer$\\
+%\end{tabbing}
+%Appliquée au processus $p_{root}$ (illustré Figure~\ref{fig:simplepdlusecase})
+%conforme à $MM_{SimplePDL}$ (Figure~\ref{fig:simplepdlmmodel}), cette
+%transformation produira un réseau de Petri $pn$ (illustré
+%Figure~\ref{fig:petrinetusecase}) conforme à $MM_{PetriNet}$
+%(Figure~\ref{fig:petrinetmmodel}), en passant par le résultat intermédiaire
+%$pn_{resolve}$ conforme au métamodèle $MM_{PetriNet_{resolve}}$. On obtient
+%donc :
+%\begin{flushleft}
+%  $SimplePDLToPetriNet(p_{root}) = Resolve(Transformer(p_{root}))$, avec\\
+%  $Transformer(p_{root}) = pn_{resolve}$ et\\ 
+%  $Resolve(p_{resolve}) = pn$
+%\end{flushleft}
+%La Figure~\ref{fig:mmresolveinst} instancie le schéma d'extension du
+%métamodèle cible au cas d'étude : le métamodèle cible est enrichi
+%d'une métaclasse \emph{ResolvePT} pour pouvoir créer des éléments
+%intermédiaires \emph{resolve} qui jouent temporairement le role d'une
+%\emph{Transition} obtenue à partir d'une source \emph{Process}.
+%\begin{figure}[h]
+%  \begin{center}
+%    \input{figures/mmresolveinst}
+%    \caption{Instanciation du schéma d'extension du métamodèle cible pour le cas d'étude SimplePDLToPetriNetPetriNet.}
+%    \label{fig:mmresolveinst}
+%  \end{center}
+%\end{figure}
+
+
+\section{Validation par un cas d'étude}
+
+Pour valider la proposition, nous nous sommes appuyés sur une étude
+de cas : la transformation \emph{SimplePDLToPetriNet}. Nous ne rentrons pour le
+moment pas dans les détails et n'expliquons pas précisément les métamodèles des
+formalismes considérés. Nous préciserons la cas dans le
+chapitre~\ref{ch:traceability} qui suit, puis nous le développerons dans son
+intégralité dans le chapitre~\ref{ch:usecase} avec son implémentation. Pour
+résumer cette étude de cas, l'objectif est de transformer des processus
+génériques décrits dans le formalisme SimplePDL en leur représentation sous la
+forme de réseaux de Petri. Par exemple, la
+figure~\ref{fig:simplesimplepdlprocess} décrit un processus simple nommé
+\emph{root} composé de deux activités : \emph{A} et \emph{B}. Ces deux
+activités sont liées par une contrainte de précédence \emph{startToFinish}
+(\emph{s2f}). Cela signifie que l'activité \emph{A} doit avoir commencé pour
+pouvoir terminer l'activité \emph{B}.
+
+\begin{figure}[h] 
+  \begin{center}
+    \input{figures/simplesimplepdlprocess}
+    \caption{Exemple de processus SimplePDL.}
+    \label{fig:simplesimplepdlprocess}
+  \end{center}
+\end{figure}
+
+Ce processus générique peut s'exprimer sous la forme d'un réseau de Petri tel
+qu'illustré par la figure~\ref{fig:simplepetrinetprocess} suivante. Les places
+sont représentées par des cercles rouges, les transitions par des carrés bleus
+et les arcs par des flèches. %Les nœuds en pointillés sont des éléments
+%intermédiaires \emph{resolve}. 
+Les flèches en pointillés sont des arcs de synchronisation, celles en trait
+plein noir sont des arcs normaux créés dans des différentes \emph{définitions},
+la flèche verte est un arc obtenu par la \emph{définition} transformant la
+séquence (qui impose la contrainte de précédence). Dans ce réseau de Petri,
+lorsque la première transition de $P_{root}$ est franchie, le jeton de la
+première place est ajouté à la seconde place de $P_{root}$. Un jeton est aussi
+ajouté aux premières places des réseaux $A$ et $B$, ce qui a pour effet de
+démarrer les tâches. La transition $t_{finish}$ de $B$ ne peut être franchie
+que si $A$ a démarré.
+
+\begin{figure}[h]
+  \begin{center}
+    \input{figures/simplepetrinetprocess}
+    \caption{Réseau de Petri correspondant au processus décrit par la
+      figure~\ref{fig:simplesimplepdlprocess}.}
+    \label{fig:simplepetrinetprocess}
+  \end{center}
+\end{figure}
+
+Cette transformation peut être décomposée en trois \emph{définitions}. Chacune
+d'entre elles produit un réseau de Petri. Nous les représentons toutes les
+trois dans la figure~\ref{fig:atomicpn} qui suit (les nœuds en pointillés sont
+des éléments intermédiaires \emph{resolve}). 
+
+\begin{figure}
+  \begin{center}
+    \input{figures/atomicpn}
+    \caption{Transformations élémentaires composant \texttt{SimplePDLToPetriNet}.}
+    \label{fig:atomicpn}
+  \end{center}
+\end{figure}
+
+Dans cette version du cas d'étude, le mécanisme de création d'éléments
+temporaires \emph{resolve} est utilisé dans le cadre de deux
+\emph{définitions}, celle qui transforme les \emph{WorkDefinitions} et celle
+qui transforme les \emph{WorkSequences}. Le mécanisme de marquage est quant à
+lui utilisé dans la \emph{définition} qui transforme les \emph{Process} afin
+d'effectuer la correspondance avec les éléments \emph{resolve} créés dans la
+transformation élémentaire qui prend en entrée une \emph{WorkDefinition}. Des
+éléments sont aussi tracés dans cette dernière pour assurer la résolution avec
+les éléments intermédiaires produits dans la \emph{définition} qui transforme
+les \emph{Worksequences}. Nous avons mis en œuvre ce mécanisme global de
+résolution que nous détaillons techniquement dans le chapitre~\ref{ch:outils}.
+Le mécanisme de marquage (ou traçage) est une forme de traçabilité, la
+traçabilité \emph{interne} (ou \emph{technique}) qui est étroitement liée à
+l'implémentation de la transformation.
+
+%\FloatBarrier
+
+\section{Synthèse} \label{ch:approach:synth}
+
+Dans ce chapitre, nous avons présenté notre approche pour transformer les
+modèles. Elle est hybride étant donné qu'il ne s'agit pas d'utiliser uniquement
+un langage généraliste ou un langage dédié, mais d'avoir une approche
+intermédiaire où nous intégrons des constructions dédiées au sein d'un langage
+généraliste. Ce procédé est rendu possible par l'utilisation du langage {\tom}
+présenté dans le chapitre~\ref{ch:tom} et qui repose sur le calcul de
+réécriture. Une telle approche a l'avantage de pouvoir faire bénéficier
+l'utilisateur du meilleur des deux mondes des langages généralistes et dédiés à
+la fois. Ainsi, l'utilisateur développant une transformation en {\tomjava} aura
+les constructions spécifiques aux transformations de modèles tout en conservant
+l'outillage existant de {\java}.
+
+Nous avons aussi expliqué que notre approche se base sur la réécriture de
+termes. Compte tenu du fait que nous transformons des modèles, notre approche
+commence par un changement d'espace technologique rendu possible grâce à un
+outil de génération d'ancrages formels que nous avons développé. Il nous permet
+de représenter des modèles {\ecore} sous la forme de termes, que nous pouvons
+ensuite parcourir et transformer avec des stratégies de réécriture. Ces
+stratégies de réécriture encodent les transformations élémentaires composant la
+transformation globale, elle-même encodée par une stratégie de réécriture. Dans
+un but d'accessibilité de l'approche et des outils pour les utilisateurs, nous
+avons choisi de proposer une méthode permettant à l'utilisateur de ne pas avoir
+à gérer l'ordonnancement des pas d'exécution. Notre solution à ce problème est
+l'introduction d'éléments intermédiaires dits \emph{resolve} qui jouent le rôle
+d'éléments cibles tant que ces derniers ne sont pas créés. Une transformation
+selon notre approche est donc composée de deux phases distinctes : la première
+où les éléments cibles et cibles intermédiaires sont créés, et la seconde qui
+consiste à \emph{résoudre} les liens, c'est-à-dire à supprimer les éléments
+intermédiaires et à remplacer les liens pointant vers eux par des liens vers
+les éléments cibles qu'ils représentaient.
+
+
+% vim:spell spelllang=fr

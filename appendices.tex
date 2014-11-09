@@ -1,0 +1,199 @@
+\appendix
+%code, métamodèles et modèles bruts
+\Annex{Étude de cas : Transformation SimplePDLToPetriNet}
+\section{Code de la transformation \emph{SimplePDLToPetriNet}}
+\label{annexe:pdl2pn}
+
+Ce code est accessible sur le dépôt officiel du projet {\tom} :
+\url{https://gforge.inria.fr/scm/?group\_id=78}. Pour plus d'informations sur le
+sujet, le lecteur pourra aussi se référer à la documentation en ligne
+accessible sur cette page
+: \url{http://tom.loria.fr/wiki/index.php5/Documentation:Playing\_with\_EMF}.
+
+\lstinputlisting[basicstyle={\ttfamily\scriptsize},name=simplepdltopetrinet,numberstyle=\tiny,numbers=left,numberblanklines=true,frame=tb,firstnumber=1,firstline=1,lastline=295]{code/simplepdltopetrinet/SimplePDLToPetriNet.t}
+%,caption=TODO,label=code:simplepdl2pni,captionpos=b
+
+\section{Modèle source}
+\label{annexe:pdl2pn:msrc}
+%\begin{codesource}
+%  \input{code/simplepdltopetrinet/models/DefaultSimplePDLInstance.xmi}
+%\end{codesource}
+
+Cette transformation a été testée avec de nombreux modèles. Le modèle donné par
+le listing~\ref{inputsimplepdl2pn} est le modèle donné en exemple dans la
+section~\ref{sec:simplepdl2pn} du chapitre~\ref{ch:usecase}. Il s'agit aussi du
+modèle par défaut de la transformation dans le cas où aucun modèle n'est passé
+en paramètre (c'est en fait le modèle équivalent directement construit en
+{\tom} sans chargement de fichier).
+
+\lstinputlisting[basicstyle={\ttfamily\scriptsize},name=inputmodelsimplepdl2pn,frame=tb,firstnumber=1,firstline=1,captionpos=b,caption=Modèle source de l'exemple pour la transformation SimplePDLToPetriNet (format \texttt{.xmi}),label=inputsimplepdl2pn]{code/simplepdltopetrinet/models/DefaultSimplePDLInstance.xmi}
+%
+
+\section{Modèle résultant}
+\label{annexe:pdl2pn:mtgt}
+%\input{}
+
+Le modèle source donné précédemment produit le modèle cible
+suivant~\ref{outputsimplepdl2pn}, qui est en fait le réseau de Petri résultant
+de la transformation, sérialisé sous la forme d'un fichier au format compatible
+avec l'entrée du \emph{model-checker} {\tina}~\cite{Berthomieu2004} (il est
+aussi affiché directement sur la sortie standard) :
+
+%la sortie suivante
+%~\ref{outputsimplepdl2pn}, qui est en fait le réseau de Petri résultant
+%de la transformation, affiché dans un format compatible avec l'entrée du
+%\emph{model-checker} {\tina} (il est aussi sérialisé sous la forme d'un fichier
+%\texttt{.net}) :
+
+\lstinputlisting[basicstyle={\ttfamily\scriptsize},name=outputsimplepdl2pn,frame=tb,firstnumber=1,firstline=1,captionpos=b,caption=Modèle cible résultant de la transformation SimplePDLToPetriNet (format lisible par {\tina}),label=outputsimplepdl2pn]{code/simplepdltopetrinet/resultingPetri.net}
+%
+%\lstinputlisting[basicstyle={\ttfamily\scriptsize},name=outputsimplepdl2pn,frame=tb,firstnumber=1,firstline=47,lastline=64,captionpos=b,caption=Sortie de la transformation SimplePDLToPetriNet au format {\tina},label=outputsimplepdl2pn]{code/simplepdltopetrinet/expected_result}
+
+%\pagebreak
+
+%Sérialisé en \texttt{.xmi}, le modèle cible obtenu est celui donné par le
+%listing~\ref{outputmodelsimplepdl2pn} :
+%
+%\lstinputlisting[basicstyle={\ttfamily\scriptsize},name=outputmodelsimplepdl2pn,frame=tb,firstnumber=1,firstline=1,label=outputmodelsimplepdl2pn]{code/simplepdltopetrinet/resultingPetrinet.xmi}
+%%\lstinputlisting[basicstyle={\ttfamily\scriptsize},name=outputmodelsimplepdl2pn,frame=tb,firstnumber=1,firstline=1,captionpos=b,caption=Modèle cible résultant de la transformation SimplePDLToPetriNet\, sérialisé au format \texttt{.xmi},label=outputmodelsimplepdl2pn]{code/simplepdltopetrinet/resultingPetrinet.xmi}
+
+\section{Vérification du résultat}
+\label{annexe:pdl2pn:mc}
+
+La boîte à outils {\tina}\footnote{\url{http://projects.laas.fr/tina}} (version
+3.1.0) a été utilisée pour vérifier le modèle résultant de la transformation de
+modèle \emph{SimplePDLToPetriNet}.
+
+\subsubsection{Procédure}
+Le résultat de la transformation est un réseau de Petri dans un format lisible
+par {\tina} (fichier \texttt{result.net}. La procédure ci-après permet de
+reproduire l'expérience :
+
+\begin{enumerate}
+  \item Visualisation du réseau de Petri :\\ \verb+~/tina-3.1.0/bin/nd result.net+
+  (sauvegarde au format \texttt{.ndr})
+
+  \item Construction du graphe d'atteignabilité :\\ \verb+~/tina-3.1.0/bin/tina -C result.ndr result.ktz+ (le format \texttt{.ktz} est un format binaire
+  propriétaire)
+
+\item Vérification de propriétés :\\ \verb+~/tina-3.1.0/bin/selt  result.ktz prop.ltl >> result.selt+ (le fichier \texttt{prop.ltl} décrit ci-après contient les formules et les propriétés à vérifier)
+\end{enumerate}
+
+
+\subsubsection{Formule et propriétés}
+
+
+\lstinputlisting[basicstyle={\ttfamily\scriptsize},name=properties,numberstyle=\tiny,numbers=left,numberblanklines=true,frame=tb,firstnumber=1,firstline=1,captionpos=b,caption=Formule et propriétés LTL à vérifier sur le modèle résulatnt de la transformation SimplePDLToPetriNet,label=properties]{code/simplepdltopetrinet/tina/tocheck.ltl}
+
+Le listing~\ref{properties} contient une formule et quatre propriétés exprimées
+en LTL afin de pouvoir être utilisées avec {\tina}. Nous les  décrivons
+ci-après, dans l'ordre :
+
+\begin{itemize}
+  %\item \verb+op finished = T /\ A_finished /\ B_finished /\ C_finished /\ D_finished;+
+
+  \item[\textbf{ligne 1 :}] Il s'agit de la formule définissant l'opérateur
+    \emph{finished} comme $\top \wedge A_{finished} \wedge B_{finished} \wedge
+    C_{finished} \wedge D_{finished}$. Cela signifie que l'on considère le
+    processus complet terminé lorsque toutes les activités le composant sont
+    terminées (lorsqu'il y a un jeton dans chaque place $finished$ des
+    activités $A$, $B$, $C$ et $D$).
+
+  %\item \verb+[] (finished => dead);+
+
+  \item[\textbf{ligne 3 :} $\square (finished \Rightarrow dead)$.] Cette
+    première propriété signifie que tout processus dans son état final est
+    terminé. %\todo{FALSE}
+
+  %\item \verb+[] (dead => finished);+
+
+  \item[\textbf{ligne 4 :} $\square (dead \Rightarrow finished)$.] Cette
+    deuxième propriété peut être traduite par \og tout processus terminé est
+    dans son état final\fg{} (correction partielle). %\todo{TRUE}
+
+  %\item \verb+[] <> dead ;+
+
+  \item[\textbf{ligne 5 :} $\square \lozenge dead$.] Cette troisième propriété
+    est la propriété de terminaison qui assure que \og toute exécution se
+    termine \fg{}. %\todo{TRUE}
+
+  %\item \verb+- <> finished;+
+
+  \item[\textbf{ligne 6 :} $\neg \lozenge finished$.] Cette quatrième propriété
+    peut être traduite par \og l'état final n'est jamais atteint \fg{} et
+    revient à vérifier la propriété de consistance faible (existence d'au moins
+    une exécution du processus).%\todo{FALSE}
+
+\end{itemize}
+
+Note : \texttt{dead} est une propriété prédéfinie vraie uniquement sur les
+états de blocage.
+
+%Rappel
+% P        : P vraie au départ du chemin (pour l'état initial)
+%square P  : P vraie tout au long du chemin
+%diamond P : P vraie une fois au moins le long du chemin
+% square diamond P : P vraie infiniment souvent
+%
+%dead      : deadlock property
+%finished  : défini par l'utilisateur
+%aide :
+%http://homepages.laas.fr/francois/POLYS/ENSEIGNEMENT/MC2/ltl.php
+
+\pagebreak
+
+\subsubsection{Résultat fourni par {\textsf{selt}\xspace}}
+
+Nous avons vérifié les propriétés données précédemment sur le réseau de Petri
+généré en utilisant \texttt{selt} (partie de {\tina}). Le résultat est le
+suivant : 
+\lstinputlisting[basicstyle={\ttfamily\scriptsize},name=mcresult,numberstyle=\tiny,numbers=left,numberblanklines=true,frame=tb,firstnumber=1,firstline=1,captionpos=b,caption=Résultat fourni par \texttt{selt} pour les propriétés et le réseau de Petri fourni dans notre exemple,label=mcresult]{code/simplepdltopetrinet/tina/tocheck.selt}
+
+Ainsi, les propriétés 2 et 3 sont vérifiées. En revanche, les propriétés 1 et 4
+sont fausses, \texttt{selt} exhibe donc un contre-exemple pour chacune. Dans le
+cas de la quatrième propriété, une évaluation à \emph{False} permet d'affirmer
+que le processus est faiblement consistant (le contre-exemple donne une
+exécution correcte du processus).
+
+
+\Annex{Étude de cas : aplatissement d'une hiérarchie de classes}
+
+\section{Code de la transformation}
+\label{annexe:flattening}
+
+\subsection{Version 1 : transformation en {\java}+{\emf}}
+\label{annexe:flattening:v1}
+%\input{code/flattening/V0_notom_UMLClassesFlattening.java}
+\lstinputlisting[basicstyle={\ttfamily\scriptsize},name=v1flattening,numberstyle=\tiny,numbers=left,numberblanklines=true,frame=tb,firstnumber=1,firstline=1]{code/flattening/V1_notom_UMLClassesFlattening.java}
+
+%\lstinputlisting[basicstyle={\ttfamily\scriptsize},name=simplepdltopetrinet,numberstyle=\tiny,numbers=left,numberblanklines=true,frame=tb,firstnumber=1,firstline=1,lastline=295,label=code:v0flattening,caption=Implémentation de la transformation d'aplatissement de hiérarchie de classes en Java]{code/flattening/V0.java}
+
+\subsection{Version 2 : transformation en {\tomjava} simple (+{\emf})}
+\label{annexe:flattening:v2}
+%\input{code/flattening/V2_nostrat_UMLClassesFlattening.t}
+
+Cette version est légèrement plus longue que la version précédente étant donné
+que nous avons intégré la création d'un modèle par défaut dans le cas où aucun
+modèle source n'est donné en argument du programme.
+
+\lstinputlisting[basicstyle={\ttfamily\scriptsize},name=v2flattening,numberstyle=\tiny,numbers=left,numberblanklines=true,frame=tb,firstnumber=1,firstline=1]{code/flattening/V2_nostrat_UMLClassesFlattening.t}
+
+\subsection{Version 3 : transformation en {\tomjava} avec stratégies (+{\emf})}
+\label{annexe:flattening:v3}
+
+Comme pour la version précédente, nous avons intégré la création d'un modèle
+par défaut dans le cas où aucun modèle source n'est donné en paramètre, d'où sa
+taille de code légèrement supérieure à la première version.
+%\input{code/flattening/V3_stratnotransfo_UMLClassesFlattening.t}
+\lstinputlisting[basicstyle={\ttfamily\scriptsize},name=v3flattening,numberstyle=\tiny,numbers=left,numberblanklines=true,frame=tb,firstnumber=1,firstline=1]{code/flattening/V3_stratnotransfo_UMLClassesFlattening.t}
+
+\subsection{Version 4 : transformation en {\tomjava} avec les nouvelles constructions (+{\emf})}
+\label{annexe:flattening:v4}
+%\input{code/flattening/V4_transfo_UMLClassesFlattening.t}
+\lstinputlisting[basicstyle={\ttfamily\scriptsize},name=v3flattening,numberstyle=\tiny,numbers=left,numberblanklines=true,frame=tb,firstnumber=1,firstline=1]{code/flattening/V4_transfo_UMLClassesFlattening.t}
+
+
+\Annex{Implémentation ATL de SimplePDLToPetriNet}
+\label{annexe:atlpdl2pn}
+
+\lstinputlisting[basicstyle={\ttfamily\scriptsize},name=atlpdl2pn,numberstyle=\tiny,numbers=left,numberblanklines=true,frame=tb,firstnumber=1,firstline=1]{code/simplepdltopetrinet.atl}

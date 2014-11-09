@@ -1,0 +1,13 @@
+%\begin{tikzpicture}[node distance=1.1cm,>=stealth',bend angle=45,auto,scale=0.75,transform shape]
+\begin{tikzpicture}[node distance=1.1cm,>=stealth',bend angle=45,auto,scale=1,transform shape]
+  \tikzstyle{every label}=[black]
+  \begin{scope}
+    \node (A) [xshift=0cm] {\textbf{A}};
+    \node (B) [right of=A,xshift=0.5cm]  {\textbf{B}};
+    \path (A) edge [post] node {s2f} (B);
+    \node[draw,rectangle,inner sep=0.4cm,fit=(A) (B)] (proot) {};
+    \node at (proot.north west) [above, inner sep=1mm,xshift=0.4cm] {\textbf{$_{root:}$}};
+  \end{scope}
+\end{tikzpicture}
+%\caption{SimplePDL use case}
+%\captionof{figure}{Instance de SimplePDL}

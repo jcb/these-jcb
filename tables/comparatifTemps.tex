@@ -1,0 +1,50 @@
+%FIXME
+\begin{tabular}{r|r|r|rr|rr}
+%FIXME N & \#src (2N) & \#tgt & \multicolumn{2}{c|}{Tom} & \multicolumn{2}{c}{ATL} \\
+N & \#src (2N) & \#tgt & \multicolumn{2}{c|}{Tom} & ATL \\
+%FIXME  &            &       & v1 & v2                  & Simple  & Parallèle \\
+  &            &       & v1 & v2                  & Simple \\
+\hline
+\num{10}     & \num{20}     & \num{148}     & \num{83}ms & \num{17}ms     & - \\%& - \\
+\num{100}    & \num{200}    & \num{1408}    & \num{638}ms & \num{73}ms    & - \\%& - \\
+\num{500}    & \num{1000}   & \num{7008}    & $\sim$38s & \num{237}ms    & - \\%& - \\
+\num{1000}   & \num{2000}   & \num{14008}   & $\sim$4min 14s & \num{414}ms & - \\%& - \\
+\num{2000}   & \num{4000}   & \num{28008}   & $\sim$36min 55s & \num{976}ms & - \\%& - \\
+\num{3000}   & \num{6000}   & \num{42008}   & $\sim$1h 59min & \num{1.7}s & - \\%& - \\
+\num{4000}   & \num{8000}   & \num{56008}   & $\sim$4h 24min & \num{2.8}s & - \\%& - \\
+\num{5000}   & \num{10000}  & \num{70008}   & $\sim$8h 14min & \num{4.1}s & $\sim$28s\\%& - \\
+\num{10000}  & \num{20000}  & \num{140008}  & N/A & $\sim$0min 15s & $\sim$1min 41s\\%& - \\
+\num{20000}  & \num{40000}  & \num{280008}  & N/A & $\sim$0min 59s & $\sim$7min 38s\\%& - \\
+\num{50000}  & \num{100000} & \num{700008}  & N/A & $\sim$6min 4s  & $\sim$1h 39min\\%& - \\
+% & & & & & \todo{$\sim$1h 2min 11s}& \\
+% & & & & & \todo{$\sim$1h 53s}& \\
+
+\num{100000} & \num{200000} & \num{1400008} & N/A & $\sim$23min 37s & $\sim$\\%& \\
+%FIXME\num{1000000}& \num{2000000}& \num{14000008}& N/A & \todo{$\sim$42h 57min} & $\sim$& \\
+\num{1000000}& \num{2000000}& \num{14000008}& N/A & $\sim$42h 10min & $\sim$\\%& \\
+\end{tabular}
+%\caption{Comparaison des performances entre Tom (première et dernière versions) et ATL}
+%\label{table:tempsTomEvolution}
+%
+%
+%
+%\begin{tabular}{r|r|r|rr|rr}
+%N & \#src (2N) & \#tgt & \multicolumn{2}{c|}{Tom} & \multicolumn{2}{c}{ATL} \\
+%  &            &       & v1 & v2                  & filip  & motu \\
+%\hline
+%\num{10}     & \num{20}     & \num{148}     & \num{83}ms & \num{17}ms     & $<$1s & \\
+%\num{100}    & \num{200}    & \num{1408}    & \num{638}ms & \num{73}ms    & $<$1s & \\
+%\num{500}    & \num{1000}   & \num{7008}    & $\sim$38s & \num{237}ms    & $\sim$5s & \\
+%\num{1000}   & \num{2000}   & \num{14008}   & $\sim$4min 14s & \num{414}ms & $\sim$7s & \\
+%\num{2000}   & \num{4000}   & \num{28008}   & $\sim$36min 55s & \num{976}ms & $\sim$21s & \\
+%\num{3000}   & \num{6000}   & \num{42008}   & $\sim$1h 59min & \num{1.7}s & $\sim$41s & \\
+%\num{4000}   & \num{8000}   & \num{56008}   & $\sim$4h 24min & \num{2.8}s & $\sim$1min 4s & \\
+%\num{5000}   & \num{10000}  & \num{70008}   & $\sim$8h 14min & \num{4.1}s & $\sim$1min 56s & $\sim$28s\\
+%\num{10000}  & \num{20000}  & \num{140008}  & N/A & $\sim$0min 15s   & $\sim$9min 14s & $\sim$1min 41s\\
+%\num{20000}  & \num{40000}  & \num{280008}  & N/A & $\sim$0min 59s   & $\sim$35min 14s & $\sim$7min 38s \\
+%\num{50000}  & \num{100000} & \num{700008}  & N/A & $\sim$6min 4s  & N/A  & \todo{$\sim$1h 39min 18s}\\
+% & & & & & & \todo{$\sim$1h 2min 11s}\\
+% & & & & & & \todo{$\sim$1h 53s}\\
+%\num{100000} & \num{200000} & \num{1400008} & N/A & $\sim$23min 37s & N/A  & $\sim$\\
+%\num{1000000}& \num{2000000}& \num{14000008}& N/A & \todo{$\sim$49h 30min} & N/A & $\sim$\\
+%\end{tabular}

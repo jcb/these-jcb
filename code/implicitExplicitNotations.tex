@@ -1,0 +1,26 @@
+\begin{tomcode3}[label=code:implicitExplicitNotations,caption=Illustration des notations explicite et implicite.]
+%gom() {
+  module Contacts
+  abstract syntax
+  Personne = Personne(nom:String, prenom:String, age:int)
+}
+
+public boolean peutConduireExplicite(Personne p) {
+  %match(p) {
+    Personne(_,_,a) -> { return (`a>18); }
+  }
+}
+
+public boolean peutConduireImplicite(Personne p) {
+  %match(p) {
+    Personne[age=a] -> { return (`a>18); }
+  }
+}
+
+public boolean peutConduireImplicite2(Personne p) {
+  %match(p) {
+    Personne[age=a] && a>18 -> { return true; }
+  }
+  return false;
+}
+\end{tomcode3}

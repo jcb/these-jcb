@@ -1,0 +1,849 @@
+@INPROCEEDINGS{DRBBBCEEJK10,
+  author = {Dur\'{a}n, Francisco and Rold\'{a}n, Manuel and Bach, Jean-Christophe
+	and Balland, Emilie and Van Den Brand, Mark and Cordy, James R. and
+	Eker, Steven and Engelen, Luc and De Jonge, Maartje and Kalleberg,
+	Karl Trygve and Kats, Lennart C. L. and Moreau, Pierre-Etienne and
+	Visser, Eelco},
+  title = {The Third Rewrite Engines Competition},
+  booktitle = {Proceedings of the 8th international conference on Rewriting logic
+	and its applications},
+  year = {2010},
+  editor = {Ölveczky, PeterCsaba},
+  volume = {6381},
+  series = {WRLA'10},
+  pages = {243-261},
+  address = {Berlin, Heidelberg},
+  publisher = {Springer-Verlag},
+  abstract = {This paper presents the main results and conclusions of the Third
+	Rewrite Engines Competition (REC III). This edition of the competition
+	took place as part of the 8th Workshop on Rewriting Logic and its
+	Applications (WRLA 2010), and the systems ASF+SDF, Maude, Stratego/XT,
+	Tom, and TXL participated in it.},
+  acmid = {1927829},
+  crossref = {wrla2010},
+  doi = {10.1007/978-3-642-16310-4_16},
+  ee = {http://dx.doi.org/10.1007/978-3-642-16310-4_16},
+  isbn = {978-3-642-16309-8},
+  location = {Paphos, Cyprus},
+  numpages = {19},
+  url = {http://dl.acm.org/citation.cfm?id=1927806.1927829}
+}
+
+@INCOLLECTION{Afroozeh2012,
+  author = {Afroozeh, Ali and Bach, Jean-Christophe and Brand, Mark and Johnstone,
+	Adrian and Manders, Maarten and Moreau, Pierre-Etienne and Scott,
+	Elizabeth},
+  title = {Island Grammar-Based Parsing Using GLL and Tom},
+  booktitle = {Software Language Engineering},
+  publisher = {Springer Berlin Heidelberg},
+  year = {2012},
+  editor = {Czarnecki, Krzysztof and Hedin, Görel},
+  volume = {7745},
+  series = {Lecture Notes in Computer Science},
+  pages = {224-243},
+  address = {Dresden, Germany},
+  abstract = {{Extending a language by embedding within it another language presents
+	significant parsing challenges, especially if the embedding is recursive.
+	The composite grammar is likely to be nondeterministic as a result
+	of tokens that are valid in both the host and the embedded language.
+	In this paper we examine the challenges of embedding the Tom language
+	into a variety of general-purpose high level languages. Tom provides
+	syntax and semantics for advanced pattern matching and tree rewriting
+	facilities. Embedded Tom constructs are translated into the host
+	language by a preprocessor, the output of which is a composite program
+	written purely in the host language. Tom implementations exist for
+	Java, C, C#, Python and Caml. The current parser is complex and difficult
+	to maintain. In this paper, we describe how Tom can be parsed using
+	island grammars implemented with the Generalised LL (GLL) parsing
+	algorithm. The grammar is, as might be expected, ambiguous. Extracting
+	the correct derivation relies on our disambiguation strategy which
+	is based on pattern matching within the parse forest. We describe
+	different classes of ambiguity and propose patterns for resolving
+	them.}},
+  doi = {10.1007/978-3-642-36089-3_13},
+  isbn = {978-3-642-36088-6},
+  keywords = {GLL; Tom; island grammars; parsing; disambiguation},
+  review = {----------------------- REVIEW 1 ---------------------
+	
+	PAPER: 25
+	
+	TITLE: Island Grammar-based Parsing using GLL and Tom
+	
+	AUTHORS: Ali Afroozeh, Jean-Christophe Bach, Mark Van Den Brand, Adrian
+	Johnstone, Maarten Manders, Pierre-Etienne Moreau and Elizabeth Scott
+	
+	
+	OVERALL RATING: 1 (B: OK paper, but I will not champion it (accept,
+	but could reject).)
+	
+	Is the paper suitable for nomination to the EAPLS award, a bridging
+	paper award, or for an extended journal version?: 1 (no)
+	
+	
+	Summary: The authors present a generalized LL parser (GLL) that allows
+	one to embed langauge grammars into each other. The authors expamplify
+	their tool with TOM, a term rewrite language that is embedded into
+	Java and that itself embeds Java expressions. 4 different types of
+	ambiguities arising from the composition are discussed and solutions
+	are proposed.
+	
+	
+	Points in favour:
+	
+	- The paper is about parsing multiple nested langauges using generalized
+	LL parsing, and is thus very relevant to SLE.
+	
+	- The paper is well written. The paper doesn't require the reader
+	to have a deep knowledge about the used technologies, instead explains
+	the algorithms from the ground up.
+	
+	- The use of GLL grammars for composition is brave. A lot of research
+	has gone into this area and technically none of the solutions really
+	convinced me. This paper presents a solution that seems to work well
+	in the given context, but that leaves many questions open (see below).
+	
+	
+	Points against:
+	
+	- The idea of using ordered choice to resolve ambiguites isn't particularly
+	novel.
+	
+	- It is not clear if the 4 ambiguties you propose solutions for are
+	specific to your example and if they are exhaustive.
+	
+	- The paper focuses on two languages: Java and TOM. It is not clear
+	how well the system scales if other languages such as SQL, XML, JavaScript,
+	... are added all at once. Would each langauge addition require the
+	parser to be rebuilt? How expensive is it to build a new composition?
+	How large would the resulting parser get? How would this affect the
+	runtime of the parser? What is the time and space complexity of a
+	parser composing n langauges?
+	
+	- It is not clear what Section 4 contributes. I don't know the difference
+	between Peano.t and BigExample.t (other than the file-size), so the
+	numbers in Table 1 don't tell me anything interesting. I would rather
+	like to see a comparison of the different tools you mention in the
+	related work.
+	
+	
+	Comments:
+	
+	- Running the lexers of all languages in parallel can be very expensive,
+	especially when there are many embedded langauges active.
+	
+	- The quoting you describe in Section 3 is essentially the quasiquoting
+	of Lisp. You should mention that.
+	
+	- You might be interested in comparing your approach with http://www.jetbrains.com/mps/
+	and with [1].
+	
+	
+	[1] "Lukas Renggli, Marcus Denker, and Oscar Nierstrasz. Language
+	Boxes: Bending the Host Language with Modular Language Changes. In
+	Software Language Engineering: Second International Conference, SLE
+	2009, Denver, Colorado, October 5-6, 2009, LNCS 5969 p. 274—293,
+	Springer, 2009."
+	
+	
+	
+	----------------------- REVIEW 2 ---------------------
+	
+	PAPER: 25
+	
+	TITLE: Island Grammar-based Parsing using GLL and Tom
+	
+	AUTHORS: Ali Afroozeh, Jean-Christophe Bach, Mark Van Den Brand, Adrian
+	Johnstone, Maarten Manders, Pierre-Etienne Moreau and Elizabeth Scott
+	
+	
+	OVERALL RATING: -1 (C: Weak paper, though I will not fight strongly
+	against it (reject, but could accept).)
+	
+	Is the paper suitable for nomination to the EAPLS award, a bridging
+	paper award, or for an extended journal version?: 1 (no)
+	
+	
+	Summary:
+	
+	The paper presents a case study on how to extend a programming language
+	like Java or C# with the
+	
+	domain specific language TOM. Combining the host language grammar
+	with the grammar of TOM leads to
+	
+	an ambiguous grammar. By using a generalized LL parser to generate
+	a graph representing all
+	
+	possible derivations and applying rewriting rules on the generated
+	graph, which select one of the
+	
+	alternatives the ambiguity is removed. The approach has been implemented
+	and evaluated against a
+	
+	big set of examples.
+	
+	
+	Pros:
+	
+	1) I think, the paper addresses an interesting problem and presents
+	a nice solution by combining
+	
+	known techniques of grammars, GLL parsing and graph rewriting. I especially
+	
+	like that the grammar, parser and rewriting rules for the embedded
+	language can be
+	
+	reused for different host languages.
+	
+	
+	2) The authors examined their technique with a lot of examples and
+	the practical results
+	
+	show that the approach works and that it is also fast enough to be
+	applied to
+	
+	big programs.
+	
+	
+	3) In my opinion, the selection of TOM as the DSL for the case study
+	has been
+	
+	a good choice. Due to the complex features of TOM and the good practical
+	
+	results, I think the approach is a promising approach to extend languages.
+	
+	
+	Cons:
+	
+	1) The paper essentially describes a case study with a disambiguation
+	
+	technique developed for that case study. As stated by the call for
+	papers,
+	
+	a research paper should "report a substantial research contribution".
+	
+	The research contribution remains unclear. The described disambiguation
+	
+	technique is targeted towards the case study and even there it does
+	not
+	
+	work for all examples (cf. Section 5). Furthermore, it is hard to
+	get
+	
+	a more abstract idea of the disambiguation technique and to generalize
+	
+	from the case study. 
+	
+	
+	2) Although quite readable, the presentation is unbalanced and immature;
+	eg.:
+	
+	-- A detailed introduction of context-free grammars (I would assume
+	that most
+	
+	 readers know CFG) is followed by a hard to understand and incomplete
+	
+	 description of the GLL parsing in Section 2.3 (I would assume that
+	only
+	
+	 some readers are familiar with the specific output format of GLL).
+	
+	 It would have been much better to combine it with the explanations
+	in 4.1.
+	
+	-- The disambiguation techniques is directly presented in the form
+	
+	 it is implemented in TOM. As this is the main contribution, it should
+	
+	 be presented in a more abstract way, unrelated to the case study
+	and
+	
+	 to the implementation technique. And the power and limitations of
+	the
+	
+	 techniques should be analysed.
+	
+	
+	In summary, I like the targeted problem and the general approach,
+	but
+	
+	the contribution as presented in the paper is too weak to merit a
+	research
+	
+	publication.
+	
+	
+	
+	Further comments on the text:
+	
+	
+	- p.9, bottom: The presentation of the TOM Syntax is missing the definition
+	of BackQuoteWater,
+	
+	which gets explained but is not contained in Listing 7. Also the semantics
+	of a variableStar
+	
+	construct in TOM is given nowhere.
+	
+	
+	- I think, it would be much easier to read Listing 1 if you mark which
+	parts of the example
+	
+	are TOM and which parts are Java. This would clearly show the nesting
+	of the constructs.
+	
+	
+	- p.2 last but one paragraph: the resulting language _is_ in the same
+	class ...
+	
+	- same paragraph: shared tokens cannot always be ...
+	
+	- p.4, 5th para: "of an inductive types", please correct this
+	
+	- p.4 last paragraph: _for_ Peano, 'zero() _and_ 'suc(zero()) , correct
+	"and", delete "for"
+	
+	- p.6 sec 2.3 first paragraph: cubic runtime order, I suppose it should
+	be complexity instead of order.
+	
+	- sec. 2.4: the gll parsing algorithm does not currently support ->
+	Currently, the gll parsing ...
+	
+	- p.13 bottom: page break between rule and its caption.
+	
+	- p.20, ref 7: sdf --> SDF
+	
+	
+	
+	----------------------- REVIEW 3 ---------------------
+	
+	PAPER: 25
+	
+	TITLE: Island Grammar-based Parsing using GLL and Tom
+	
+	AUTHORS: Ali Afroozeh, Jean-Christophe Bach, Mark Van Den Brand, Adrian
+	Johnstone, Maarten Manders, Pierre-Etienne Moreau and Elizabeth Scott
+	
+	
+	OVERALL RATING: 3 (A: Good paper. I will champion it (advocate/accept).)
+	
+	Is the paper suitable for nomination to the EAPLS award, a bridging
+	paper award, or for an extended journal version?: 2 (possibly (please
+	motivate under REMARKS FOR THE PC))
+	
+	
+	This paper describes how GLL parsing can be used with TOM, a mature
+	pattern matching and rewriting language that has been embedded into
+	a number of host languages. 
+	
+	
+	One contribution is to show how TOM can be used to write sophisticated
+	disambiguation functions. When the GLL parser returns multiple valid
+	parses, represented efficiently as a shared packed parse forest,
+	TOM is used to find ambiguities and select the desired one. The intersting
+	thing here is that much more excessive disambiguations can be expressed
+	than in other generalized parsers.
+	
+	
+	Another contribution is to apply a parser built in this way to a host
+	language in which TOM has been embedded. This is done using island
+	grammars and provides for some evaluation and validation of the described
+	techniques.
+	
+	
+	I think this is a quite interesting paper, the ideas are novel and
+	worth exploring, it is highly relevant to SLE, and it would be nice
+	to see it in SLE.
+	
+	
+	However, there are some problems with the paper as it now stands.
+	But I suspect that these can be addressed. I believe that all must
+	be fully addressed.
+	
+	
+	Incomplete listing. The discussion of Listing 7 on page 9 mentions
+	a nonterminal type BackWaterQuote but it does not appear in the grammar
+	in the listing. It can, however, be determined from Figures 5 and
+	6. 
+	
+	
+	Missing related work. Schwerdfeger and Van Wyk (GPCE 2007, PLDI 2009)
+	have built a scanner and parser generator specifically for this type
+	of problem. How does it compare? That system handles embeddings with
+	only opening tags, supports unbounded nesting of the host construct
+	in an extension construct in a host construct, etc. That scanner
+	also handles terminals with overlapping regular expressions without
+	prioritizing one over the other in all places. Since that system
+	is deterministic one has the guarantee that the grammar is not ambiguous
+	and thus the disambiguation phase is not needed. Is your approach
+	easier to use or more expressive? What do you gain in this approach?
+	
+	
+	The evaluation of the exiting TOM programs has some inaccuracies.
+	You state that your approach parses "most" of the example programs
+	which total 70,000 lines of code. But the you say that the "parsed
+	examples" are 10,000 "characters" long. This certainly is not "most".
+	Do you mean only the five samples shown in Table 1? This needs to
+	be clarified.
+	
+	
+	There is also no discussion of the characteristics of the programs
+	that you cannot parse? What are some examples of where the approach
+	doesn't work? Some discussion of this should be included.
+	
+	
+	Your future work includes replacing the ANTLR parser with yours, but
+	you do not list improving the parser so that it will parse all of
+	the example programs. Certainly this is important, right? 
+	
+	
+	Other concerns:
+	
+	- There is no discussion about ensuring that all ambiguities will
+	be caught. Given the large set of samples that were used perhaps
+	It would be interesting to see how and when these ambiguities were
+	first encountered.
+	
+	
+	- Section 2.2 seems to serve no purpose as these topics are quite
+	well known.
+	
+	
+	- At the top of page 10 you state the inside back quoted expressions
+	you want to recognize things like "1+" as part of the host, but can
+	you distinguish "f(x)" as either a TOM pattern or as a host language
+	function call. I suspect not and it would be helpful to discuss the
+	consequences of this. Can the ANTLR-based system make this distinction?
+	
+	
+	- The disambiguation discussed at the bottom of page 15 checks for
+	white space between a variable and an asterisk. Does the scanner
+	return all white space then? I guess that it must, but listing 5
+	shows no white space between "%include" and "{" [} for balancing],
+	so do there need to be not separated by white space? This needs to
+	be clarified.
+	
+	
+	- Why do nonterminals need to be written between double quotes in
+	the TOM disambiguation functions? Doesn't this lead to mistyping
+	errors that should be easily checked for? Please explain.},
+  url = {http://dx.doi.org/10.1007/978-3-642-36089-3_13}
+}
+
+@TECHREPORT{Bach2009,
+  author = {Bach, Jean-Christophe and Balland, Emilie and Brauner, Paul and Kopetz,
+	Radu and Moreau, Pierre-Etienne and Reilles, Antoine},
+  title = {Tom Manual},
+  institution = {PAREO - INRIA Lorraine - LORIA - INRIA - CNRS : UMR7503 - Universit{\'e}
+	Henri Poincar{\'e} - Nancy I - Universit{\'e} Nancy II - Institut
+	National Polytechnique de Lorraine},
+  year = {2009},
+  type = {Rapport Technique},
+  abstract = {This manual contains information for Tom version 2.7. Tom is a language
+	extension which adds new matching primitives to languages like C,
+	Java, and Caml. Although rich and complex, Tom is not a stand-alone
+	language: like a preprocessor, it strongly relies on the underlying
+	language (C, Java, or Caml), called host-language in the following.
+	To this language, Tom adds several constructs. The main construct,
+	\%match, is similar to the match primitive found in functional languages:
+	given an object (called subject) and a list of patterns-actions,
+	the match primitive selects the first pattern that matches the subject
+	and performs the associated action. The sub ject against which we
+	match can be any object, but in practice, this ob ject is usually
+	a tree-based data-structure, also called term in the algebraic programming
+	community. The match construct may be seen as an extension of the
+	classical switch/case construct. The main difference is that the
+	discrimination occurs on a term and not on atomic values like characters
+	or integers: the patterns are used to discriminate and retrieve information
+	from an algebraic data structure. There- fore, Tom is a good language
+	for programming by pattern matching, and it is particularly well-suited
+	for programming various transformations on trees/terms or Xml data-structures.},
+  affiliation = {PAREO - INRIA Lorraine - LORIA - INRIA - CNRS : UMR7503 - Universit{\'e}
+	Henri Poincar{\'e} - Nancy I - Universit{\'e} Nancy II - Institut
+	National Polytechnique de Lorraine},
+  hal_id = {inria-00121885},
+  language = {Anglais},
+  pages = {155},
+  pdf = {http://hal.inria.fr/inria-00121885/PDF/manual-2.7.pdf},
+  url = {http://hal.inria.fr/inria-00121885/en/}
+}
+
+@MANUAL{TomManual-2.10,
+  title = {{Documentation of Tom 2.10}},
+  url = {http://tom.loria.fr/wiki/index.php5/Documentation_Tom-2.10},
+  author = {Jean-Christophe Bach and {\'E}milie Balland and and Paul Brauner and
+    Radu Kopetz and Pierre-Etienne Moreau and Marc Pantel and Fran{\c c}ois Prugniel
+      and Antoine Reilles and Cl{\'a}udia Tavares},
+  month = {March},
+  year = {2013}
+}
+
+@INPROCEEDINGS{Bach2012,
+  author = {Jean-Christophe Bach and Xavier Crégut and Pierre-Etienne Moreau and Marc Pantel},
+  title = {Model transformations with Tom},
+  booktitle = {Proceedings of the Twelfth Workshop on Language Descriptions, Tools, and Applications},
+  series = {LDTA '12},
+  month = 3,
+  year = {2012},
+  isbn = {978-1-4503-1536-4},
+  location = {Tallinn, Estonia},
+  pages = {4:1--4:9},
+  articleno = {4},
+  numpages = {9},
+  doi = {10.1145/2427048.2427052},
+  acmid = {2427052},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+  abstract = {Model Driven Engineering (MDE) advocates the use of Model Transformations
+	(MT) in order to automate repetitive development tasks. Many different
+	model transformation languages have been proposed with a significant
+	development cost as classical elements like expressions, statements,
+	. . . must be developed from scratch in each language. The Tom language
+	is a shallow extension of Java tailored to describe and implement
+	transformations of tree based data-structures. Expressions, statements
+	and many other elements rely directly on Java constructs and are
+	thus almost costless. A key feature of Tom allows to map any Java
+	data-structure to tree based data abstractions that can be accessed
+	by pattern matching. In this paper, we present how this approach
+	can be extended in order to describe model transformations, and in
+	particular EMF (Eclipse Modeling Framework) based model transformations.
+	This allows to provide a low cost transformation language both on
+	the language tool development and on the developpers training side.},
+  hal_id = {hal-00646350},
+  keywords = {model transformation;Tom;language;Java;EMF;term structure},
+  review = {----------------------- REVIEW 1 ---------------------
+	
+	PAPER: 15
+	
+	TITLE: Models Transformations with Tom
+	
+	AUTHORS: Jean-Christophe Bach, Pierre-Etienne Moreau, Marc Pantel
+	and Xavier Crégut
+	
+	
+	OVERALL RATING: 0 (borderline paper)
+	
+	
+	This paper presents a case study of model transformations using the
+	Tom language. It starts by presenting an example to be used through
+	the paper. The Tom language is then introduced in its various parts.
+	The paper then elaborates on how to use elementary transformations
+	and strategies to achieve model transformations applying the technique
+	to the running example.
+	
+	
+	The paper is well written and it is very clear. The example presented
+	seems to be useful, but it is not clear if the technique can be applied
+	to other examples. In fact, the scenarios to which this technique
+	is applicable are not clear in the paper, and this limits its interest.
+	Some questions arise: Can Tom be used to specify any model transformation
+	between any two different models? To which kind of models is it tailored
+	for? Which kind of transformations should be written with it? To
+	answer to this questions is fundamental to increase the research
+	interest of the paper.
+	
+	Finally, the related work refers several transformation techniques/tools,
+	but the relation between this paper and those works is not well exposed.
+	A more concrete comparing should be done. Actually, the last sentence
+	of related work is not very well supported and should be reconsidered.
+	
+	
+	Small remarks:
+	
+	- In the first sentence of introduction, the footnote on MDE in not
+	necessary since it was already introduced in the abstract.
+	
+	- In the second page, "The meta-classes can be liked by inheritance"
+	-> "The meta-classes can be linked by inheritance"
+	
+	- Fist sentence of section 2, "and al" should be et al.
+	
+	- It would be nice if the paragraph describing figure 1 was in the
+	same page as the figure.
+	
+	- In page 7, "is defined for each elements" -> "is defined for each
+	element".
+	
+	- End of page 8, "how each specific sub-parts" -> "how each specific
+	sub-part".
+	
+	- Last paragraph of page 9, "is specified in term" -> "is specified
+	in terms".
+	
+	
+	
+	----------------------- REVIEW 2 ---------------------
+	
+	PAPER: 15
+	
+	TITLE: Models Transformations with Tom
+	
+	AUTHORS: Jean-Christophe Bach, Pierre-Etienne Moreau, Marc Pantel
+	and Xavier Crégut
+	
+	
+	OVERALL RATING: 0 (borderline paper)
+	
+	
+	The paper describes the transformation language TOM, which is built
+	on Java.
+	
+	TOM can be used to implement model transformations.
+	
+	The paper describes the language and presents an example of a model
+	transformation implemented with the language.
+	
+	
+	The paper is well-structured and mostly easy to follow.
+	
+	However, mainly in Section 3 it sometimes is unclear.
+	
+	The language constructs are not explained thoroughly enough and also
+	the motivation on why they are needed is missing.
+	
+	Also, I think the authors do not use the paper enough to sell TOM.
+	
+	All in all, I think the paper certainly has great potential, but it
+	could use some work, therefore I give it the score 'borderline'
+	
+	
+	There are a lot of spelling and grammar errors in the paper.
+	
+	A reasonable grammar checker should be able to find most of them.
+	
+	I think this requires little effort, but makes the paper much better.
+	
+	
+	After reading the introduction, I was confused about the message the
+	paper should convey.
+	
+	At first, it seems that advice will be given on how to implement a
+	transformation language in a way to avoid a large amount of rework
+	that has to be done for standard functionality. (see for example
+	last line of the abstract)
+	
+	Later, it turns out that the actual message is that TOM will be presented,
+	which has been done in such a way as to minimize the aforementioned
+	rework.
+	
+	I think this distinction should be made more clear.
+	
+	
+	In the abstract it is stated that certain language elements rely on
+	Java and are therefore costless.
+	
+	With costless, I assume this means that implementation of these constructs
+	in the language is easy.
+	
+	Or does it mean that no performance penalty is imposed when using
+	the construct.
+	
+	Or does it mean that it is easy to understand how the construct works.
+	
+	If one of the latter two is meant, then this is interesting for a
+	user of the language and it should be made more clear.
+	
+	If it is the first, it is not really important for a user and I think
+	it may be omitted.
+	
+	
+	In the introduction, two approaches to model transformation are described.
+	
+	There is one more, see S. Sendall and W. Kozaczynski: Model Transformation:
+	The Heart and Soul of Model-Driven Software Development.
+	
+	
+	In the introduction is stated that the development of new languages
+	is costly.
+	
+	I wonder how much of a problem is this. How often do you decide to
+	implement a new language?
+	
+	Such an argument does not convince me to use TOM.
+	
+	As I mentioned before, the message of the paper is unclear. I think
+	the focus should be more on why to use TOM rather than to justify
+	the way it is implemented.
+	
+	
+	In the introduction is stated "... are handled as strings." Is this
+	always the case? Can it be done differently?
+	
+	
+	In Section 3, some code snippets with line numbers are shown. I would
+	advice to use these line numbers in the accompanying text to refer
+	to certain parts in the code.
+	
+	
+	In Section 3 a 'ProcessElementEList' construct is described. Is this
+	a built-in TOM function, or is it manually implemented? This should
+	be made clear.
+	
+	
+	The %typeterm construct explanation is insufficiently clear, this
+	should be explained more thoroughly.
+	
+	
+	The %op construct appears in a code snippet, but is not explained.
+	
+	
+	The 'is_fsym' construct is explained, but not motivated. Why is it
+	needed?
+	
+	
+	The second paragraph in the subsection 'Generator of algebraic views'
+	I don't understand.
+	
+	What does it mean and why is it needed?
+	
+	
+	In the last subsection of Section 3, the implementation is described.
+	
+	I was wondering how flexible is TOM with respect to changes in EMF?
+	
+	
+	In the last subsection of Section 3 is stated "...avoid many dynamic
+	casts."
+	
+	What is the advantage of this.
+	
+	
+	After reading Section 3, I wondered how a target model is emitted
+	and also how it can be checked whether it conforms to its metamodel.
+	Some clarification on this would help.
+	
+	
+	In the second paragraph of Section 4 the word 'treatments' is used.
+	Is this the same as a transformation step?
+	
+	
+	After reading the part on 'Generic traversal strategies', I was wondering
+	why it is needed.
+	
+	Since TOM is based on Java, why not implement a transformation imperatively
+	and express a transformation strategy like that?
+	
+	
+	In the part on 'Decomposition of the transformation' is referred to
+	'elementary transformation'. What is that?
+	
+	
+	After reading Section 4, I was wondering how the 'resolve' strategy
+	is invoked.
+	
+	I assume that is after the rest of the transformation has been performed.
+	
+	Is it required that this strategy is called 'resolve', or is any name
+	fine?
+	
+	
+	In Section 5, related work is described.
+	
+	This section lacks positioning of TOM with respect to the related
+	work.
+	
+	This should be added.
+	
+	
+	
+	----------------------- REVIEW 3 ---------------------
+	
+	PAPER: 15
+	
+	TITLE: Models Transformations with Tom
+	
+	AUTHORS: Jean-Christophe Bach, Pierre-Etienne Moreau, Marc Pantel
+	and Xavier Crégut
+	
+	
+	OVERALL RATING: 1 (weak accept)
+	
+	
+	The paper presents Tom: an extension of Java that allows pattern matching
+	over terms and creation of terms. The paper illustrates the application
+	of Tom for model transformations.
+	
+	
+	Term rewriting, strategies and extensions of general purpose languages
+	(Java in this work) are not new techniques. Tom is a language that
+	integrates these technologies in an interesting way and applies them
+	for model transformations.
+	
+	
+	The main motivation of the authors is that it is often easier to use
+	an already existing language to solve a problem instead of using
+	a domain-specific language. Furthermore, the tools for the current
+	model transformation languages are still immature. The latter argument
+	is valid, however, the decision to use or not to use DSL/GPL is not
+	always easy. The authors should be more careful in their argumentation
+	for choosing the approach of extending a GPL to perform model tranformations.
+	
+	
+	Every library or an extension that aims at solving model transformation
+	problems implies some learning effort. In the case of Tom the developer
+	needs to understand the new constructs added to Java, the concept
+	of strategy and to take care of maintaining and resolving traces
+	between model elements. Thus, it is not clear if this effort is less
+	than the effort required to learn a relatively simple domain-specific
+	transformation language. Moreover, it seems that the developer has
+	to encode the rule execution order explicitly. Several declarative
+	transformation languages (e.g. ATL, QVTr) detect the order at runtime
+	and free the developer from this task.
+	
+	
+	The paper gives only one example of application of Tom for model transformations.
+	This is not enough for getting a real impression of the language.
+	If other examples are available the authors may give a reference
+	to them.},
+  url = {http://doi.acm.org/10.1145/2427048.2427052}
+}
+
+@INPROCEEDINGS{Bach2012a,
+  author = {Bach, Jean-Christophe and Moreau, Pierre-Etienne and Pantel, Marc},
+  title = {Tom-based tools to transform {EMF} models in avionics context},
+  booktitle = {ITSLE},
+  year = {2012},
+  address = {Dresden, Germany},
+  abstract = {{Model Driven Engineering (MDE) is now widely used in many industrial
+	contexts such as the AeroSpace domain which requires a high level
+	of system safety. Model-checking is one of the formal techniques
+	which are considered to ensure a system compliance to its requirements.
+	It relies on verification dedicated languages to model the system
+	under verification. In order to ease the use of these tools, model
+	transformations are provided that translate the end user provided
+	input model of the system to the formal languages than can be verified.
+	In order to rely on these activities for system certification, the
+	correctness of these transformation steps must be assessed (qualification
+	of the development and verification tools). One of the goal of our
+	work is to provide tools to implement the transformation steps between
+	the end user source languages used for the system development and
+	the target languages used for formal verification. In this paper,
+	we present a Tom rule-based approach which is used in a research
+	project involving industrial partners: Airbus and Ellidiss.}},
+  keywords = {model transformation, language, Tom, Java, EMF, Domain Specific Language,
+	DSL, AADL, Fiacre},
+  type = {inproceedings}
+}
+
+@MISC{Bach2012b,
+  author = {Bach, Jean-Christophe and Moreau, Pierre-Etienne and Pantel, Marc},
+  title = {{EMF Models Transformations with Tom}},
+  howpublished = {poster},
+  year = {2012}
+}
+TODO: update
+@ARTICLE{bachTSI2014,
+    hal_id = {hal-00786254},
+    url = {http://hal.inria.fr/hal-00786254},
+    title = {{Une approche hybride GPL-DSL pour transformer des mod{\`e}les}},
+    author = {Bach, Jean-Christophe},
+    language = {Fran{\c c}ais},
+    pages = {175-201},
+    volume = {33},
+    number = {3},
+    year = {2014},
+    journal = {Technique et Science Informatiques},
+    doi = {10.3166/tsi.33.175-201},
+    ee = {http://dx.doi.org/10.3166/tsi.33.175-201},
+    address = {France}
+}

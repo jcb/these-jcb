@@ -1,0 +1,28 @@
+%\lstinputlisting[name=ws2pn,numberstyle=\tiny,numbers=left,numberblanklines=true,frame=tb,firstnumber=1,firstline=120,lastline=146,caption=TODO,label=code:ws2pn,captionpos=b]{code/simplepdltopetrinet/SimplePDLToPetriNet.t}
+\begin{tomcode3}[caption=\texttt{WS2PN :} Code de la définition \emph{WorkSequenceToPetriNet},label=code:ws2pn]
+definition WS2PN traversal `TopDown(WS2PN(tom__linkClass,pn)) {
+  ws@WorkSequence[predecessor=p,successor=s,linkType=linkType] -> {
+    Place source= null;
+    Transition target= null;
+    %match(linkType) { 
+      (WorkSequenceTypefinishToFinish|WorkSequenceTypefinishToStart)[] -> {
+               source = %resolve(p:WorkDefinition, WDp_finished:Place); 
+      }
+      (WorkSequenceTypestartToStart|WorkSequenceTypestartToFinish)[]   -> {
+               source = %resolve(p:WorkDefinition, WDp_started:Place);
+      }
+
+      (WorkSequenceTypefinishToStart|WorkSequenceTypestartToStart)[]   -> {
+               target = %resolve(s:WorkDefinition, WDt_start:Transition); 
+      }
+      (WorkSequenceTypestartToFinish|WorkSequenceTypefinishToFinish)[] -> {
+               target = %resolve(s:WorkDefinition, WDt_finish:Transition); 
+      }
+    }
+    source.setNet(pn);
+    target.setNet(pn);
+
+    Arc wsImage = `Arc(target,source, pn, ArcKindread_arc(), 1);  
+  }
+}
+\end{tomcode3}

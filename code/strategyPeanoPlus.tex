@@ -1,0 +1,19 @@
+\begin{tomcode3}[label=code:strategyPeanoTransform,caption=Exemple d'utilisation de stratégie.]
+  %strategy transformationPeano() extends Identity() {
+    visit Nat {
+      plus(x, zero()) -> { return `x; }
+      plus(zero(), x) -> { return `x; }
+      one() -> { return `suc(zero()); }
+    }
+  }
+  ...
+  public static void main(String[] args) {
+    ...
+    Nat number = `plus(plus(suc(suc(one())), one()),
+                         plus(suc(one()), zero()) );
+    Strategy transformStrat = `BottomUp(transformationPeano());
+    Nat transformedNumber = transformStrat.visit(number);
+    System.out.println(number + " a #\texttt{é}#t#\texttt{é}# transform#\texttt{é}# en " + transformedNumber);
+    ...
+  }
+\end{tomcode3}

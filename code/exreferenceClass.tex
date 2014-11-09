@@ -1,0 +1,32 @@
+\begin{tomcode3}[caption=Exemple de classe générée implémentant l'interface \texttt{ReferenceClass} dans le cas de la transformation \emph{Text2Picture}.,label=code:exreferenceClass]
+public static class tom__reference_class_Letter2Shape 
+                                   implements tom.library.utils.ReferenceClass {
+  private Circle target_left;
+  public Circle gettarget_left() { return target_left; }
+  public void settarget_left(Circle value) { this.target_left = value; }
+
+  public Object get(String name) {
+    if(name.equals("target_left")) {
+      return gettarget_left();
+    } else  {
+      throw new RuntimeException("This field does not exist:" + name);
+    }
+  }
+}
+\end{tomcode3}
+%
+%public static class tom__reference_class_Symbol2Shape implements tom.library.utils.ReferenceClass {
+%
+%  private Square right_connector;
+%  public Square getright_connector() { return right_connector; }
+%  public void setright_connector(Square value) { this.right_connector = value; }
+%
+%  public Object get(String name) {
+%    if(name.equals("right_connector")) {
+%      return getright_connector();
+%    } else  {
+%      throw new RuntimeException("This field does not exist:" + name);
+%    }
+%  }
+%
+%}

@@ -1,0 +1,19 @@
+% `tlnatbib' package
+%
+% This package should be used instead of natbib.sty, when used
+% with the thloria class.
+%
+% D. Roegel
+%
+\NeedsTeXFormat{LaTeX2e}[1995/12/01]
+\ProvidesPackage{tlnatbib}
+         [1999/03/08 natbib package for thloria (DR)]
+\DeclareOption*{\PassOptionsToPackage{\CurrentOption}{natbib}}
+\ProcessOptions
+\RequirePackage{natbib}
+\@ifundefined{NAT@sectionbib}%
+  {\renewcommand\bibsection{\SpecialSection{\bibname}%
+   \generic@mark{\bibname}}}
+  {\renewcommand\bibsection{\section*{\bibname
+   \ifx\@mkboth\@gobbletwo\else\markright{\MakeUppercase{\bibname}}\fi}}}
+\endinput

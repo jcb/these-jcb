@@ -1,0 +1,74 @@
+\documentclass{article}
+
+\usepackage{tikz}
+\usepackage{pgfplots}
+\begin{document}
+\definecolor{mygreen}{HTML}{129d1c}
+\pgfplotsset{scaled y ticks=false,scaled x ticks=false}
+\begin{tikzpicture}
+  \begin{axis}[
+      xlabel=$Nombre\ de\ sources$,%0 -> 250 000
+      ylabel=$Temps\ moyen\ (en\ ms)$, %0 -> 1 600 000
+      ylabel style={xshift=-5pt,yshift=12pt},
+      legend cell align=left,
+      legend style={draw=none,legend pos=north west,font=\small},
+      xticklabel style={/pgf/number format/fixed},
+      yticklabel style={/pgf/number format/fixed},
+     /pgf/number format/1000 sep={\ }]
+
+    \addplot[color=mygreen,mark=+] plot coordinates {
+%      (4,      )
+      (20,     16.7)
+      (200,    66)
+      (1000,   208.6)
+      (2000,   359.6)
+      (4000,   833.4)
+      (6000,   1470)
+      (8000,   2409.4)
+      (10000,  3610.2)
+      (20000,  13436.8)
+      (40000,  52300.5)
+      (100000, 322164.1)
+      (200000, 1250304.9)
+    };
+    \addlegendentry{Temps moyen phase \#1}
+
+    \addplot[color=blue,mark=+] plot coordinates {
+%      (4,      )
+      (20,     0.5)
+      (200,    6.8)
+      (1000,   28.7)
+      (2000,   54)
+      (4000,   142.7)
+      (6000,   223.8)
+      (8000,   342.4)
+      (10000,  491.4)
+      (20000,  1760)
+      (40000,  6781.2)
+      (100000, 41708.1)
+      (200000, 166934.2)
+   };
+    \addlegendentry{Temps moyen phase \#2}
+
+    \addplot[color=red,mark=+] plot coordinates {
+%      (4,      )
+      (20,     17.2)
+      (200,    72.8)
+      (1000,   237.3)
+      (2000,   413.6)
+      (4000,   976.1)
+      (6000,   1693.8)
+      (8000,   2751.8)
+      (10000,  4101.6)
+      (20000,  15196.8)
+      (40000,  59081.7)
+      (100000, 363872.2)
+      (200000, 1417239.1)
+  };
+    \addlegendentry{Temps moyen total}
+
+    %\legend{$d=2$\\$d=3$\\$d=4$\\$d=5$\\$d=6$\\}
+  \end{axis}
+\end{tikzpicture}
+
+\end{document}

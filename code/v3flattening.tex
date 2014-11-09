@@ -1,0 +1,31 @@
+\begin{codesource}[label=code:v3flattening,caption=Version 3 : Implémentation de la transformation d'aplatissement de hiérarchie de classes en Tom+Java avec stratégies.]
+%strategy FlatteningStrat(translator:UMLClassesFlattening) extends Identity() {
+  visit cfVirtualRoot {
+    cfVirtualRoot(cfClassEList(_*,cl@cfClass(n,_,_,cfClassEList(),_),_*)) -> {
+      EList<Class> newChildren = translator.virtR.getChildren();
+      translator.virtR = `cfVirtualRoot(cfClassEList(flattening(cl),newChildren*));
+    }
+  }
+}
+
+public static Class flattening(Class toFlatten) {
+  Class parent = toFlatten.getSuperclass();
+  if(parent==null) {
+    return toFlatten;
+  } else {
+    Class flattenedParent = flattening(parent);
+    EList<Attribute> head = toFlatten.getAttributes();
+    head.addAll(flattenedParent.getAttributes());
+    return `cfClass(flattenedParent.getName()+toFlatten.getName(), head, 
+        flattenedParent.getSuperclass(), cfClassEList(), null);
+  }
+}
+...
+public static void main(String[] args) {
+  ...
+  VirtualRoot translator.virtR = `cfVirtualRoot(cfClassEList()); 
+  Strategy transformer = `BottomUp(FlatteningStrat(translator));
+  transformer.visit(source_root, new EcoreContainmentIntrospector());
+  ...
+}
+\end{codesource}

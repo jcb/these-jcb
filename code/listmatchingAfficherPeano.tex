@@ -1,0 +1,11 @@
+\begin{tomcode3}[label=code:listmatchingAfficherPeano,caption=Filtrage associatif.]
+public void afficher(NatList liste) {
+  int i = 0;
+  %match(liste) {
+    concNat(X1*,x,X2*) -> { 
+      i = `X1.length();
+      System.out.println("liste("+i+") = " + `x);
+    }
+  }
+}
+\end{tomcode3}

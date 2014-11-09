@@ -1,0 +1,9 @@
+\begin{gomcode1}[label=code:gomPeano,caption=Signature algébrique Gom avec opérateur variadique pour les entiers de Peano.]
+module Peano
+abstract syntax
+
+Nat = zero()
+    | suc(n:Nat)
+
+NatList = concNat(Nat*)
+\end{gomcode1}

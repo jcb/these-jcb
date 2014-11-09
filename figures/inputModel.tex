@@ -1,0 +1,131 @@
+\begin{tikzpicture}[node distance=1.2cm,>=stealth',bend
+  angle=25,auto,scale=1.0,transform shape]
+
+  \tikzstyle{place}=[circle,thick,draw=red!75,fill=red!20,minimum size=5mm]
+  \tikzstyle{transition}=[rectangle,thick,draw=blue!75,fill=blue!20,minimum size=4mm]
+
+  \tikzstyle{every label}=[black]
+
+  \begin{scope}
+    
+    % Petri net A
+    \node [place] (pa1) [xshift=-3.5cm]{} ;
+
+    \node [transition] (ta1) [below of=pa1] {}
+      edge [pre]  (pa1)
+    ;
+
+    %%in order to center tstart transition
+    \node [place] (pa) [below of=ta1,circle,draw=white,fill=white] {};
+
+    \node [place] (pa2) [left of=pa] {}
+      edge [pre] (ta1)
+    ;
+
+    \node [place] (pa3)  [right of=pa] {}
+      edge [pre] (ta1)
+    ;
+    \node at (pa3.west) [left] {};
+
+    \node [transition] (ta2) [below of=pa2] {}
+      edge [pre]  (pa2)
+    ;
+
+    \node [place] (pa4) [below of=ta2] {}
+      edge [pre] (ta2)
+    ;
+
+    % Petri net B
+    \node [place] (pb1) {};
+
+    \node [transition] (tb1) [below of=pb1] {}
+      edge [pre] (pb1)
+      ;
+    \node at (tb1.east) [right] {};
+
+    %%in order to center tstart transition
+    \node [place] (pp) [below of=tb1,circle,draw=white,fill=white] {};
+    \node [place] (pb2) [left of=pp] {}
+      edge [pre] (tb1)
+    ;
+    \node [place] (pb3) [right of=pp] {}
+      edge [pre] (tb1)
+    ;
+
+    \node [transition] (tb2) [below of=pb2] {}
+      edge [pre]  (pb2)
+      edge [pre,bend right,green!50!black,thick] (pa3)
+      ;
+
+    \node [place] (pb4) [below of=tb2] {}
+      edge [pre] (tb2)
+    ;
+
+    %C, D, ...
+    %(finally not invisible) nodes
+    \node [place] (pi1) [right of=pb3,draw=white,fill=white] {} ;
+    \node [transition] (ti) [below of=pi1,draw=blue!15,fill=blue!5] {}
+      edge [pre,bend right,green!50!black,thick] (pb3)
+      ;
+
+
+     % last Petri net: Z
+    \node [place] (pz1) [xshift=8cm] {}
+    ;
+
+    \node [transition] (tz1) [below of=pz1] {}
+      edge [pre] (pz1)
+      ;
+    \node at (tz1.east) [right] {};
+
+    %%in order to center tstart transition
+    \node [place] (pz) [below of=tz1,circle,draw=white,fill=white] {};
+    \node [place] (pz2) [left of=pz] {}
+      edge [pre] (tz1)
+    ;
+    %(finally not invisible) nodes
+    \node [place] (pi2) [left of=pz2,draw=red!15,fill=red!5] {} ;
+    \node (phantom) [left of=pi2,xshift=-0.5cm] {$\cdots\cdots\cdots$};
+
+    \node [place] (pz3) [right of=pz] {}
+      edge [pre] (tz1)
+    ;
+
+    \node [transition] (tz2) [below of=pz2] {}
+      edge [pre,bend right,green!50!black,thick] (pi2)
+      edge [pre]  (pz2)
+      ;
+
+    \node [place] (pz4) [below of=tz2] {}
+      edge [pre] (tz2)
+    ;
+ 
+ % Petri net root
+    \node [place] (p1) [tokens=1,xshift=-6.5cm]{}
+    ;
+    
+    \node [transition] (t1) [below of=p1] {}
+      edge [pre]  (p1)
+      edge [post,bend left,dash pattern=on 2pt off 2pt] (pa1)
+      edge [post,bend left,dash pattern=on 2pt off 2pt] (pb1)
+      edge [post,bend left,dash pattern=on 2pt off 2pt] (pz1)
+    ;
+
+    \node [place] (p2) [below of=t1] {}
+      edge [pre] (t1)
+    ;
+
+    \node [transition] (t2) [below of=p2] {}
+      edge [pre]  (p2)
+      edge [pre,bend right,dash pattern=on 2pt off 2pt] (pa4)
+      edge [pre,bend right,dash pattern=on 2pt off 2pt] (pb4)
+      edge [pre,bend right,dash pattern=on 2pt off 2pt] (pz4)
+    ;
+
+    \node [place] (p3) [below of=t2] {}
+      edge [pre] (t2)
+    ;
+    
+  
+  \end{scope}
+\end{tikzpicture}

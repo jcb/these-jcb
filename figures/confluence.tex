@@ -1,0 +1,43 @@
+\begin{tikzpicture}[node distance=1cm,>=stealth',scale=1,transform shape, on grid, auto]
+
+  \tikzstyle{node}=[text centered]
+
+  \node (t) {$t$};
+  \node (ghost) [below of=t] {};
+  \node (t1) [left of=ghost] {$t_1$};
+  \node (t2) [right of=ghost] {$t_2$};
+  \node (tprime) [below of=ghost] {$t'$};
+
+  \path[->,draw] (t) -- node [above,xshift=-0.1cm, yshift=-0.1cm] {$^*$} (t1);
+  \path[->,draw] (t) -- node [above,xshift=0.1cm, yshift=-0.1cm] {$^*$} (t2);
+  \path[dotted,->,draw] (t1) -- node [below,xshift=-0.1cm, yshift=0.1cm] {$^*$} (tprime);
+  \path[dotted,->,draw] (t2) -- node [below,xshift=0.1cm, yshift=0.1cm] {$^*$} (tprime);
+
+
+  %\begin{scope}
+  %  %confluence
+  %  \node [node] (t) {$t$};
+  %  \path (t)+(-1.3,-1.3) node (t1)	[node]{$t_1$};
+  %  \path (t)+(1.3,-1.3) node (t2) [node]	{$t_2$};
+  %  \path (t1)+(1.3,-1.3) node (tprime)	[node] {$t'$};
+
+  %  %Church-Rosser
+  %  \path (t2)+(4.0,0.0) node (tt1) 			[node]	{$t_1$};
+  %  \path (tt1)+(2.6,0.0) node (tt2)			[node]	{$t_2$};
+  %  \path (tt1)+(1.3,-1.3) node (tt)			[node]	{$t'$};
+  %\end{scope}
+
+  % Draw arrows between elements
+  %confluence
+	%\path [draw, ->] (t.south)+(-0.2,0.0) -- node [above] {$^*$} (t1);
+	%\path [draw, ->] (t.south)+(0.2,0.0)-- node [above] {$^*$} (t2);
+	%\path [draw, dotted, ->] (t1.south)+(0.2,0.0)-- node [above] {$^*$}
+  %(tprime);
+	%\path [draw, dotted, ->] (t2.south)+(-0.2,0.0)-- node [above] {$^*$}
+  %(tprime);
+
+  %Church-Rosser
+	%\path [draw, <->] (tt1.east)+(0.0,0.0) -- node 		[above] {$^*$} (tt2);
+	%\path [draw, dotted, ->] (tt1.south)+(0.2,0.0)-- node 	[above] {$^*$} (tt);
+	%\path [draw, dotted, ->] (tt2.south)+(-0.2,0.0)-- node 	[above] {$^*$} (tt);
+\end{tikzpicture}

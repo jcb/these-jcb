@@ -1,0 +1,25 @@
+static class JIndividu { }
+static class JIndividuList { }
+
+%static class Jzombie extends JIndividu {
+%  public Jzombie() {}
+%  public boolean equals(Object o) {
+%    if(o instanceof Jzombie) {
+%      return true;
+%    }
+%    return false;
+%  }
+%}
+
+static class Jpersonne extends JIndividu {
+  public JIndividu n;
+  public Jpersonne() { }
+  public Jpersonne(JIndividu n) { this.n = n; }
+  public boolean equals(Object o) {
+    if(o instanceof Jpersonne) {
+      Jpersonne obj = (Jpersonne) o;
+      return n.equals(obj.n);
+    }
+    return false;
+  }
+} 

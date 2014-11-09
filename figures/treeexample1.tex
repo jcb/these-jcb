@@ -1,0 +1,28 @@
+%\begin{tikzpicture}[>=latex, node distance=1cm, on grid, auto,level/.style={sibling distance=60mm/#1}]
+\begin{tikzpicture}[>=latex, node distance=1cm, on grid,
+auto,composition/.style={yshift=11mm,scale=0.6,diamond,very thin,draw,fill=black}]
+\node [rectangle,draw] (root){$Process_{root}$}
+child{node[composition] (rc) {}
+  child {
+    node [rectangle,draw] (a) {$WD_A$}
+  }
+  child {
+    node [rectangle,draw] (s1) {$WS_1$}
+  }
+  child {node [rectangle,draw] (b) {$WD_B$}
+    child{node[composition] (bc) {}
+      child {node [rectangle,draw] (child) {$Process_{child}$}
+        child{node[composition] (cc) {}
+          child{node [rectangle,draw] (c) {$WD_C$}}
+          child{node [rectangle,draw] (s2) {$WS_2$}}
+          child{node [rectangle,draw] (d) {$WD_D$}}
+        }
+      }
+    }
+  }
+};
+
+%\node[composition] at (root.south) [label=] {};
+%\node[composition] at (b.south) [label=] {};
+%\node[composition] at (child.south) [label=] {};
+\end{tikzpicture}

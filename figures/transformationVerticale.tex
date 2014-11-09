@@ -1,0 +1,24 @@
+\begin{tikzpicture}[node distance=1cm,>=stealth',scale=1,transform shape, on grid, auto]%>=latex 
+  \tikzstyle{every label}=[black]
+  \begin{scope}
+
+    \draw[dotted] (-0.5,0.8) -- (1.5,0.8);
+    \node (ms) [yshift=0.5cm,xshift=0.5cm] {$m_s$};
+    \draw[dotted] (-0.5,0) -- (1.5,0);
+    \node (mt) [below of=ms] {$m_t$};
+    \draw[dotted] (-0.5,-0.8) -- (1.5,-0.8);
+    \path[->,thick] (ms) edge (mt);
+
+
+%\node [xshift=-1cm,rotate=90,text width=1.5cm] {\begin{center} \scriptsize{niveaux \newline d'abstraction \newline w~x~y~z}\end{center}};
+
+    \node [xshift=-1.2cm,rotate=90,text width=1.5cm,align=center] {\begin{center} \scriptsize{niveaux \newline d'abstraction}\end{center}};
+    \node [yshift=-1.2cm,xshift=-0.5cm,rotate=90,align=center] {\scriptsize{w}};
+    \node [yshift=-0.4cm,xshift=-0.5cm,rotate=90,align=center] {\scriptsize{x}};
+    \node [yshift=0.4cm,xshift=-0.5cm,rotate=90,align=center] {\scriptsize{y}};
+    \node [yshift=1.2cm,xshift=-0.5cm,rotate=90,align=center] {\scriptsize{z}};
+
+%\node [yshift=-1.2cm] {\scriptsize{Transformation verticale}};
+
+  \end{scope}
+\end{tikzpicture}

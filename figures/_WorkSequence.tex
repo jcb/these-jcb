@@ -1,0 +1,69 @@
+\begin{tikzpicture}[node distance=1.2cm,>=stealth',bend
+  angle=25,auto,transform shape]
+
+  \tikzstyle{place}=[circle,thick,draw=red!15,fill=red!5,minimum size=5mm]
+  \tikzstyle{transition}=[rectangle,thick,draw=blue!15,fill=blue!5,minimum size=4mm]
+
+  \tikzstyle{edge}=[black!25!black!25]
+  \tikzstyle{every label}=[black]
+
+  \begin{scope}
+    % Petri net A
+    \node [place] (p1) [tokens=0] [xshift=-3.5cm]{}
+    ;
+
+    \node [transition] (t1) [below of=p1] {}
+      edge [pre,black!25]  (p1)
+    ;
+
+    %%in order to center tstart transition
+    \node [place] (p) [below of=t1,circle,draw=white,fill=white] {};
+
+    \node [place] (p2) [left of=p] {}
+      edge [pre,black!25] (t1)
+    ;
+
+    \node [place] (p3)  [right of=p,draw=red!75,fill=red!20,dash pattern=on 2pt off 2pt] {}
+      edge [pre,black!25] (t1)
+    ;
+%    \node at (p3.west) [left] {{$start$}};
+
+    \node [transition] (t2) [below of=p2] {}
+      edge [pre,black!25]  (p2)
+    ;
+
+    \node [place] (p4) [below of=t2] {}
+      edge [pre,black!25] (t2)
+    ;
+
+    % Petri net B
+    \node [place] (pb1) [tokens=0] {}
+    ;
+
+    %dotted,
+    \node [transition] (tb1) [below of=pb1] {}
+      edge [pre,black!25] (pb1)
+      ;
+
+    %%in order to center tstart transition
+    \node [place] (pp) [below of=tb1,circle,draw=white,fill=white] {};
+    \node [place] (pb2) [left of=pp] {}
+      edge [pre,black!25] (tb1)
+    ;
+    \node [place] (pb3) [right of=pp] {}
+      edge [pre,black!25] (tb1)
+    ;
+
+    \node [transition] (tb2) [below of=pb2,draw=blue!75,fill=blue!20,dash pattern=on 2pt off 2pt] {}
+      edge [pre,black!25] (pb2)
+      edge [pre,bend right,green!50!black] (p3)
+      ;
+%    \node at (tb2.east) [right] {{$finish$}};
+
+    \node [place] (pb4) [below of=tb2] {}
+      edge [pre,black!25] (tb2)
+    ;
+
+  \end{scope}
+
+\end{tikzpicture}

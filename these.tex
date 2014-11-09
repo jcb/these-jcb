@@ -1,0 +1,336 @@
+% vim:spell spelllang=fr
+%             Exemple d'utilisation de la classe thloria
+%             ------------------------------------------
+%
+%
+% (de maniere generale, les commandes de thloria sont celles
+% qui ne sont pas completement en minuscules)
+%
+% Voir la documentation complete pour plus de details.
+%
+%
+% D. Roegel, 18 janvier 2001
+%
+\pdfoutput=1
+%\documentclass[12pt]{thloria}%,noprintercorrection%
+\documentclass{thloria}%,noprintercorrection%
+                
+% « nofrench » permet de recharger le package babel ulterieurement
+
+%----------------------------------------------------------------------
+%                     Chargement de quelques packages
+%----------------------------------------------------------------------
+\usepackage[pageanchor=false]{tlhypref}
+%\usepackage[pdftex]{tlhypref}
+%\usepackage{tlhypref}
+
+\usepackage{blindtext} %lorem ipsum
+
+\usepackage{aeguill,aecompl}
+\usepackage[T1]{fontenc}                % accents dans le DVI
+%\usepackage[latin1]{inputenc}           % accents dans le source and hyphenation
+\usepackage[utf8]{inputenc}
+%\usepackage[english,frenchb]{babel}      % charger packages babel
+%\selectlanguage{french}
+\usepackage{url}
+\usepackage{pdfpages}
+%\usepackage[final]{pdfpages}
+\usepackage{amsmath,amsthm,amssymb}     %mode math
+\usepackage{listings}                   % afficher code source
+\usepackage{moreverb}
+\usepackage{verbatim}
+%\usepackage{fancyvrb}
+\usepackage{array} %alignement vertical
+%\usepackage{lastpage}
+\usepackage{xspace}
+\usepackage{color, colortbl}            % colors, colors for tables, + todos
+\usepackage{xcolor}
+\usepackage{float} %incompatible avec thloria si \listof utilisée
+%\usepackage{tlfloat}
+\usepackage[small,justification=centering]{caption}% or e.g. [format=hang]
+\usepackage{subcaption}
+%\usepackage[all]{xy}                    % draw diagrams
+\usepackage{fancybox} % for shadow and Bitemize
+\usepackage{graphicx} % pour les figures .ps ?
+\usepackage{siunitx}
+%\usepackage[output-decimal-marker={,}]{siunitx}
+\sisetup{locale = FR,
+detect-all,
+}
+\usepackage{placeins} % pour pouvoir utiliser FloatBarrier (vide le cache des flottants)
+\DeclareGraphicsRule{*}{mps}{*}{}             % to use pdflatex
+\DeclareGraphicsExtensions{.pdf}
+\def\xcolorversion{2.00}
+\def\xkeyvalversion{1.8}
+\usepackage[version=0.96]{pgf}                % draw complex graphics with tikz
+\usepackage{tikz}                                         % draw complex diagrams
+\usepackage{pgfplots}
+\usetikzlibrary{automata}
+\usetikzlibrary{arrows}
+\usetikzlibrary{backgrounds}
+\usetikzlibrary{fit}
+%\usetikzlibrary{matrix}
+\usetikzlibrary{patterns}
+\usetikzlibrary{petri}
+\usetikzlibrary{positioning}
+\usetikzlibrary{shapes}
+\usetikzlibrary{shapes.arrows}
+\usetikzlibrary{shapes.multipart}
+\usetikzlibrary{decorations}
+\usetikzlibrary{decorations.pathreplacing}
+%\usetikzlibrary{snakes}
+
+%\usepackage{auto-pst-pdf}
+
+\usepackage{custom_pgf-umlcd}
+%incompatible
+%\usepackage[pagebackref]{hyperref}% propr. du pdf + liens inverses
+%\usepackage{hyperref}% propr. du pdf + liens inverses
+\usepackage{tlhypref}% propr. du pdf + liens inverses
+%\hypersetup{colorlinks=true,linkcolor=magenta,citecolor=magenta}
+\usepackage[hyperpageref]{backref}
+
+%\usepackage{bibtopic} %tentative de biblio avec sections
+
+%\usepackage{lscape}                    % rotate figures
+%a tester
+\usepackage{pdflscape}                  % rotate figures (also in pdf)
+%\usepackage{todonotes}                              % add notes
+\usepackage{setspace}                   % le spacing reduit pour l'abstract
+%\usepackage[square,comma]{natbib}      % ordonner
+\usepackage{paralist}                  % lists in one line
+% Si on veut le style de bibliographie named :
+%\usepackage{named}
+% Pour tout savoir sur les polices
+% (cette ligne n'est pas necessaire au traitement du fichier)
+%\usepackage[infoshow]{tracefnt}
+\usepackage{setspace} %JC
+% Si on veut des mini-tables des matieres (utiliser minitoc-hyper
+% en conjonction avec tlhypref) :
+%\usepackage[french]{minitoc-hyper}
+\usepackage[french]{minitoc}
+%\usepackage{diagbox}%\usepackage{slashbox}
+\usepackage{multirow}
+%\usepackage{arydshln} %hdashline
+
+\input{macros}
+
+%hyphenation{con-tex-te}
+
+% Pour modifier les marges. Par default c'est 30mm x 20mm
+% rend les pages sans schéma illisibles
+\SetRealMargins{28mm}{40mm} %pas mal
+
+%-------------------------------------------------------------------
+%       Pour avoir les proprietes du papier sur le pdf genere
+%-------------------------------------------------------------------
+\hypersetup
+{
+   pdfauthor={Jean-Christophe Bach},
+   pdfsubject={Transformations de modèles et certification : un îlot formel pour les transformations de modèles qualifiables},
+   pdftitle={Un îlot formel pour les transformations de modèles qualifiables},
+   pdfkeywords={rewriting, réécriture, termes, terms, modèles, models,
+   transformation, pattern matching, filtrage de motif, Tom, EMF, Ecore, Java, resolve, traçabilité, traceability, qualification}
+}
+
+
+%-------------------------------------------------------------------
+%                   Pour collecter un glossaire et un index
+%-------------------------------------------------------------------
+
+%TODO
+%\makeglossary
+%\makeindex
+
+\begin{document}
+
+
+      %\OddHead={{\leftmark\rightmark}{\hfil\slshape\rightmark}}
+      %\EvenHead={{\leftmark}{{\slshape\leftmark}\hfil}}
+      %\OddFoot={\hfil\thepage}
+      %\EvenFoot={\thepage\hfil}
+      %\pagestyle{ThesisHeadingsII}
+
+
+%TODO
+\includepdf[pages={1}]{./cover/cover.pdf}
+%%\input{cover/cover}
+%\begin{ThesisDedication}
+%  À ceux qui liront cette thèse.
+%\end{ThesisDedication}
+\begin{ThesisAcknowledgments}
+\input{remerciements}
+\end{ThesisAcknowledgments}
+
+%-------------------------------------------------------------------
+%                        table des matieres
+%-------------------------------------------------------------------
+
+%\pagestyle{plain}
+\tableofcontents
+
+% Pour ne pas avoir le mot `Chapitre' au debut de chaque chapitre.
+%\NoChapterHead
+
+%\DontWriteThisInToc
+%TODO
+\listoffigures
+
+% La commande \mainmatter (nouvelle commande LaTeX2e) permet de passer
+% a la numerotation arabe (ce que fait \pagenumbering{arabic})
+% et de faire commencer la nouvelle page 1 sur une page impaire.
+% On evitera donc d'utiliser directement \pagenumbering{arabic}.
+\mainmatter
+
+%\pagestyle{ThesisHeadingsII}
+%\DontFrameThisInToc
+%\input{resume.tex}
+
+%\DontFrameThisInToc
+\input{ch-introduction.tex}
+
+%\input{test.tex}
+\part{État de l'art}
+\label{part:sota}
+
+%\DontFrameThisInToc
+\input{ch-tom.tex}
+
+%\DontFrameThisInToc
+\input{ch-notions.tex}
+
+%\DontFrameThisInToc
+\input{ch-verification.tex}
+
+%%\DontFrameThisInToc
+%%\input{ch-context_motivations.tex}
+
+\part{Contributions}
+\label{part:contrib}
+
+%\DontFrameThisInToc
+\input{ch-approach.tex}
+
+%\DontFrameThisInToc
+%\input{ch-modularity.tex}
+
+%\DontFrameThisInToc
+\input{ch-traceability.tex}
+
+%\DontFrameThisInToc
+%%\input{ch-sysml2vhdlams}
+
+%\DontFrameThisInToc
+\input{ch-outils}
+
+%\DontFrameThisInToc
+\input{ch-usecase.tex}
+
+%\DontFrameThisInToc
+\input{ch-evaluation}
+
+%\DontFrameThisInToc
+\input{ch-conclusion.tex}
+
+% En cours de route, on peut changer le cadrage par defaut:
+%\DontFrameChaptersInToc
+
+%\DontFrameThisInToc
+%TODO
+\input{appendices.tex}
+
+%\Annexe
+%\Annex{premi\`ere annexe}
+
+%Avec plein de texte tr\`es vari\'e.
+%Une autre page avec plein de texte tr\`es vari\'e.
+
+%\section{Une section}
+%Une autre page avec plein de texte tr\`es vari\'e.
+
+% En cours de route, on peut changer le cadrage par defaut:
+%\Annex{deuxi\`eme annexe}
+
+%Avec plein de texte tr\`es vari\'e.
+%Une autre page avec plein de texte tr\`es vari\'e.
+
+%\section{Une section}
+%Une autre page avec plein de texte tr\`es vari\'e.
+
+%\Glossary{Chat1}{animal}\Glossary{Chien1}{Autre animal}
+%\Glossary{Chat2}{animal}\Glossary{Chien2}{Autre animal}
+
+%-------------------------------------------------------------------
+%                         Le glossaire
+%-------------------------------------------------------------------
+%\BeginGloWith{Voici un glossaire tout-\`a-fait fictif,
+%              introduit par un texte sur toute la largeur
+%              des deux colonnes.}
+
+%TODO
+\input{glossaire}
+\twocolumn
+\PrintGlossary
+
+%-------------------------------------------------------------------
+%              L'index (toujours sur deux colonnes)
+%-------------------------------------------------------------------
+%TODO
+%\cleardoublepage
+%\phantomsection
+%%\BeginIndWith{Voici un index}
+%%TODO
+%\PrintIndex
+
+%-------------------------------------------------------------------
+%                       La bibliographie
+%-------------------------------------------------------------------
+
+% La bibliographie (comme d'habitude)
+
+
+\cleardoublepage
+\phantomsection
+\onecolumn
+%\nocite{*}
+%pour assurer que mes publis apparaissent bien, quoi qu'il arrive
+\nocite{DRBBBCEEJK10, Afroozeh2012, Bach2009, TomManual-2.10, Bach2012, Bach2012a, Bach2012b, bachTSI2014}
+\bibliographystyle{alpha}
+\bibliography{bach,ref}
+%%\bibliographystyle{apalike}
+%%\bibliographystyle{plainnat}
+%%\bibliographystyle{named}
+
+%\input{publisjcb}
+
+%-------------------------------------------------------------------
+%                          Les resumes
+%-------------------------------------------------------------------
+% (si le resume' apparait sur une colonne etroite, avec la
+% bibliographie a gauche, c'est sans doute parce que vous avez
+% oublie' de generer les fichiers d'index et de glossaire...)
+
+% This renders a bad head margin in last page of bibliography
+% \setlength{\headsep}{-18mm}
+% \AdjustTextheight
+
+%TODO
+\input{abstract}
+%\NumberAbstractPages
+%\begin{ThesisAbstract}
+%  \begin{FrenchAbstract}
+%  \begin{spacing}{0.88}
+%    Ici, je mets l'abstract de ma thèse
+%    \KeyWords{transformation de mod\`eles, resolve, Tom, EMF, Ecore, Java, filtrage de motifs, r\'e\'ecriture.}
+%    \end{spacing}
+%  \end{FrenchAbstract}
+%  \begin{EnglishAbstract}
+%  \begin{spacing}{0.88}
+%    Here is my thesis abstract.
+%    \KeyWords{models transformation, resolve, Tom, EMF, Ecore, Java, pattern matching, rewriting.}
+%    \end{spacing}
+%  \end{EnglishAbstract}
+%\end{ThesisAbstract}
+
+\end{document}
+% vim:spell spelllang=fr

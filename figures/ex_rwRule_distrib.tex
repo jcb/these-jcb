@@ -1,0 +1,43 @@
+\begin{tikzpicture}[>=latex, node distance=1cm, on grid, auto]
+  \tikzstyle{node}=[fill=white, text centered]
+%  \begin{scope}
+    \node [node] (lmult) {$\times$};
+    \path (lmult)+(-1.0,-1)  node (lx) [node] {$x$};
+    \path (lmult)+(1.0,-1)  node (lplus) [node] {$+$};
+    \path (lplus)+(-0.7,-1)  node (ly) [node] {$y$};
+    \path (lplus)+(0.7,-1)  node (lz) [node] {$z$};
+%  \end{scope}
+  % Draw arrows between elements
+	  \path [draw, -] (lmult.south)+(-0.2,0.0) -- node	[above] {} (lx);
+	  \path [draw, -] (lmult.south)+(0.2,0.0) -- node	[above] {} (lplus);
+	  \path [draw, -] (lplus.south)+(-0.2,0.0)-- node 	[above] {} (ly);
+	  \path [draw, -] (lplus.south)+(0.2,0.0)-- node		[above] {} (lz);
+\node [node] (center) [right of=lmult,xshift=1.5cm] {} ;
+\path (center)+(0.0,-1) node (arr) [node] {$\longrightarrow$} ;
+%   \begin{scope}
+    \node [node] (rplus) [right of=center,xshift=1.5cm] {$+$};
+    \path (rplus)+(-1.0,-1)  node (rmult1) [node] {$\times$};
+    \path (rmult1)+(-0.7,-1) node (rx1) [node] {$x$};
+    \path (rmult1)+(0.7,-1)  node (ry) [node] {$y$};
+    \path (rplus)+(1.0,-1)   node (rmult2) [node] {$\times$};
+    \path (rmult2)+(-0.7,-1) node (rx2) [node] {$x$};
+    \path (rmult2)+(0.7,-1)  node (rz) [node] {$z$};
+%  \end{scope}
+  % Draw arrows between elements
+	  \path [draw, -] (rplus.south)+(-0.2,0.0) -- node	[above] {} (rmult1);
+	  \path [draw, -] (rplus.south)+(0.2,0.0) -- node	[above] {} (rmult2);
+	  \path [draw, -] (rmult1.south)+(-0.2,0.0)-- node 	[above] {} (rx1);
+	  \path [draw, -] (rmult1.south)+(0.2,0.0)-- node		[above] {} (ry);
+	  \path [draw, -] (rmult2.south)+(-0.2,0.0)-- node 	[above] {} (rx2);
+	  \path [draw, -] (rmult2.south)+(0.2,0.0)-- node		[above] {} (rz);
+%\path (plus) -- (mult1) node [midway] {$\longrightarrow$};
+\end{tikzpicture}
+%\caption{}
+%
+%x*(y+z) -> (x*y)+(x*z)
+%
+%  *          +
+% / \        / \
+%x   +  ->  *   *
+%    /\    /\   /\
+%   y  z  x  y x  z

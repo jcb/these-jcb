@@ -1,0 +1,87 @@
+%\begin{figure}[H]
+
+  % Define the layers to draw the diagram
+  \pgfdeclarelayer{tomgombackground}
+  \pgfdeclarelayer{tombackground}
+  \pgfsetlayers{tomgombackground,tombackground,main}
+
+  % Define a new shape: page with a folded corner 
+  \makeatletter
+  \pgfdeclareshape{flippedpage}{
+    \inheritsavedanchors[from=rectangle] % this is nearly a rectangle
+    \inheritanchorborder[from=rectangle]
+    \inheritanchor[from=rectangle]{center}
+    \inheritanchor[from=rectangle]{north}
+    \inheritanchor[from=rectangle]{south}
+    \inheritanchor[from=rectangle]{west}
+    \inheritanchor[from=rectangle]{east}
+    % ... and possibly more
+    \backgroundpath{% this is new
+    % store lower left in xa/ya and upper right in xb/yb
+    \southwest \pgf@xa=\pgf@x \pgf@ya=\pgf@y
+    \northeast \pgf@xb=\pgf@x \pgf@yb=\pgf@y
+    % compute corner of ``flipped page''
+    \pgf@xc=\pgf@xb \advance\pgf@xc by-5pt % this should be a parameter
+    \pgf@yc=\pgf@yb \advance\pgf@yc by-5pt
+    % diagonal path of the corner 
+    \pgfpathmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    \pgfpathlineto{\pgfpoint{\pgf@xa}{\pgf@yb}}
+    \pgfpathlineto{\pgfpoint{\pgf@xc}{\pgf@yb}}
+    \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@yc}}
+    \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@ya}}
+    \pgfpathclose
+    % add little corner
+    \pgfpathmoveto{\pgfpoint{\pgf@xc}{\pgf@yb}}
+    \pgfpathlineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+    \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@yc}}
+    \pgfpathlineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+    }
+  }
+
+  % Define block styles
+  \tikzstyle{compiler}=[draw, fill=blue!20, text width=6em, text centered, minimum height=2.5em, rounded corners]
+  %\tikzstyle{compiler2}=[diamond, aspect=2, draw, fill=blue!20, text centered, rounded corners=1]
+  \tikzstyle{compiler2}=[diamond, aspect=2, draw, text centered, rounded
+  corners=1, text width=5em]
+  %\tikzstyle{code}=[draw,shape=flippedpage,text width=2.7em, text centered, minimum height=3.7em,fill=white]
+  \tikzstyle{code}=[draw,shape=flippedpage,text width=3em, text centered,
+  minimum height=4.2em,fill=white]
+  \tikzstyle{texttitle}=[fill=white, rounded corners, draw=black!50, dashed]
+  \tikzstyle{background}=[fill=yellow!20, rounded corners, draw=black!50, dashed]
+
+%  \begin{center}
+
+\definecolor{myred}{HTML}{d01e1e}
+\definecolor{mygreen}{HTML}{129d1c}
+\definecolor{myblue}{HTML}{0000FF}
+
+  %\begin{tikzpicture}[>=latex, node distance=3cm, on grid, auto]
+  \begin{tikzpicture}[>=latex, on grid, auto, node distance=2.5cm, scale=1.0]
+
+    % Draw diagram elements
+    \node (tomemf) [compiler2] {\figcode{\textbf{{\tomemf}}}};
+    \node (manualmapping) [code, above of=tomemf,xshift=-1.5cm] {\figcode{Ecore.tom (manuel)}};
+    \node (emfmapping) [code, right of=tomemf,xshift=1.0cm] {\figcode{Ecore.tom}};
+    \node (emfstruct) [code, left of=tomemf,xshift=-1.0cm] {\figcode{Ecore.jar}};
+    %\node (emf) [compiler2, left of=emfstruct,xshift=-1.0cm] {\figcode{\textbf{{\emf}}}};
+%%%
+    %\node (ecore) [above of=emf,text width=3em, text centered] {\figcode{Ecore.ecore}};
+    %\node (mm1)[rectangle, minimum width=0.5cm, minimum height=0.5cm,draw,left of=ecore,yshift=0.8cm,xshift=2.2cm]{};
+    %\node (mm2)[rectangle, minimum width=0.5cm, minimum height=0.5cm,draw,below of=mm1,yshift=1.4cm,xshift=-0.6cm]{};
+    %\node (mm3)[rectangle, minimum width=0.5cm, minimum height=0.5cm,draw,right of=mm1,yshift=-0.3cm,xshift=-1.5cm]{};
+    %\path[draw] (mm1) -- (mm2);
+    %\path[draw] (mm1) -- (mm3);
+%%%
+    % Draw arrows between elements
+    %\path[->] (ecore) edge (emf);
+    %\path[->] (emf) edge (emfstruct);
+    \path[->] (emfstruct) edge (tomemf);
+    \path[dashed,->] (manualmapping) edge (tomemf);
+    \path[->] (tomemf) edge (emfmapping);
+    \draw[dashed,->] (emfmapping) -- ++(0,1.5) -- ++(-3.5,0) -- (tomemf);
+
+  \end{tikzpicture}
+%  \end{center}
+%  \caption{\emph{Bootstrap} de {\tomemf} : remplacement des ancrages algébriques \texttt{Ecore.tom} écrits manuellement par les ancrages générés}
+%\label{fig:bootstrapTomEMF}
+%\end{figure}

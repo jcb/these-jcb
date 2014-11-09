@@ -1,0 +1,33 @@
+%\begin{figure}
+%  \begin{center}
+  \begin{tabular}{ccccc}
+  Process & & WorkDefinition & & WorkSequence \\
+    $\downarrow$ & & $\downarrow$ & & $\downarrow$ \\
+%    \begin{subfigure}[h]{0.25\linewidth}
+    \begingroup
+\tikzset{every picture/.style={scale=0.7}}%
+    \input{figures/_SimpleProcess} 
+\endgroup
+%    \end{subfigure}
+    & ~~~ &
+%    \begin{subfigure}[h]{0.30\linewidth}
+    \begingroup
+\tikzset{every picture/.style={scale=0.6}}%
+    \input{figures/_WorkDefinition} 
+\endgroup
+%    \end{subfigure}
+    & ~~~ &
+%    \begin{subfigure}[h]{0.35\linewidth}
+    \begingroup
+\tikzset{every picture/.style={scale=0.6}}%
+    \input{figures/_WorkSequence}
+\endgroup
+%    \end{subfigure}
+    \\
+    %\emph{a. ProcessToPetriNet} & \emph{b. WorkDefinitionToPetriNet} & \emph{c. WorkSequenceToPetriNet}\\
+    %\emph{(a)} & \emph{(b)} & \emph{(c)}\\
+    \end{tabular}
+%    \caption{Transformations élémentaires composant \texttt{SimplePDLToPetriNet}}
+%    \label{fig:atomicpn}
+%  \end{center}
+%\end{figure}

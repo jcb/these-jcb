@@ -1,0 +1,40 @@
+\begin{tomcode}[caption=Exemple de \emph{mapping} pour les entiers de Peano,label=code:mapping]
+%typeterm Nat {
+  implement     { JNat }
+  is_sort(s)    { (s instanceof JNat) }
+  equals(t1,t2) { (t1.equals(t2)) }
+}
+
+%typeterm NatList {
+  implement     { JNatList }
+  is_sort(s)    { (s instanceof JNatList) }
+  equals(t1,t2) { (t1.equals(t2)) }
+}
+
+%op Nat zero() {
+  is_fsym(s)  { (s instanceof Jzero) }
+  make()      { new Jzero() }
+}
+
+%op Nat suc(n:Nat) {
+  is_fsym(s)    { (s instanceof Jsuc) }
+  get_slot(n,s) { ((Jsuc)s).n }
+  make(t0)      { new Jsuc(t0) }
+}
+
+%op Nat plus(n1:Nat,n2:Nat) {
+  is_fsym(s)     { (s instanceof Jplus) }
+  get_slot(n1,s) { ((Jplus)s).n1 }
+  get_slot(n2,s) { ((Jplus)s).n2 }
+  make(t0,t1)    { new Jplus(t0,t1) }
+}
+
+%oplist NatList concNat(Nat*) {
+  is_fsym(s)         { (s instanceof JconcJNat) }
+  get_head(l)        { ((JconcJNat)l).head }
+  get_tail(l)        { ((JconcJNat)l).tail }
+  is_empty(l)        { ((JconcJNat)l).isEmpty() }
+  make_empty()       { new JconcJNat() }
+  make_insert(t,l)   { new JconcJNat(t,l) }
+}
+\end{tomcode}

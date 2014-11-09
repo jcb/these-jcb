@@ -1,0 +1,31 @@
+%\begin{tikzpicture}[scale=0.7,transform shape]
+\begin{tikzpicture}[scale=1,transform shape]
+
+  \begin{class}{Trace}{-5,0}
+    \attribute{transfoName : String}
+  \end{class}
+  
+  \begin{class}{TraceLink}{0,0}
+    \attribute{ruleName : String}
+  \end{class}
+  
+  \begin{class}{Element}{4.5,0}
+    \attribute{}
+  \end{class}
+  
+  \composition{Trace}{links}{*}{TraceLink}
+  \draw [umlcd style, ->] ([yshift=40pt]TraceLink) -- (Element)
+  node[near end, above,xshift=-7pt]{sources *};
+  %node[near end, above]{sources}
+  %node[near end, below]{*};
+
+\draw [umlcd style, ->] ([yshift=-40pt]TraceLink) -- (Element)
+  node[near end, below,xshift=-7pt]{targets *};
+%  node[near end, below]{targets}
+%  node[near end, above]{*};
+%controls +(-160:5em) and +(140:5em) ..
+
+%  \unidirectionalAssociation{TraceLink}{sources}{*}{Element}
+%  \unidirectionalAssociation{TraceLink}{targets}{*}{Element}
+  
+\end{tikzpicture}

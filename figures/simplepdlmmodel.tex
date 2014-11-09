@@ -1,0 +1,45 @@
+%\begin{tikzpicture}[scale=0.61,transform shape]
+\begin{tikzpicture}%[scale=1,transform shape]
+
+  \begin{class}{Process}{-8,3}
+    \attribute{name : String}
+  \end{class}
+  
+  \begin{abstractclass}{ProcessElement}{0,3}
+  \end{abstractclass}
+  
+%  \begin{class}{Guidance}{-1,0.5}
+%    \inherit{ProcessElement}
+%    \attribute{text : String}
+%  \end{class}
+  
+  \begin{class}{WorkDefinition}{-8,-1.5}
+    \inherit{ProcessElement}
+    \attribute{name : String}
+  \end{class}
+  
+  \begin{class}{WorkSequence}{0,-1.5}
+    \inherit{ProcessElement}
+    \attribute{linkType : WorkSequenceType}
+  \end{class}
+  
+  \begin{enum}{WorkSequenceType}{2.5,1.5}
+    \attribute{startToStart}
+    \attribute{finishToStart}
+    \attribute{startToFinish}
+    \attribute{finishToFinish}
+  \end{enum}
+  
+  \composition{Process}{processElements}{*}{ProcessElement}
+  \composition{WorkDefinition}{process}{0..1}{Process}
+
+  \unidirectionalAssociation{Process}{from}{0..1}{WorkDefinition}
+  \unidirectionalAssociation{ProcessElement}{parent}{1}{Process}
+
+  %\association{WorkDefinition}{successor}{1}{WorkSequence}{0..*}{linksToPredecessors}
+  \myassociation{WorkDefinition}{successor}{1}{WorkSequence}{*}{linksToPredecessors}{-4.5,-1}{0} %{210}
+
+  %\association{WorkDefinition}{predecessor}{1}{WorkSequence}{0..*}{linksToSuccessors}
+  \myassociation{WorkDefinition}{predecessor}{1}{WorkSequence}{*}{linksToSuccessors}{-4.8,-3.2}{1}  %{150}
+
+\end{tikzpicture}

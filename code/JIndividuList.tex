@@ -1,0 +1,26 @@
+static class JIndividuList { }
+
+static class JconcJIndividu extends JIndividuList {
+  public JIndividu head;
+  public JIndividuList tail;
+  public JconcJIndividu() { head = null; tail = null; }
+  public JconcJIndividu(JIndividu h, JIndividuList ntail) {
+    head = h;
+    tail = ntail;
+  }
+  public boolean isEmpty() {
+    return (head == null && tail == null);
+  }
+  public boolean equals(Object o) {
+    if (o instanceof JconcJIndividu) {
+      JconcJIndividu obj = (JconcJIndividu) o;
+      if (this.isEmpty() && obj.isEmpty()) {
+        return true;
+      } else if (!this.isEmpty() && !obj.isEmpty()) {
+        return 
+          head.equals(obj.head) && tail.equals(obj.tail);
+      }
+    }
+    return false;
+  }
+}

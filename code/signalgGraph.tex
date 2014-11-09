@@ -1,0 +1,13 @@
+\begin{gomcode}[caption=Signature algébrique correspondant au métamodèle de la
+  figure~\ref{fig:graphmm}.,label=code:signalgGraph]
+Graph = opGraph(nodes:NodeList, arcs:ArcList)
+
+Node  = opNode(name:String, graph:Graph, incomings:ArcList, outgoings:ArcList)
+
+Arc   = opArc(weight:Int, graph:Graph, source:Node, target:Node)
+
+NodeList = opNodeList(Node*)
+
+ArcList   = opArcList(Arc*)
+\end{gomcode}
+

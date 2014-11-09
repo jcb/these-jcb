@@ -1,0 +1,56 @@
+%\begin{tikzpicture}[scale=0.61,transform shape]
+\begin{tikzpicture}%[scale=1,transform shape]
+
+  \begin{abstractclass}{Text}{0,2}
+    \attribute{name : String}
+  \end{abstractclass}
+  
+  \begin{class}{Symbol}{-4,-1.5}
+  \end{class}
+  \begin{class}{SemiColon}{-4,-4.5}
+    \inherit{Symbol}
+  \end{class}
+  
+  \begin{class}{Letter}{4,-1.5}
+  \end{class}
+  \begin{class}{AText}{2,-4.5}
+    \inherit{Letter}
+  \end{class}
+  \begin{class}{BText}{6,-4.5}
+    \inherit{Letter}
+  \end{class}
+  
+
+  \composition{Text}{symbols}{*}{Symbol}
+  \composition{Text}{letters}{1..*}{Letter}
+
+  %\unidirectionalAssociation{Text}{from}{0..1}{WorkDefinition}
+  %\unidirectionalAssociation{Text}{parent}{1}{Process}
+
+  %\association{Letter}{right}{1}{Symbol}{0..*}{linksToLefts}
+%  \myassociation{Letter}{right}{1}{Symbol}{0..*}{linksToLefts}{0,-1}{0} %{210}
+
+\draw [umlcd style, fill=white] (Letter) -- 
+node[near start, above, anchor=210,xshift=-0.2cm,yshift=-0.2cm]{right}
+node[near start, below, anchor=150, yshift=-0.1cm]{*}
+(0,-1) -- (Symbol)
+node[near end, below]{*}
+node[near end, above, xshift=0.4cm, yshift=-0.2cm]{linksToLefts};
+
+
+%  \draw [umlcd style, ->] ([yshift=40pt]TraceLink) -- (SourceElement)
+%  node[near end, above,xshift=-12pt]{sources 1..*};
+
+  %\association{Letter}{predecessor}{1}{Symbol}{0..*}{linksToRights}
+%  \myassociation{Letter}{left}{1}{Symbol}{0..*}{linksToRights}{0,-3.2}{1}  %{150}
+
+  \draw [umlcd style, fill=white] (Letter) -- 
+node[near start, below, anchor=150]{left}
+node[near start, above, anchor=210, yshift=0.1cm]{*}
+(0,-3.2) -- (Symbol)
+node[near end, above]{*}
+node[near end, below, xshift=0.4cm, yshift=-0.2cm]{linksToRights};
+
+
+
+\end{tikzpicture}

@@ -1,0 +1,84 @@
+\documentclass[french,9pt]{article}
+
+\usepackage[french]{babel}    % faire du français
+\usepackage[utf8]{inputenc} % accents dans le source
+\usepackage[T1]{fontenc}     % accents dans le DVI
+\usepackage{bibtopic} %tentative de biblio avec sections
+
+%\input{../macros}
+%% Pour mes grands titres
+%\newcommand{\grandtitre}[1]{%
+%  \begin{flushleft}
+%    \textbf{\huge #1}
+%    \par\rule{\textwidth}{1pt}
+%  \end{flushleft}
+%}
+%
+% Pour mes titres
+\newcommand{\titre}[1]{%
+  \begin{flushleft}
+    \rule{\textwidth}{1pt}
+    \par\vspace{0.1cm}
+    \textbf{\large #1}
+    \par\rule{\textwidth}{1pt}
+  \end{flushleft}
+}
+
+\begin{document}
+\pagenumbering{gobble}
+%\titre{Publications}
+
+\bibliographystyle{plain}
+%%%%%%%%%%%% package bibtopic
+\vspace*{-5pt}
+%
+\setcounter{secnumdepth}{1}
+\begin{btSect}[plain]{articles-fr-with-review}
+  \subsection*{Revues nationales avec comit\'e de lecture}
+  \btPrintAll
+ %\btPrintCited
+ %\btPrintNotCited
+\end{btSect}
+
+\vspace*{-5pt}
+
+\begin{btSect}[plain]{conferences-intl-with-review}
+  \subsection*{Conf\'erences internationales avec comit\'e de lecture}
+  \btPrintAll
+ %\btPrintCited
+\end{btSect}
+
+\vspace*{-5pt}
+
+\begin{btSect}[plain]{workshop-intl-with-review}
+ \subsection*{Workshop internationaux avec comit\'e de lecture}
+ \btPrintAll
+ %\btPrintCited
+\end{btSect}
+
+\vspace*{-5pt}
+
+\begin{btSect}[plain]{posters-intl-with-review}
+ \subsection*{Posters internationaux avec comit\'e de lecture}
+ \btPrintAll
+ %\btPrintCited
+\end{btSect}
+
+\vspace*{-5pt}
+
+\begin{btSect}[plain]{mediation-fr-with-review}
+ \subsection*{Articles nationaux de médiation et de vulgarisation scientifique avec comit\'e
+ de relecture}
+ \btPrintAll
+ %\btPrintCited
+\end{btSect}
+
+\vspace*{-5pt}
+
+\begin{btSect}[plain]{technical-without-review}
+ \subsection*{Rapports techniques}
+ \btPrintAll
+ %\btPrintCited
+\end{btSect}
+
+\end{document}

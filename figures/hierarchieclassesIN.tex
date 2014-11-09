@@ -1,0 +1,21 @@
+\begin{tikzpicture}%[scale=1,transform shape]
+
+  \begin{class}[text width=2cm]{C}{-1,2}
+    \attribute{attrC : C}
+  \end{class}
+ 
+  \begin{class}[text width=2cm]{D}{2,2}
+    \attribute{attrD : C}
+  \end{class}
+
+  \begin{class}[text width=2cm]{A}{2,0}
+    \inherit{D}
+  \end{class}
+
+  \begin{class}[text width=2cm]{B}{2,-2}
+    \inherit{A}
+    \attribute{attrB1 : C}
+    \attribute{attrB2 : C}
+  \end{class}
+
+\end{tikzpicture}

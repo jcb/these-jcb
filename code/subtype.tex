@@ -1,0 +1,10 @@
+\begin{tomcode3}[label=code:subtypeIndividu,caption=Exemple de déclaration de type avec sous-typage.]
+%typeterm IndividuBiologie extends Individu {
+  implement { JIndividuBiologie }
+  is_sort(s) { (s instanceof JIndividuBiologie) }
+  equals(t1,t2) { (t1.equals(t2)) }
+}
+public class JIndividuBiologie extends Individu {
+  ...
+}
+\end{tomcode3}

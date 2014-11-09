@@ -1,0 +1,19 @@
+\begin{tomcode3}[label=code:opNat,caption=Constructeurs des entiers de Peano]
+  %op Nat zero() {
+    is_fsym(s) { (s instanceof Jzero) }
+    make() { new Jzero() }
+  }
+
+  %op Nat suc(n:Nat) {
+    is_fsym(s) { (s instanceof Jsuc) }
+    get_slot(n,s) { ((Jsuc)s).n }
+    get_default(n) { `zero() }
+    make(t0) { new Jsuc(t0) }
+  }
+\end{tomcode3}
+%  %op Nat plus(n1:Nat,n2:Nat) {
+%    is_fsym(s)     { (s instanceof Jplus) }
+%    get_slot(n1,s) { ((Jplus)s).n1 }
+%    get_slot(n2,s) { ((Jplus)s).n2 }
+%    make(t0,t1)    { new Jplus(t0,t1) }
+%  }

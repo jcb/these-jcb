@@ -1,0 +1,210 @@
+-- @path simplepdl=/BenchSimplePDL2PetriNet/SimplePDLSemantics_updated.ecore
+-- @path petrinet=/BenchSimplePDL2PetriNet/PetriNetSemantics_updated.ecore
+
+module simplepdltopetrinet;
+create OUT: petrinet from IN: simplepdl;
+
+-- Process -> PetriNet
+rule Process2PetriNet {
+	from
+		p: simplepdl!Process
+	to
+		--Petri net creation (sufficient for flat exemple, should be a bit modified for the nested version)
+		pn: petrinet!PetriNet (
+			name <- p.name,
+			nodes <- simplepdl!WorkDefinition.allInstances()->collect(pl | thisModule.resolveTemp(pl,'p_ready')) -- WD2PN nodes
+			    .union(simplepdl!WorkDefinition.allInstances()->collect(tr | thisModule.resolveTemp(tr,'t_start')))
+				.union(simplepdl!WorkDefinition.allInstances()->collect(pl | thisModule.resolveTemp(pl,'p_started')))
+				.union(simplepdl!WorkDefinition.allInstances()->collect(pl | thisModule.resolveTemp(pl,'p_running')))
+				.union(simplepdl!WorkDefinition.allInstances()->collect(tr | thisModule.resolveTemp(tr,'t_finish')))
+				.union(simplepdl!WorkDefinition.allInstances()->collect(pl | thisModule.resolveTemp(pl,'p_finished')))
+				.append(p_ready) -- P2PN nodes
+				.append(t_start)
+				.append(p_running)
+				.append(t_finish)
+				.append(p_finished)
+				,
+			arcs <- simplepdl!WorkDefinition.allInstances()->collect(a | thisModule.resolveTemp(a,'a_ready2start')) -- WD2PN arcs
+				.union(simplepdl!WorkDefinition.allInstances()->collect(a | thisModule.resolveTemp(a,'a_start2started')))
+				.union(simplepdl!WorkDefinition.allInstances()->collect(a | thisModule.resolveTemp(a,'a_start2running')))
+				.union(simplepdl!WorkDefinition.allInstances()->collect(a | thisModule.resolveTemp(a,'a_running2finish')))
+				.union(simplepdl!WorkDefinition.allInstances()->collect(a | thisModule.resolveTemp(a,'a_finish2finished')))
+				.union(simplepdl!WorkDefinition.allInstances()->collect(a | thisModule.resolveTemp(a,'a_distribute')))
+				.union(simplepdl!WorkDefinition.allInstances()->collect(a | thisModule.resolveTemp(a,'a_rejoin')))
+				.union(simplepdl!WorkSequence.allInstances()->collect(a | thisModule.resolveTemp(a,'a_ws'))) -- WS2PN arc
+				.append(a_ready2start) -- P2PN arcs
+				.append(a_start2running)
+				.append(a_running2finish)
+				.append(a_finish2finished)
+		),
+		-- Process PLACES
+		p_ready: petrinet!Place (
+			name <- p.name + '_ready',
+			initialMarking <- 1
+		),
+		p_running: petrinet!Place (
+			name <- p.name + '_running',
+			initialMarking <- 0
+		),
+ 		p_finished: petrinet!Place (
+			name <- p.name + '_finished',
+			initialMarking <- 0
+ 		),
+		-- Process TRANSITIONS
+ 		t_start: petrinet!Transition (
+			name <- p.name + '_start',
+			min_time <- 0,
+			max_time <- 0
+		),
+		t_finish: petrinet!Transition (
+			name <- p.name + '_finish',
+			min_time <- 0,
+			max_time <- 0
+ 		),
+		-- Process ARCS
+		a_ready2start: petrinet!Arc (
+			source <- p_ready,
+			target <- t_start,
+			weight <- 1,
+			kind <- #normal
+		),
+		a_start2running: petrinet!Arc (
+			source <- t_start,
+			target <- p_running,
+			weight <- 1,
+			kind <- #normal
+		),
+		a_running2finish: petrinet!Arc (
+			source <- p_running,
+			target <- t_finish,
+			weight <- 1,
+			kind <- #normal
+		),
+		a_finish2finished: petrinet!Arc (
+			source <- t_finish,
+			target <- p_finished,
+			weight <- 1,
+			kind <- #normal
+		)
+		-- nested case
+		--if (p.from!=null)
+		--then
+		--ain: petrinet!Arc (
+		--	source <- thisModule.resolveTemp(p.from, 't_start'),
+		--	target <- p_ready,
+		--	weight <- 1,
+		--	kind <- #read_arc
+		--),
+		--aout: petrinet!Arc (
+		--	source <- p_finished,
+		--	target <- thisModule.resolveTemp(p.from, 't_finish'),
+		--	weight <- 1,
+		--	kind <- #read_arc
+		--)
+		--else
+		--endif
+}
+
+-- WorkDefinition -> PetriNet
+rule WorkDefinition2PetriNet {
+	from
+		wd: simplepdl!WorkDefinition
+	to
+		-- WorkDefinition PLACES
+		p_ready: petrinet!Place (
+			name <- wd.name + '_ready',
+			initialMarking <- 1
+		),
+		p_started: petrinet!Place (
+			name <- wd.name + '_started',
+			initialMarking <- 0
+		),
+		-- place that allows to memorize a task has been started
+		p_running: petrinet!Place (
+			name <- wd.name + '_running',
+			initialMarking <- 0
+		),
+		p_finished: petrinet!Place (
+			name <- wd.name + '_finished',
+			initialMarking <- 0
+		),
+		-- WorkDefinition TRANSITIONS
+		t_start: petrinet!Transition (
+			name <- wd.name + '_start',
+			min_time <- 0,
+			max_time <- 0
+		),
+		t_finish: petrinet!Transition (
+			name <- wd.name + '_finish',
+			min_time <- 0,
+			max_time <- 0
+		),
+		-- WorkDefinition ARCS
+		a_ready2start: petrinet!Arc (
+			source <- p_ready,
+			target <- t_start,
+			weight <- 1,
+			kind <- #normal
+		),
+		a_start2started: petrinet!Arc (
+			source <- t_start,
+			target <- p_started,
+			weight <- 1,
+			kind <- #normal
+		),
+		a_start2running: petrinet!Arc (
+			source <- t_start,
+			target <- p_running,
+			weight <- 1,
+			kind <- #normal
+		),
+		a_running2finish: petrinet!Arc (
+			source <- p_running,
+			target <- t_finish,
+			weight <- 1,
+			kind <- #normal
+		),
+		a_finish2finished: petrinet!Arc (
+			source <- t_finish,
+			target <- p_finished,
+			weight <- 1,
+			kind <- #normal
+		),
+		-- synchonization ARCS (case of a process described by activities)
+		a_distribute: petrinet!Arc (
+			source <- thisModule.resolveTemp(wd.parent, 't_start'),
+			target <- p_ready,
+			weight <- 1,
+			kind <- #normal
+		),
+		a_rejoin: petrinet!Arc(
+			source <- p_finished,
+			target <- thisModule.resolveTemp(wd.parent, 't_finish'),
+			weight <- 1,
+			kind <- #read_arc
+		)
+}
+
+-- WorkSequence -> PetriNet
+rule WorkSequence2PetriNet {
+	from
+		ws: simplepdl!WorkSequence
+	to
+		-- WorkSequence ARC
+		a_ws: petrinet!Arc (
+			source <- if (ws.linkType = #finishToStart or ws.linkType = #finishToFinish)
+					then
+					thisModule.resolveTemp(ws.predecessor, 'p_finished')
+				else
+					thisModule.resolveTemp(ws.predecessor, 'p_started')
+				endif,
+			target <- if (ws.linkType = #startToFinish or ws.linkType = #finishToFinish)
+					then
+					thisModule.resolveTemp(ws.successor, 't_finish')
+				else
+					thisModule.resolveTemp(ws.successor, 't_start')
+				endif,
+			weight <- 1,
+			kind <- #read_arc
+		)
+}

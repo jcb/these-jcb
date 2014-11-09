@@ -1,0 +1,1195 @@
+% vim:spell spelllang=fr
+\chapter{Transformations de modèles}
+\label{ch:notions}
+%20-30p
+
+Dans ce chapitre, nous présentons un domaine du développement logiciel en plein
+essor : l'Ingénierie Dirigée par les Modèles ({\idm}). Nous présentons les
+approches actuelles et les notions importantes de ce domaine indispensables à
+la bonne compréhension de ce document. Dans un premier temps, nous expliquons
+ce qu'est l'{\idm} et notamment l'approche {\mda} (\emph{Model Driven
+Architecture}). Ensuite, nous abordons la problématique des transformations de
+modèles, et enfin nous présentons brièvement certains outils très utilisés.
+
+%\ttodo{
+%\begin{itemize}
+%\item modèles, métamodèles, {\etc} $\rightarrow$ OK
+%\item transformations de modèles
+%\begin{itemize}
+%  \item taxonomie  $\rightarrow$ OK
+%  \item approches  $\rightarrow$ OK
+%  \item approche opérationnelle  $\rightarrow$ OK
+%  \item approche relationnelle $\rightarrow$ OK
+%  \item outils $\rightarrow$ NOK
+%\end{itemize}
+%\item vérification : tests / model-checking / validation $\rightarrow$ NOK, en
+%  faire un chapitre
+%\end{itemize}
+%todo: \cite{Brown2004} $\rightarrow$ OK
+%}
+
+\section{Modélisation}% \todo{[vs Ingénierie Dirigée par les modèles]}}
+%\subsection{{\mde} / {\mda}}
+
+
+À partir des années 80, l'ingénierie du logiciel a été marquée par l'approche
+objet dans laquelle le principe « Tout est objet » prévaut. Ce principe permet
+d'amener les outils et les technologies à la simplicité, la généralité et la
+bonne intégration dans les systèmes. Cette approche repose sur la notion
+d'\emph{objet}, qui \emph{est une instance} d'une \emph{classe}, qui peut
+\emph{hériter} d'une autre classe (\emph{surclasse}).
+
+L'arrivée de l'{\idm} a renouvelé les notions phares guidant le développement
+logiciel. Le principe « Tout est objet » est remplacé par celui du «
+Tout est modèle »~\cite{bezivin2004}~\cite{Bezivin2005a}. Les notions de
+\emph{modèle} \emph{représentant} un système, et \emph{conforme à} un
+\emph{métamodèle} sont apparues. L'approche {\idm} vise à élever le niveau
+d'abstraction dans la spécification logicielle, et à augmenter l'automatisation
+dans le développement. L'idée promue par l'{\idm} est d'utiliser les
+modèles à différents niveaux d'abstraction pour développer les systèmes, et
+ainsi élever le niveau d'abstraction dans la spécification du programme.
+L'augmentation de l'automatisation dans le développement logiciel est obtenue
+en utilisant des transformations de modèles exécutables. Les modèles de plus
+haut niveau sont transformés en modèles de plus bas niveau jusqu'à ce que le
+modèle puisse être exécuté en utilisant soit la génération de code, soit
+l'interprétation du modèle (exécution du modèle).
+
+La définition même de modèle a longtemps été discutée, et de nombreuses
+propositions ---~dont notamment celle de~\cite{Bezivin2001a}, ainsi que celle
+de~\cite{Kleppe2003}~--- nous permettent de donner la définition suivante :
+\begin{definition}[Modèle] 
+Un modèle est la représentation ou l'abstraction d'un (ou d'une partie d'un)
+système, écrit dans un langage bien défini.  Un modèle doit pouvoir être
+utilisé à la place du système modélisé pour répondre à une question sur le
+système représenté.
+%%Bezivin2001a
+%"A model is a simplification of a system built with an intended goal in mind. The
+%model should be able to answer questions in place of the actual system." [19]
+%Dans~\cite{Kleppe2003} (p.16), les auteurs définissent un modèle comme
+%suit : \emph{A model is a description of (part of) a system written in a
+%well-defined language}. Ce que nous traduisons par la définitions suivante : Un
+%modèle est une description (d'une partie) d'un système écrit dans un langage
+%bien défini.
+\end{definition}
+
+Il en découle la définition de la relation \emph{représente} entre le modèle et
+le système modélisé~\cite{Atkinson2003,Seidewitz2003,Bezivin2005a}. Du fait de
+l'utilisation du modèle à la place du système, cette représentation doit être
+pertinente. La définition précédente amène aussi à préciser la notion de langage
+bien défini :%bien défini, que nous empruntons à~\cite{Kleppe2003} (p.16) :
+\begin{definition}[Langage bien défini]
+Un langage bien défini est un langage avec une forme bien définie (syntaxe), et
+une signification (sémantique), qui est appropriée pour une interprétation
+automatique par un ordinateur\footnote{Traduction de~\cite{Kleppe2003}, page 16
+: \emph{A well-defined language is a language with well-defined form (syntax),
+and meaning (semantics), which is suitable for automated interpretation by a
+computer.}}.
+\end{definition}
+
+Pour pouvoir utiliser un modèle, son langage de modélisation doit être précisé.
+Il est représenté par un métamodèle.
+
+\begin{definition}[Métamodèle]
+Un métamodèle est un modèle qui définit le langage d'expression d'un
+modèle~\cite{omgmof}, c'est-à-dire le langage de modélisation.\\
+Dans la suite de ce document, nous noterons les métamodèles $MM$, indicés en
+fonction de leur nature : ainsi un métamodèle source ---~respectivement cible~---
+sera noté $MM_s$ ---~respectivement $MM_t$.
+\end{definition}
+
+La relation qui lie un modèle à son métamodèle est la relation de
+\emph{conformité}, c'est-à-dire qu'un métamodèle est la spécification d'un
+modèle : on dit qu'un modèle \emph{est conforme à} son métamodèle.
+
+%\subsection{Approche {\mda}}
+%\todo{[{\mda}, standards ]}
+La publication en 2000 de l'initiative {\mda}~\cite{mda} par
+l'{\omg}\footnote{Object Management Group : \url{http://www.omg.org/}.} a
+considérablement amplifié l'intérêt de l'{\idm}. Le {\mda} est la vision qu'a
+l'{\omg} de l'{\idm} : il s'agissait de définir un cadre pour utiliser
+concrètement les modèles dans le développement logiciel~\cite{Kleppe2003,
+Mellor2004}.
+%\todo{Pour cela, elle impose l'usage de certains types de modèles, comment ces
+%modèles sont préparés, et les relations entre les différents types de
+%modèles.}
+Pour cela, elle propose différents standards pour résoudre des problèmes
+soulevés par l'ingénierie dirigée par les modèles :
+\begin{itemize}
+\item établissement de nouveaux langages de modélisation~\cite{omgmof} ;
+\item modélisation des systèmes~\cite{uml2,uml241} ;
+\item expression de la sémantique statique des modèles et des
+  métamodèles~\cite{omgocl2} ;
+\item représentation des modèles sous forme de documents {\xml} (pour
+l'interopérabilité)\cite{omgxmi} ;
+\item représentation des parties graphiques d'un modèle au format {\xml}~\cite{omgdi}.
+\end{itemize}%~\cite{cmw}
+
+%\todo{[Partie {\mof}]} 
+L'{\omg} a donc proposé le standard {\mof}~\cite{omgmof}\footnote{Meta Object
+Facility : \url{http://www.omg.org/mof/}.} comme un sous-ensemble du
+diagramme de classes {\uml}. Intuitivement, un métamodèle est composé d'un
+ensemble de métaclasses qui contiennent des \emph{attributs} et des
+\emph{opérations} comme les classes en programmation orientée objet. Les
+métaclasses peuvent être liées par héritage, et par une métarelation
+(une association ou une composition). Chaque modèle doit se conformer à un
+tel métamodèle, c'est-à-dire être un ensemble d'éléments,
+d'attributs et de relations entre les éléments se conformant à leurs
+métadéfinitions.
+
+%Ce standard {\mof} ---~composé de deux parties depuis la version 2.0
+%({\emof}\footnote{Essential {\mof}} et {\cmof}\footnote{Complete {\mof}})~---
+Ce standard {\mof} ---~composé de {\emof}\footnote{Essential {\mof}} et {\cmof}\footnote{Complete {\mof}} depuis la version 2.0~---
+permet d'établir de nouveaux langages de modélisation et se situe au sommet
+d'une architecture en quatre couches proposée par l'{\omg} (figure~\ref{fig:mdalevels}).
+
+\begin{figure}[h]%H]
+  \begin{center}
+    \input{figures/mdalevels}
+    \caption{Organisation du {\mda} en 4 niveaux d'abstraction (3+1).}
+    \label{fig:mdalevels}
+  \end{center}
+\end{figure}
+
+La couche M0 est celle du monde réel qui est représenté par des modèles de la
+couche M1. Ces modèles sont conformes à leurs métamodèles ---~couche M2~--- qui
+sont eux-mêmes décrits par le métamétamodèle {\mof} ---~couche M3. Ce dernier est
+unique et métacirculaire, c'est-à-dire qu'il se décrit lui-même.
+
+\begin{definition}[Métamétamodèle]
+Un métamétamodèle est un métamodèle qui décrit un langage de métamodélisation.
+Il permet donc de définir des langages de modélisation et est métacirculaire,
+c'est-à-dire qu'il se décrit lui-même.
+\end{definition}
+
+Cette approche hiérarchique est classique et on la retrouve dans plusieurs
+autres domaines de l'informatique. Une telle hiérarchie définit ce que l'on
+appelle un \emph{espace technique} (ou \emph{espace
+technologique})~\cite{KurtevBezAks2002, Bezivin2006}. Ainsi, nous parlerons de
+\emph{modelware}, de \emph{grammarware}~\cite{Klint2005,grammarware} pour
+l'espace des grammaires définies par l'EBNF\footnote{Extended Backus-Naur
+Form}, de \emph{dataware} (ou parfois \emph{DBware}) avec SQL et de
+\emph{documentware} avec {\xml}. Ce que nous appelons métamodèle dans l'espace
+des modèles correspond à la grammaire dans l'espace \emph{grammarware}, au
+type dans les langages de programmation, au
+schéma dans les espaces \emph{documentware} et \emph{dataware}.
+%\todo{[Modelware+{\uml} ; schema $\leftrightarrow$ grammaire $\leftrightarrow$
+%MM]}. 
+Pour illustrer notre propos, dans la figure~\ref{fig:mdalevelsinterpretation},
+nous interprétons les niveaux d'abstraction de cette organisation en couches du
+{\mda} et faisons une analogie avec l'espace technique des grammaires. Ainsi,
+{\mof} correspond à l'EBNF, tandis que la couche M2 contient les langages
+définis par la grammaire, la couche M1 les programmes écrits dans ces langages,
+et M0 consiste en les exécutions de ces programmes.
+
+\begin{figure}[h]%H]
+  \begin{center}
+    \input{figures/mdalevelsinterpretation}
+    \caption{Interprétation des niveaux d'abstraction du {\mda}.}
+    \label{fig:mdalevelsinterpretation}
+  \end{center}
+\end{figure}
+
+Outre {\mof}, l'{\omg} propose d'utiliser d'autres standards dans son
+approche {\mda}, notamment {\uml} (\emph{Unified Modeling Language}) et ({\ocl}
+\emph{Object Constraint Language}) :
+\begin{itemize}
+%\todo{[Partie {\uml}]}
+%\emph{Unified Modeling Language} ({\uml}) est le standard de
+
+  \item {\uml} est le standard de modélisation des systèmes logiciels. Il est
+    composé depuis 2009~\cite{uml2} du paquetage \emph{UML 2.2 Superstructure}
+    qui est le standard pour la modélisation orientée objet, ainsi que du
+    paquetage \emph{UML 2.2 Infrastructure} décrivant le noyau commun entre
+    {\mof} et {\uml}.
+
+%\todo{[Partie OCL ]}
+%\emph{Object Constraint Language} (OCL) a été proposé pour exprimer la
+  \item {\ocl} a été proposé pour exprimer la sémantique axiomatique des modèles
+    et des métamodèles. Il permet d'exprimer des contraintes sur les
+    métamodèles (invariant, pre- et post-conditions sur les opérations), afin de
+    mieux les définir pour ensuite pouvoir les outiller. 
+%{\ocl} ne permet pas de créer ou modifier un élément du modèle
+\end{itemize}
+
+%\\\todo{[{\mda} : après les standards, l'approche en elle-même]}\\
+L'initiative {\mda} se concentre sur la variabilité technique d'un logiciel,
+c'est-à-dire sur la manière de spécifier un logiciel indépendamment de la
+plateforme, afin de mettre en œuvre des systèmes durables et maintenables. Elle
+propose d'élaborer différents modèles pour définir une architecture de
+spécification à plusieurs niveaux. Pour cela, les notions de CIM
+(\emph{Computation Independent Model}), PIM (\emph{Platform Independent Model})
+et PSM (\emph{Platform Specific Model}) ont été introduites :
+\begin{itemize}
+  \item \textbf{CIM :} modèle d'exigence, défini hors de toute
+  considération informatique (par exemple, le diagramme de cas d'utilisation
+  {\uml}) ;
+  \item \textbf{PIM :} ce modèle défini indépendamment de la plateforme
+  d'exécution est aussi appelé modèle d'analyse et conception ;
+  \item \textbf{PSM :} modèle de code, pour lequel les
+  caractéristiques de la plateforme d'exécution ont été prises en compte.
+\end{itemize}
+
+Le passage de PIM à PSM peut se faire par des transformations de modèles,
+intégrant parfois des transformations intermédiaires de PIM à PIM (pour des
+raisons d'interopérabilité), d'où leur place de choix dans les approches
+modèles pour le développement logiciel.
+
+%\ttodo{OMG dit que {\mda} == "un autre petit pas sur la longue route pour
+%transformer l'art de fabriquer du logiciel en science de l'ingénierie"
+%(retrouver la citation exacte + traduire).}\\
+%\ttodo{donc métaclasse, métarelation et conformité à définir, à mettre en
+%relation avec la relation objet/classe, comme dans le papier de
+%Bézivin\cite{Bezivin2005a}}
+
+%\subsection{Ecore}
+
+
+%Le {\mda} fournit le terreau pour aider l'{\idm} à se développer, cependant il
+%ne s'agit pas de son unique vision, qui peut être abordée de différentes
+%manières~\cite{Favre2006}. On pense notamment aux \emph{usines logicielles}
+Le {\mda} fournit un socle pour aider l'{\idm} à se développer. Cependant, il
+s'agit d'une vision parmi d'autres~\cite{Favre2006}. On pense notamment aux
+\emph{usines logicielles} (\emph{Software Factories})~\cite{Greenfield2003}
+dont l'idée est de se calquer sur le processus de production du monde matériel
+pour mettre en œuvre celui du monde logiciel. Il s'agit de composer des
+applications à partir d'un grand nombre d'outils, de \emph{patterns}, de
+modèles et de \emph{frameworks}. Les idées principales de cette approche sont :
+\begin{itemize}
+  \item la spécialisation des fournisseurs et développeurs de logiciels ;
+  \item l'utilisation d'outils dédiés (transformations de modèles, langages et
+    outils de modélisation) ;
+  \item l'intégration systématique de code réutilisable.
+\end{itemize}
+Microsoft a intégré ces concepts au sein de son \emph{framework} {\dotnet} et
+de son environnement de développement. %Visual Studio
+%=> lignes d-e produits (software product lines)
+
+De son côté, IBM a activement contribué à l'approche {\mda} %et à l'élaboration
+%des standards liés (notamment principal développeur de {\uml})
+en étant le principal développeur de {\uml} et en participant à l'élaboration
+des standards {\mof}, {\xmi} et {\cwm}. IBM donne sa vision du {\mda} dans
+~\cite{Booch2004} où ces trois principes sont développés :
+
+\begin{itemize}
+  \item \textbf{représentation directe :} il faut se détacher du domaine
+    technologique et se concentrer sur les idées et concepts du domaine métier.
+    Réduire la distance sémantique entre le domaine métier et la représentation
+    permet de répondre plus directement et précisément aux problèmes. Pour
+    prendre en compte ces situations métier, on utilise des langages dédiés (
+    \emph{Domain Specific Language}, {\dsl}) ;
+  
+  \item \textbf{automatisation :} il faut automatiser tout ce qui ne nécessite
+    pas d'intelligence et de réflexion ;%. L'un des objectifs du {\mda} est de
+%    combler le fossé sémantique entre les concepts d'un domaine et
+%    l'implémentation technique en les modélisant tous les deux ;
+
+  \item \textbf{standards ouverts :} les standards encouragent la création de
+    communautés autour d'outils, et un développement ouvert permet d'assurer
+    que ces standards soient implémentés de manière cohérente tout en poussant
+    à leur adoption. Les communautés autour des plateformes  de logiciel libres
+    ont un rôle structurant.
+    %communautés autour de plateformes de logiciel libre (ex : {\mof} ou {\xml}).
+\end{itemize}
+
+IBM a donc proposé son langage de métamodélisation ---~{\ecore}~--- pour
+l'\emph{Eclipse Modeling Framework} ({\emf})~\cite{emf09}. Il s'aligne
+quasiment sur {\emof}, et cette proximité des deux métamodèles permet à {\emf}
+de supporter directement {\emof} comme une sérialisation {\xmi} alternative de
+{\ecore}. Le passage de l'un à l'autre consiste essentiellement en des tâches
+de renommage de classes et de fonctionnalités. {\ecore} est intégré dans
+l'environnement {\eclipse} et est l'un des \emph{frameworks} les plus utilisés
+pour la manipulation de modèles, ce qui en fait un standard \emph{de facto}. 
+Il fait le lien entre la programmation {\java} et la modélisation. C'est
+pourquoi nous avons choisi {\emf} comme première technologie pour les
+outils développés durant cette thèse.
+%{\emf} est peut être vu comme une unification de {\xml}, {\uml} et {\java}
+
+
+%\ttodo{IBM eclipse IDE en 2001, EMF == proposition {\mda} de IBM, Ecore+UML2 +
+%GEF/GMP ? ex p11 et 12 }
+%\ttodo{Papyrus}
+%\subsection{Approche Usines logicielles (MS)}
+
+%\todo{alternatives techno : Ecore (Eclipse), grammarware, BdD, {\xml}}
+%\todo{
+%\begin{itemize}
+%\item « On the unification power of models »~\cite{Bezivin2005a} $\rightarrow$ OK
+%\item sur les principes de base de l'{\idm}~\cite{bezivin2004} $\rightarrow$ OK
+%\item what Models means ~\cite{Seidewitz2003} $\rightarrow$ OK
+%\item IDm au delà de {\mda}~\cite{Favre2006} $\rightarrow$ OK
+%\item {\mda} en action ~\cite{Blanc2005} $\rightarrow$ OK
+%\item espaces technologiques :~\cite{KurtevBezAks2002},~\cite{Bezivin2006} $\rightarrow$ OK
+%\item Vue large de l'ingénierie des modèles :~\cite{Bezivin2005b} -> court
+%\item {\mda}~\cite{mda} $\rightarrow$ OK
+%\item spéc de QVT~\cite{omgqvt1} $\rightarrow$ OK
+%\item Model-Driven Development: A Metamodeling Foundation\cite{Atkinson2003} $\rightarrow$ OK
+%\end{itemize}
+%}
+
+
+%\subsection{Définitions modélisation}
+%modèle, métamodèle, métamétamodèle, langage (?), relations (représente,
+%se conforme à)
+
+Pour une description approfondie du {\mda}, le lecteur intéressé pourra se
+référer à ~\cite{Kleppe2003}, \cite{Brown2004} et~\cite{Blanc2005}.
+
+
+\section{Transformations de modèles}
+%\todo{cœur de l'{\idm}, intérêt pratique (génération de code, réingénierie, migration
+%technologique, analyse de code, {\etc}) ; réutilisation}
+
+Les transformations de modèles sont au cœur de l'{\idm}~\cite{Sendall2003}.
+Elles permettent d'automatiser les tâches répétitives ---~application d'un
+traitement à un grand nombre de modèles ou multiples applications d'un
+traitement sur un modèle~--- ainsi que des tâches complexes et sujettes à
+erreurs si elles étaient effectuées manuellement par un utilisateur. Les
+transformations de modèles sont aussi utiles dans le cas où le développement
+d'un système est segmenté et que les rôles dans le développement sont séparés :
+si le spécialiste de la plateforme n'est pas le spécialiste du système
+développé, le traitement par l'un d'un modèle produit par l'autre est
+particulièrement complexe. Les transformations de modèles permettent un gain
+accru en termes de productivité, de maîtrise de la complexité, de diminution
+des risques et donc, finalement, de coût. Elles sont utilisées pour réaliser
+des tâches variées telles que : 
+\begin{itemize}
+
+  \item la réingénierie %$^{\todo{trouver le bon mot, réusinage ?}}$
+    (\emph{refactoring}) : tâche qui consiste à changer un logiciel de
+    telle sorte que son comportement extérieur n'est pas affecté tout en
+    améliorant sa structure interne\footnote{Traduction de la définition
+      de~\cite{Fow99}} ;% \todo{[« \emph{Refactoring is the process of changing a
+  %software system in such a way that it does not alter the external behavior
+  %of the code yet improves its internal structure}]} »
+  
+  \item la génération de code : processus qui produit du code à partir
+    d'instructions abstraites en prenant en compte les caractéristiques de la
+    plateforme cible d'exécution ;
+  
+  \item le raffinement : transformation d'une spécification abstraite en une
+  spécification (plus) concrète; 
+  
+  \item la normalisation : mise en conformité d'un logiciel, adaptation du style
+  de code, \etc ; 
+  
+  \item la migration : passage d'une technologie (ou d'une version à une autre
+    d'une technologie) à l'autre ;
+  
+  \item la sérialisation : processus de mise en série des données sous la
+  forme d'un fichier ;
+  
+  \item la rétro-conception ou rétro-ingénierie (\emph{reverse engineering}) :
+    étude d'un programme pour en comprendre le fonctionnement interne et
+    sa méthode de conception.
+\end{itemize}
+
+
+\begin{definition}[Transformation de modèle]
+Une transformation de modèle $T$ est une relation d'un (ou plusieurs)
+métamodèle(s) source(s) $MM_s$ vers un (ou plusieurs) métamodèle(s) cible(s)
+$MM_t$. On la notera : $T : MM_s \rightarrow MM_t$ (ou $T : MM_{s_0} \times
+\ldots \times MM_{s_n} \rightarrow MM_{t_0} \times \ldots \times MM_{t_m}$ dans
+le cas d'une transformation de $n$ métamodèles sources vers $m$ métamodèles
+cibles).
+\end{definition}
+Dans la suite du document, nous considérerons essentiellement des
+transformations de modèles d'un seul métamodèle source vers un seul
+métamodèle cible ($T : MM_s \rightarrow MM_t$).
+
+Compte tenu de la diversité des transformations, tant par leurs approches de
+développement, que par les structures de données dont elles se servent pour
+représenter les modèles qu'elles manipulent, que par les caractéristiques des
+métamodèles sources et cibles, de nombreux travaux ont été menés pour tenter de
+les classifier~\cite{Czarnecki2003}, \cite{Sendall2003}, \cite{ibm06},
+\cite{MensG06}.
+
+%Dans la suite de cette section, nous définissons et présentons différents types
+%de transformations~\ref{ssec:taxonomie} ainsi que plusieurs
+%approches~\ref{ssec:approches}.
+
+%Plusieurs chercheurs ont travaillé sur la classification des transformations de
+%modèles, selon différents critères : identité du métamodèle source et cible,
+%changement de niveau d'abstraction entre la source et la cible, multiplicité des
+%sources et des cibles, structures représentant les modèles.
+
+%\todo{type, taxonomie, approches :
+%  \begin{itemize}
+%    \item taxonomie MensG06
+%    \item type : multiplicité
+%    \item stuctures pour représenter les modèles (chronologique)
+%    \item approches de développement Blanc2005, + les autres
+%  \end{itemize}
+%}
+
+\subsection{Taxonomie des transformations}
+\label{ssec:taxonomie}
+%\subsection{Types (\todo{vs taxonomie}) de transformations}
+
+On distingue différents types de transformations de modèles que l'on peut
+définir et classifier selon que les métamodèles source et cible sont
+identiques ou non, et selon qu'ils appartiennent ou non au même niveau
+d'abstraction. C'est à partir de ces critères que~\cite{MensG06} a proposé une
+taxonomie des transformations de modèles sur laquelle nous nous appuyons dans
+cette section.
+%. Dans cette section, nous nous appuyons sur la taxonomie
+%de transformations de modèles proposée par~\cite{MensG06}.
+
+\begin{definition}[Transformation endogène]
+Une transformation $T : MM_s \rightarrow MM_t$ est dite endogène si $MM_s =
+MM_t$, c'est-à-dire si les métamodèles source et cible sont identiques.
+\end{definition}
+
+Par exemple, une activité de réingénierie d'un logiciel est une transformation
+endogène. Par analogie avec les langues naturelles, la reformulation d'une
+phrase en est aussi une. Une transformation endogène s'opère dans un
+même espace technologique, si les modifications sont directement appliquées
+sur le modèle source, on parle de transformation \emph{in-place}. Dans le
+cas contraire, il s'agit d'une transformation \emph{out-place}.
+
+\begin{definition}[Transformation exogène]
+%Une transformation est dite exogène si les métamodèles source et
+%cible sont différents.\\
+Une transformation $T : MM_s \rightarrow MM_t$ est dite exogène si $MM_s \neq
+MM_t$, c'est-à-dire si les métamodèles cible et source sont différents..
+\end{definition}
+Par exemple, la migration d'un système ou la réécriture d'un logiciel dans un
+autre langage est une transformation exogène. En utilisant l'analogie
+précédente, la traduction en est aussi une. Une transformation exogène est
+toujours \emph{out-place} et peut permettre un changement d'espace technique. 
+
+\begin{definition}[Transformation horizontale]
+Une transformation est dite horizontale si les modèles source et cible
+appartiennent au même niveau d'abstraction.
+\end{definition}
+
+Par exemple, l'activité de réingénierie est une transformation horizontale
+(endogène), tout comme celle de migration (exogène).
+
+\begin{definition}[Transformation verticale]
+Une transformation est dite verticale si les modèles source et cible
+n'appartiennent pas au même niveau d'abstraction.
+\end{definition}
+Par exemple, la rétro-conception et le raffinement sont des transformations
+verticales, respectivement exogène et endogène.
+%est une transformation verticale (exogène),
+
+La figure~\ref{tab:transformationclassification} résume sous forme matricielle
+cette classification en fonction des deux critères :
+\begin{itemize}
+  \item les colonnes classifient les transformations selon le changement de
+    niveau d'abstraction (transformation verticale {\vs} horizontale) ;
+  \item les lignes classifient les transformations selon que le métamodèle
+    cible est le même (ou non) que le métamodèle source (transformation
+    endogène {\vs} exogène).
+\end{itemize}
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular}{m{3.4cm}|m{4cm}|m{4cm}}
+%\diagbox[dir=NW]{XXX}YYY} & Horizontale & Verticale \\
+      & \begin{center}\vspace{0.4cm}\input{figures/transformationHorizontale}\newline \newline {\scriptsize{Transformation horizontale}}\end{center}
+
+ & \begin{center}\input{figures/transformationVerticale}\newline {\scriptsize{Transformation verticale}}\end{center} \\
+\hline
+%\vspace*{\stretch{1}}
+\input{figures/transformationExo} & Migration, \newline Sérialisation & Génération de
+code, \newline Retro-conception\\
+%\vspace*{\stretch{1}}
+\hline
+\input{figures/transformationEndo} & Optimisation, \newline Réingénierie, \newline
+Normalisation, \newline Simplification & Raffinement \\
+    \end{tabular}
+    \caption{Classification des catégories de transformations de modèles.}
+    \label{tab:transformationclassification}
+  \end{center}
+\end{figure}
+
+
+\subsection{Approches de développement des transformations de modèles }
+\label{ssec:approches}
+
+%\todo{opérationnelle, relationnelle, architecturelle + directement dans le
+%  monde des modèles ou depuis d'autres espaces technologiques $\rightarrow$ pas
+%  une approche à part entière, c'est plus orthogonal aux précédentes approches
+%  en fait\\+ approches par programmation, par modélisation, et par template
+%  dans~\cite{Blanc2005}}
+%
+%\todo{techniques de transfo + \cite{ibm06}
+%\begin{itemize}
+%\item impérative : plus naturel pour le codeur, parcours du modèle source,
+%génération de la cible, plus lourd et complexe à écrire, mais plus
+%d'expressivité si algo complexe
+%\item déclarative : pattern, remplacements par des règles $l \rightarrow r$
+% ;plus simple à écrire
+%\item hybride : versions déclaratives ont souvent des constructions
+%impératives pour remédier aux cas complexes. $\Rightarrow$ Tom est un peu hybride
+%\end{itemize}}
+
+%\todo{structures (et chrono) :
+%  \begin{itemize}
+%    \item[Transformations de structures séquentielles d'enregistrements] script
+%      avec un fichier en entrée et un fichier en sortie. typiquement : AWK,
+%      sed, Perl, etc. \og lisible\fg{} et maintenable, parsing de l'input
+%      nécessaire
+%    \item[transformation d'arbres] Parcours d'un arbre en entrée, génération
+%      d'arbre en sortie. Typiquement : le monde XML (+XSLT ou XQuery), et celui
+%      des grammaires et des compilateurs.
+%    \item[Transformations de graphes] modèle ==  graphe orienté étiqueté en
+%      entrée -> pdlutôt approche modélisation (transfo = modèle comme un autre)
+%  \end{itemize}
+%}
+
+%\ttodo{tout ce qui est au-dessus doit être nettoyé}
+
+Les transformations de modèles peuvent être classifiées selon leurs approches
+de développement et selon les structures de données représentant les modèles.
+
+Trois approches de transformation de modèles sont définies
+dans~\cite{Blanc2005} :
+\begin{itemize}
+  \item par programmation ;
+  \item par \emph{template} ;
+  \item par modélisation.
+\end{itemize}
+
+%\subsubsection{Approche par programmation}
+%\ttodo{?}
+%Usage d'un langage de programmation classique/généraliste OO, par exemple Java ;
+%transformation ==  programme => utilisé et pratique car outillage
+Dans l'approche par programmation, une transformation est développée 
+en utilisant des langages de programmation \og classiques \fg{} (généralistes)
+généralement orientés objet, tels que {\java}. La transformation se présente
+sous la forme d'un programme %semblable à tout autre programme 
+et le développeur
+a accès à tout l'écosystème existant (environnement de développement,
+bibliothèques, documentation, communauté d'utilisateurs\ldots). Cela en fait
+une approche très répandue.
+
+%\subsubsection{Approche par \emph{template}}
+%\ttodo{?}
+Dans l'approche par \emph{template}, un \emph{modèle cible paramétré}
+(ou \emph{modèle template}) est défini. 
+%canevas est défini pour les modèles cibles, on parle de \emph{modèle cible
+%paramétré} ou de \emph{modèle template}). 
+ La transformation consiste alors à procéder au remplacement des paramètres en
+utilisant les valeurs fournies par le modèle source. %(\todo{Approche du
+%logiciel Softeam MDA Modeler})
+C'est ce qu'implémente le logiciel \textit{Softeam MDA Modeler}.
+
+
+%\subsubsection{Approche par modélisation}
+%\ttodo{Les langages de modélisation sont définis en utilisant le standard {\mof} et
+%sont manipulés en utilisant OCL~\cite{omgocl2}.}
+%\ttodo{?}
+%concepts de l'{\idm}, modélisation des transformations de modèles
+%standard QVT, 
+%règles de transformation, relations entre source et cible (MM)
+La troisième approche identifiée ---~l'approche par modélisation~--- consiste à
+%modéliser la transformation et à la 
+considérer la transformation elle-même comme un modèle conforme à son
+métamodèle de transformation. L'{\omg} a défini le standard
+\emph{Query/View/Transformation} ({\qvt}) pour modéliser les transformations de
+modèles~\cite{omgqvt1}. Il est composé de trois langages conformes à {\mof}
+---~{\qvto}, {\qvtr} et {\qvtc}~--- regroupant deux paradigmes de description
+des transformations de modèles :
+
+\begin{itemize}
+
+%\subsubsection{Approche modélisation opérationnelle}
+%\ttodo{}
+  \item[\textbf{Approche opérationnelle :}] une transformation de modèle est exprimée
+    comme une séquence de pas d'exécution élémentaires qui construisent le
+    modèle cible (instanciation des nouveaux éléments, initialisation
+    des attributs, création des liens, {\etc}) en utilisant les informations du
+    modèle source.  Cette approche, appelée \emph{opérationnelle},
+    est impérative.  Elle peut être implémentée en utilisant des outils dédiés
+    tels que {\kermeta}, {\qvto}, ou en utilisant des bibliothèques
+    %réflexives ou du code généré 
+    au sein d'un langage généraliste.
+%\subsubsection{Approche modélisation relationnelle}
+%\ttodo{}
+  \item[\textbf{Approche relationnelle :}] une transformation de modèle peut aussi être
+    définie comme des relations devant exister entre la source et la cible à la
+    fin de la transformation. Cette approche, appelée
+    \emph{relationnelle} (ou déclarative), n'est pas directement exécutable,
+    mais peut parfois être traduite en une transformation opérationnelle.
+\end{itemize}
+La principale différence entre les deux approches est le fait que l'approche
+opérationnelle nécessite de décrire le contrôle comme une partie de la
+transformation, tandis que cet aspect est géré par le moteur d'exécution dans le
+cas de l'approche relationnelle.
+
+%\ttodo{ici, un bloc avec les 3 approches architecturales de~\cite{Sendall2003}
+%est commenté}
+%\todo{3 Approches architecturales :~\cite{Sendall2003}
+%\begin{itemize}
+%  \item manipulation directe de modèle (\emph{pull}): accès à la représentation
+%    interne d'un modèle et capacité à manipuler la représentation en utilisant
+%    une API
+%  \item représentation intermédiaire : export du modèles dans un format
+%    standard (XML par exemple) pour pouvoir le transfosrmer avec des outils
+%    externes
+%  \item support d'un langage de transformation : langage fournissent un
+%    ensemble de constructions pour exprimer, composer et appliquer des
+%    transformations
+%\end{itemize}}
+%
+%\todo{\textbf{Vieux bout de texte, que faire de ça ? utilisable/exploitable ?}\\Certains auteurs~\cite{Sendall2003} considèrent même une troisième
+%approche architecturelle basée sur l'introduction d'une représentation
+%intermédiaire com\-me {\xml} ou n'importe quelle autre syntaxe concrète
+%textuelle. La transformation de modèle peut ensuite être décrite en
+%utilisant un langage tel que {\xslt}~\cite{xslt} ou tout autre langage de
+%transformation comme Stratego/XT, ASF+SDF, Rascal, etc.}
+
+%\todo{directement dans le monde des modèles ou depuis d'autres espaces
+%technologiques : pas une approche à part entière, c'est plus orthogonal aux précédentes
+%approches en fait}
+
+
+%Un aspect différenciant des outils
+%utilisés pour la transformation de modèles est le type de structures de données
+%sur lesquelles il s'appuie pour représenter les modèles.
+%%Un autre aspect différenciant dans les approches de transformations de modèles
+%%est la question des structures de données représentant les modèles. %%La
+%%%manière dont sont représentés les modèles permet de séparer les outils utilisés
+%%%%pour écrire les transformations en familles
+
+%\todo{[ici ou dans la section suivante?]}
+
+Un autre aspect différenciant des transformations de modèles est la question de
+la représentation des modèles. Si le type de structure de données permettant de
+représenter un modèle peut être indépendant de l'approche, la
+représentation choisie a toutefois des conséquences concrètes concernant les
+outils utilisés pour les transformations. On peut distinguer ainsi rois grandes
+familles d'outils de transformation :
+
+%\todo{[Transformation de fichiers] }
+\paragraph{Transformation de texte (fichiers).} 
+%\subsubsection{Transformation de texte (fichiers)} 
+L'approche la plus simple et intuitive à comprendre, mais aussi, historiquement,
+la plus ancienne, consiste à transformer séquentiellement des fichiers donnés
+en entrée à des scripts, qui produisent eux-mêmes des fichiers en sortie. C'est
+l'approche adoptée par les outils s'appuyant sur {\awk}, {\sed} ou {\perl}. Ils 
+conviennent particulièrement bien aux transformations les plus simples, qui sont
+généralement assez faciles à comprendre et à maintenir. Cependant, cette
+approche nécessite de \emph{parser} l'entrée et de sérialiser la sortie, et ne
+permet pas de manipuler une structure plus abstraite~\cite{Gerber2002}. % \todo{[2.4 du papier,
+%text-based tools ; argument syntaxe concrète vs abstraite -> mouais, à voir ]}
+%Du fait du faible niveau d'abstraction et de leur usage peu approprié pour
+%développer des transformations complexes dans un contexte industriel, nous ne
+%nous étendrons pas sur ce type d'outils.
+
+%\subsubsection{Transformation d'arbres}
+\paragraph{Transformation d'arbres.}
+%\todo{[Transformation d'arbres] }
+La structure d'arbre est une seconde représentation courante des modèles.
+L'arbre en entrée est parcouru et des nœuds sont créés au fur et à mesure de
+l'exécution des pas de transformation pour générer un arbre de sortie (ou
+modifier directement l'arbre source). C'est l'approche des outils de
+transformation reposant sur {\xml} tels que {\xslt}~\cite{xslt} ou
+{\xquery}\footnote{Plus exactement {\xqueryuf}~\cite{xqueryuf} étant donné que
+{\xquery} 1.0 n'a pas de fonctionnalité pour modifier les
+données.}~\cite{xquery,xqueryuf}. C'est aussi traditionnellement l'approche des
+compilateurs et, plus généralement, des outils de l'espace technique
+\emph{grammarware} (les langages respectent des grammaires ---~des
+métamodèles~--- conformes à EBNF).
+
+%\subsubsection{Transformation de graphes}
+\paragraph{Transformation de graphes.}
+%\todo{[Transformation de graphes] }
+Un troisième type de représentation de modèle possible est le graphe (orienté
+et étiqueté). C'est souvent la représentation adoptée par les outils modernes
+dédiés à la modélisation et aux transformations de modèles (par exemple
+AGG~\cite{Taentzer2004}). Cette représentation est fortement liée à l'approche
+de développement de transformation par modélisation que nous avons décrite plus
+haut. C'est aussi la principale représentation de modèles de la plupart des
+outils que nous allons présenter dans la section suivante.
+%$transfo(MM_{a_{i}}, MM_{b_{j}}, M_t, M_{a_{i}}) \rightarrow MM_{b_{j}}$
+
+\subsection{Outils existants}
+\label{ssec:outils}
+
+%\todo{familles d'outils :
+%\begin{itemize}
+%\item données == séquences -> fichiers texte -> AWK
+%\item données == arbres -> {\xml} ({\xslt}), compilation, Tom, RASCAL, etc.
+%\item données == graphes -> {\uml} -> ATL, QVT, Kermeta, etc.
+%\end{itemize}
+%}
+
+Dans cette section, nous présentons différents outils utilisés dans le cadre de
+l'{\idm} pour modéliser ou développer des transformations de modèles. Ces outils
+adoptent l'une ou l'autre des approches décrites dans la section
+précédente, voire une combinaison de plusieurs méthodes.
+Du fait de leur faible niveau d'abstraction et de leur usage peu approprié pour
+développer des transformations complexes dans un contexte industriel, nous ne
+nous étendrons pas sur les outils de transformation de texte (type {\awk, \sed
+ou \perl}).
+
+%\ttodo{\begin{itemize}
+%  \item QVT
+%    \begin{itemize}
+%      \item QVT relations
+%        \begin{itemize}
+%          \item Medini
+%          \item MMT (anciennement M2M)
+%        \end{itemize}
+%      \item QVT operational
+%        \begin{itemize}
+%          \item SmartQVT
+%        \end{itemize}
+%      \item QVt core : \optimalj
+%      \item Kermeta (op)
+%      \item jQVT : moteur QVT pour Java, XBase à la place de OCL, support de EMF
+%      \item QVT-like 
+%        \begin{itemize}
+%          \item Tefkat (QVT-R)
+%          \item ATL
+%          \item {\great}~\cite{Agrawal2003,Balasubramanian2007}
+%      \item Viatra
+%        \end{itemize}
+%    \end{itemize}
+%  \item transfo de graphes
+%    \begin{itemize}
+%      \item Viatra
+%      \item (TGG) {\moflon}\footnote{\url{http://www.moflon.org}}\cite{Amelunxen2006}
+%      \item AGG généraliste ; Henshin\footnote{\url{http://www.eclipse.org/modeling/emft/henshin/}}\cite{Arendt2010}
+%    \end{itemize}
+%  \item transfo
+%    \begin{itemize}
+%      \item Rascal~\cite{Klint2011,Klint2011a} $\rightarrow$ OK
+%      \item tom $\rightarrow$ OK
+%      \item Stratego/XT  ~\cite{Visser01}-> Spoofax~\cite{Kats2010} $\rightarrow$ OK
+%      \item Maude~\cite{Clavel1996,Clavel1996a,Clavel2002} ; Maude et MDE~\cite{Romero2007,Rivera2008} MOMENT\footnote{\url{http://moment.dsic.upv.es/}} $\rightarrow$ OK
+%      \item ASF+SDF $\rightarrow$ OK
+%      \item TXL
+%    \end{itemize}
+%  \item langages généralistes : Java+EMF $\rightarrow$ OK
+%\end{itemize}}
+
+\subsubsection{Outils généralistes}
+
+Pour écrire une transformation de modèles, il est nécessaire de sélectionner
+non seulement une approche, mais également un langage et un type d'outil. Si le
+{\mda} plaide en faveur d'outils et de langages dédiés (\dsl), il est tout à
+fait possible d'écrire une transformation de modèles comme n'importe quel autre
+programme informatique, en choisissant un langage généraliste. On l'utilise
+généralement avec un \emph{framework} fournissant des fonctionnalités pour
+manipuler les modèles. 
+
+\paragraph{\emf.}{\emf}~\cite{emf09} est un \emph{framework} de modélisation
+ouvert initié par IBM. Intégré à l'environnement {\eclipse}, il comprend une
+infrastructure de génération de code pour développer des applications à partir
+de modèles pouvant être spécifiés en utilisant \uml, \xml ou \java. Ces modèles
+peuvent ensuite être importés et manipulés avec les services fournis par
+{\emf}. Le métamodèle central du \emph{framework} est {\ecore}. Il est aligné
+sur {\emof} (le passage de l'un à l'autre consiste essentiellement en quelques
+renommages), ce qui en fait son implémentation de référence. Compte tenu de
+l'environnement (\eclipse) dans lequel il est intégré, ainsi que du langage de
+programmation généraliste utilisé (\java) et des standards liés ({\xml} et
+{\uml}), {\emf} est une technologie intéressante
+%car accessible à la plupart des développeurs.
+dans le cas d'un développement de transformation par des utilisateurs \og non
+spécialistes \fg{}\footnote{Nous désignons par \emph{utilisateur non
+spécialiste} tout utilisateur ayant bénéficié d'une formation satisfaisante en
+informatique avec un socle théorique minimal, un apprentissage de la
+programmation orientée objet, ainsi que l'utilisation d'outils tels que
+{\eclipse}. Par exemple, un jeune ingénieur en début de carrière est un
+développeur non spécialiste.  Son expertise est donc bien supérieure à celle
+d'un étudiant n'ayant pas encore reçu de formation, mais inférieure à celle
+d'un ingénieur expert de son domaine depuis de longues années.}. Il a
+l'avantage d'être bien outillé et maintenu, de bénéficier d'une large
+communauté d'utilisateurs et de pouvoir facilement être couplé avec les outils
+des écosystèmes \java, \uml et \xml.  Nous reparlerons par la suite de {\emf}
+qui nous a servi de technologie de support pour le développement de nos outils.
+
+\paragraph{\xml.} Une famille d'outils utilisables pour les transformations est
+celle de l'espace technique {\xml}. Les modèles sont des arbres conformes à des
+schémas, et des outils de transformation tels que {\xslt}~\cite{xslt} et
+{\xqueryuf}~\cite{xqueryuf} permettent de parcourir et transformer les
+documents {\xml}. Bien que verbeuse, la syntaxe {\xml} a l'avantage d'être
+simple et très répandue. Beaucoup d'outils et d'applications utilisant
+nativement {\xml}, il peut être intéressant d'avoir une vision \emph{arbre
+\xml} des modèles. Ces outils peuvent aussi être utilisés en conjonction de
+\emph{frameworks} tels que {\emf} sans adaptation majeure, ceux-ci ayant
+généralement une fonctionnalité de sérialisation {\xml} (standard {\xmi} de
+l'initiative {\mda}).
+
+\paragraph{Outils de transformation d'arbres.} 
+Les outils généralistes de transformation d'arbres ---~plus couramment associés
+aux mondes de la compilation, de l'analyse de code et de la réécriture qu'à
+l'{\idm}~--- ont aussi leur rôle à jouer en {\idm} et peuvent fournir une base
+technique solide pour la construction d'autres outils. Outre le langage
+{\tom}~\cite{Moreau2003,Balland2007,TomManual-2.10} sur lequel nous nous sommes
+appuyés pour ce travail, d'autres outils de la communauté présentent un intérêt
+certain. Notons par exemple
+{\rascal}\footnote{Voir \url{http://www.rascal-mpl.org/}.}~\cite{Klint2011,Klint2011a},
+le langage de métaprogrammation conçu pour l'analyse de programmes qui succède
+à {\asfsdf}~\cite{Brand2001}. Il existe sous forme d'un \emph{plugin}
+{\eclipse} et permet d'analyser, d'effectuer des requêtes et de transformer des
+programmes sous la forme de modèles conformes à M3\footnote{Métamodèle
+  générique pour représenter du code parsé dans {\rascal},
+  \url{http://tutor.rascal-mpl.org/Rascal/Libraries/lang/java/m3/m3.html}.}.
+%expérience d'utilisation de Rascal avec M3 (métamodèle générique pour
+%représenter du code parsé dans Rascal), analyse, requêtes, transformations
+
+Pour le même type d'utilisation, l'outil
+{\spoofax}\footnote{Voir \url{http://strategoxt.org/Spoofax/}.}~\cite{Kats2010}
+---~lui aussi disponible sous forme d'un \emph{plugin} {\eclipse}~--- intègre
+{\stratego}~\cite{Visser1998},\cite{Visser01} et {\sdf}. Il permet d'écrire des
+transformations de programmes en utilisant des règles et des stratégies de
+réécriture.
+
+Le système {\maude}\footnote{Voir \url{http://maude.cs.uiuc.edu/}.}\cite{Clavel1996,
+Clavel1996a, Clavel2002} est un autre outil de réécriture. Il comprend une
+infrastructure orientée objet permettant d'implémenter des modèles et
+métamodèles. Des travaux ont été menés dans ce sens par plusieurs
+équipes~\cite{Romero2007,Rivera2008,Rusu2011}, ce qui a donné naissance à
+divers outils dont le projet
+{\moment}\footnote{Voir \url{http://moment.dsic.upv.es/}.} qui permet d'effectuer des
+transformations de modèles {\emf} avec {\maude}~\cite{Boronat2009,Boronat2010}.
+
+\paragraph{Outils de réécriture de graphes.} L'une des représentations de
+modèles pouvant être le graphe, l'utilisation d'outils de réécriture de graphes
+est une approche qui a été expérimentée~\cite{Taentzer10,Schurr2008} en
+utilisant des outils catégoriques tels que le \emph{single-pushout} et le
+\emph{double-pushout}, ainsi que le formalisme de spécification \emph{Triple
+Graph Grammar} (TGG)~\cite{Konigs2005}. Dans cette catégorie d'outils, on
+notera {\moflon}\footnote{Voir \url{http://www.moflon.org/}.} qui repose sur le
+mécanisme TGG pour implémenter des transformations de
+modèles~\cite{Amelunxen2006},
+{\henshin}\footnote{Voir \url{http://www.eclipse.org/modeling/emft/henshin/}.}\cite{Arendt2010}
+reposant sur le système AGG\footnote{\emph{Attributed Graph Grammar} :
+\url{http://user.cs.tu-berlin.de/~gragra/agg/}.}\cite{Taentzer2004}, ainsi que
+{\viatra}\footnote{Sous-projet de GMT :
+  \url{http://www.eclipse.org/gmt/}.}~\cite{Varro2007}. Du fait de la complexité
+  des algorithmes liés à la transformation de graphes ---~et donc des
+  ressources nécessaires pour transformer efficacement des graphes de grande
+  taille~---, le principal problème de l'approche par réécriture de graphes
+  réside dans le coût élevé des transformations et la difficulté de passer à
+  l'échelle.% son passage à l'échelle. 
+
+\subsubsection{Outils dédiés}
+La solution largement mise en avant en {\idm} pour le développement de
+transformations de modèles est l'utilisation de langages dédiés. On pense
+notamment au standard {\qvt}~\cite{omgqvt1} proposé par l'initiative {\mda}.
+
+\paragraph{{\qvt}.}Il est composé de trois langages de transformation
+différents, comme illustré par la figure~\ref{fig:qvt} : d'une part {\qvtr} et
+{\qvtc} pour la partie déclarative, d'autre part {\qvto} pour la partie
+impérative.
+
+%\ttodo{refaire schéma ? schéma officiel/de la norme ci-dessous moche}
+\begin{figure}[h]
+  \centering
+  \input{figures/schemaQVT_new}
+  %\includegraphics[scale=1.0]{figures/schemaQVTofficiel.png}
+  \caption{Architecture du standard {\qvt}~\cite{omgqvt1}.}
+  \label{fig:qvt}
+\end{figure}
+{\qvtr} et {\qvtc} constituent la partie déclarative de {\qvt}. {\qvtr} est un
+langage orienté utilisateur avec une syntaxe textuelle et graphique permettant
+de définir des transformations à un niveau d'abstraction élevé (représentation
+graphique possible). {\qvtc} est quant à lui plus bas niveau avec uniquement
+une syntaxe textuelle. Il sert à spécifier la sémantique de {\qvtr} sous la
+forme d'une transformation \emph{Relations2Core}. L'expression d'une
+transformation avec {\qvt} déclaratif est une association de motifs
+(\emph{patterns}) entre la source et la cible. Bien que relativement complexe à
+prendre en main, il permet de définir des transformations bidirectionnelles.
+{\optimalj} était une implémentation commerciale de {\qvtc}, mais son
+développement a cessé. Les outils
+{\mediniqvt}\footnote{\url{http://projects.ikv.de/qvt/wikia}}, {\eclipsemmt}
+(anciennement {\eclipsemtom}\footnote{\url{http://www.eclipse.org/m2m/}}) ainsi
+que {\moment}~\cite{Boronat2009} implémentent quant à eux {\qvtr}.
+
+Le langage {\qvto} supporte la partie impérative de {\qvt}. De par la nature
+même du style impératif, la navigation et la création d'éléments du modèle
+cible sont explicites. {\qvto} étend {\qvtr} et {\qvtc} par ajout de
+constructions impératives telles que la séquence, la répétition, la sélection,
+{\etc} ainsi que par des constructions {\ocl}. {\smartqvt} et
+{\eclipsemmtoqvt} implémentent {\qvto}.
+
+%\ttodo{à mettre ?}
+%Le tableau\needcite{} résume la classification des outils implémentant {\qvt},
+%selon qu'ils implémentent la partie déclarative ou impérative.
+%\begin{tabular}[h]{m{2.5cm}m{5cm}}
+% & \\
+%  \hline
+%Core & (OptimalJ (fini)\\
+%Operational Mappings& Borland Together Architect 2006\newline SmartQVT\newline Eclipse M2M\newline ATL\\
+%Relations & \mediniqvt\newline ModelDorf\newline MomentQVT\newline M2M, ATL\\
+%\end{tabular}
+
+%Comparaison QVTo vs QVTr, dans Guduric2009\\
+%\begin{tabular}{m{0.25\linewidth}|m{0.35\linewidth}|m{0.35\linewidth}}
+%Critère & QVT-Operational & QVT-Relational\\
+%\hline
+%Paradigme de programmation & impératif & déclaratif \\
+%Niveau d'abstraction & bas niveau & haut niveau \\
+%Traçabilité & unidirectionnelle & bidirectionnelle \\
+%Compétences requises & répandues & rares, inhabituelles\\
+%Scénarios de transfo & génération ou synchro dans 1 sens  & génération+synchro
+%2 sens,
+%contrôle de conformité, \\
+%Niveau de contrôle & Précis & générique \\
+%Complexité du code & Standard & Initialement complexe \\
+%Organisation du code & Comme QVT-R + bibliothèques de transfo & héritage de
+%transformation, surcharge de règles\\
+%Représentation graphique & Inappropriée & Possible \\
+%Outils & SmartQVT & mediniQVT \\
+%\end{tabular}
+
+
+\paragraph{\emph{{\qvt}-like}.}
+%n'implémente pas à proprement parler le standard {\qvt}, cependant on peut le
+%classer dans la catégorie des \emph{{\qvt}-like}, c'est-à-dire qu'il s'agit
+%d'un langage de transformation similaire à {\qvt}. 
+Les outils dont nous allons parler ici n'implémentent pas, à proprement parler,
+le standard {\qvt}, mais sont cependant suffisamment proches et similaires pour
+être souvent classés dans la catégorie des \emph{{\qvt}-like}. Le premier
+d'entre eux est très certainement
+{\atl}\footnote{\url{http://www.eclipse.org/atl/}}~\cite{Bezivin2003-firstExperiment,Bezivin2005,Jouault2006,JouaultABK08}
+: il s'agit d'un des langages les plus utilisés dans la communauté des
+modèles et est intégré dans l'environnement {\eclipse}~\cite{atl04}. Il permet
+de spécifier une transformation d'un ensemble de modèles sources en un ensemble
+de modèles cibles. Écrire un programme {\atl} consiste à écrire des règles
+(\emph{rules}) en donnant une source et une cible. Une règle peut faire appel à
+des fonctions d'aide (\emph{helper}) permettant d'effectuer un traitement
+(collecte de valeurs dans une liste, \etc).
+%\todo{\begin{itemize} \item ATL :~\cite{Bezivin2003-ATLTechReport}, premières
+%XP~\cite{Bezivin2003-firstExperiment}({\xslt} into XQuery), plus
+%récent~\cite{JouaultABK08}, \item Environnement Eclipse pour ATL~\cite{atl04}
+%\item Traçabilité (\emph{loosely coupled}) :~\cite{Jouault2005} \item Modeling
+%in Large, modeling in small :~\cite{Bezivin2005} \item Syntaxe ATL
+%:~\cite{Jouault2006} \item Poster, fiche de résumé :~\cite{Jouault2006a} \item
+%comparaison CGT vs AGG vs ATL :~\cite{Groenmo2009} \end{itemize}} Dans la
+%suite du document, les exemples sur lesquels nous nous appuyons sont tous des
+%exemples qui ont déjà été écrits en {\atl}. 
+Outre {\atl}, d'autres outils \emph{{\qvt}-like} existent, notamment
+{\tefkat}\footnote{\url{http://tefkat.sourceforge.net/}}~\cite{Lawley2006} (qui
+propose une syntaxe à la {\sql} et offre une implémentation de {\qvtr}),
+{\great}~\cite{Agrawal2003,Balasubramanian2007} et {\viatra}~\cite{Varro2007},
+qui sont des outils de transformation de graphes. Ces deux derniers sont
+distribués sous forme d'un \emph{plugin} {\eclipse} ce qui leur permet
+d'interagir avec l'environnement {\emf}.  Enfin, dans cette catégorie d'outils,
+nous pouvons ajouter
+{\jqvt}\footnote{\url{http://sourceforge.net/projects/jqvt/}} qui est un moteur
+{\qvt} pour {\java}. Il est intégré dans {\eclipse}, est compatible avec {\emf}
+et n'utilise pas {\ocl}, mais
+{\xbase}\footnote{\url{https://wiki.eclipse.org/Xbase}}.
+
+
+\paragraph{\kermeta.} Il s'agit d'un environnement de métamodélisation dans
+{\eclipse}. Il permet de définir et spécifier des langages de modélisation
+dédiés. Le langage
+{\kermeta}\footnote{\url{http://www.kermeta.org}}~\cite{kermeta10} mêle
+plusieurs paradigmes de programmation (orienté objet, orienté
+aspects~\cite{Muller2005,Muller2005a}, par contrats, fonctionnel) et fournit un
+support complet de {\ecore} et de {\emof}. Ainsi, tout modèle {\kermeta}
+conforme à {\emof} est aussi un programme {\kermeta} valide. Une définition
+{\kermeta} peut être compilée pour produire un modèle exécutable. Le code
+généré est exprimé en {\java} et {\scala}, qui peut être ensuite compilé pour
+être exécuté sur la machine virtuelle {\java}.
+
+%Le langage {\kermeta} repose sur 
+%\ttodo{is'étendre un peu plus sur {\kermeta} ; parler de K2/K3 ; de la génération
+%de code jvm/scala.}
+
+%impératif
+
+%kevoree\footnote{\url{http://kevoree.org}}
+     
+
+
+
+%\section{Validation et vérification du logiciel}
+%intro, définitions, contraintes, outils
+%
+%\ttodo{augmenter la qualité du soft, la confiance dans le logiciel :
+%vérification. Comment ? tests et simulation ; preuve mathématique ; MC
+%(exploration d'espaces d'états, tests exhaustifs, recherche de contre-exemple)}
+%
+%Dans cette section, nous abordons différentes manières de valider et vérifier
+%le logiciel afin d'en améliorer sa qualité, et donc la confiance que
+%l'utilisateur peut avoir dans les logiciels qu'il utilise.
+%
+%\ttodo{pourquoi ai-je écrit ces 4 paragraphes ? utile ou pas ?}
+%
+%\paragraph{Tests.}Une première approche, intuitive, est de tester intensément
+%tout programme informatique avant sa mise en production. Il existe diverses
+%méthodologies et techniques pour tester du code. On citera par exemple la mise
+%en place de tests unitaires censés tester des \emph{unités} de code (fonctions,
+%classes). Cela a été popularisé par les méthodes agiles, et particulièrement
+%par l'approche dirigée par les tests (\emph{Tests Driven Engineering}). Bien
+%que l'utilisation de tests permette d'améliorer grandement la qualité du
+%logiciel durant sa phase de développement, la solution des tests unitaires
+%commence à montrer ses limites lors de développements de logiciels complexes où
+%les \emph{bugs} peuvent avoir des origines plus nombreuses. Du fait des coûts
+%et des délais de développement, il n'est pas rare de ne pas écrire de tests
+%pour se concentrer sur le logiciel lui-même. Par conséquent, certains morceaux
+%de code ne sont pas testés et sont donc susceptibles de recéler des
+%\emph{bugs}. Des techniques de génération automatique de tests ont vu le jour
+%\ttodo{quelques réf aussi} pour augmenter la couverture de tests et tester au
+%maximum les cas limite. D'autres comportements anormaux peuvent aussi naître
+%d'une combinaison de comportements normaux de modules fonctionnels
+%indépendamment. Le problème pouvant alors provenir d'une incompréhension entre
+%les équipes de développeurs, ou entre le client et le fournisseur
+%(spécification ambiguë).\\ 
+%Cependant, si l'intégration de tests est absolument nécessaire dans le
+%processus de développement d'un logiciel, elle se révèle insuffisante dans le
+%cas du logiciel critique. En effet, tester intensément un logiciel permet
+%de tester son comportement dans la plupart des cas, mais rien ne garantit que
+%toutes les situations ont été testées.\ttodo{un peu de contexte sur le test} 
+%
+%\paragraph{Preuve.}À l'opposé, une autre approche pour améliorer la confiance
+%dans un logiciel consiste à prouver mathématiquement les algorithmes. Le
+%problème étant alors que la preuve formelle est généralement faite sur les
+%algorithmes ou les spécifications, mais pas sur l'implémentation elle-même. Or,
+%le facteur humain n'est pas à négliger, l'implémentation concrète du logiciel
+%dépendant fortement du développeur et des outils utilisés durant le processus.
+%En outre, lors d'une preuve, le contexte réel n'est pas forcément pris en
+%compte et certaines conditions d'utilisation réelles peuvent fortement
+%influencer le comportement et la fiabilité de l'application.
+%\ttodo{petite réf sur les protocoles réseau ? protocole ethernet ? gap pratique
+%vs théorie car phénomènes physiques (bruit), ou alors physique, bio}\\
+%\todo{"Beware of bugs in the above code; I have only proved it correct, not
+%tried it." --- D.E.Knuth}
+%
+%
+%\paragraph{Simulation.}Pour répondre à ce problème de réalisme du comportement
+%d'une système sous conditions d'utilisation réelles, une approche liée aux
+%tests revient à simuler ou émuler le système pour étudier son comportement et
+%détecter les anomalies. L'intérêt de ce type d'approche est que l'on peut
+%travailler sur un système qui serait coûteux à déployer en conditions réelles.
+%Notons par exemple les domaines du nucléaire ou de l'avionique \ttodo{référence
+%à l'A380 entièrement simulé ?} qui ne permettent pas aisément des tests
+%logiciels en conditions réelles, en particulier lors des premières étapes de
+%développement. \ttodo{réf aux gens qui font de la simulation pour \emph{tester} ?}
+%
+%Par rapport une preuve formelle, les méthodes de tests ont aussi l'inconvénient
+%d'être fortement conditionnées par la plateforme sur lesquels els sont exécutés
+%et par les technologies employées.
+%
+%\paragraph{Model-checking.}Le \emph{model-checking} est une autre approche
+%entre preuve et test. Elle consiste modéliser un système selon un formalisme
+%donné, puis à explorer les espaces d'états possibles de ce système pour le
+%valider. Cela revient à du test exhaustif, ce qui a donc valeur de preuve.
+%L'intérêt du \emph{model-checking} est que ---~contrairement aux tests~--- il est
+%généralement indépendant de la plateforme d'exécution et qu'il apporte une
+%validation formelle du système. On peut toutefois reprocher au
+%\emph{model-checking} de ne pas toujours être proche de la réalité et d'avoir
+%un coût en ressources élevé dans le cas de systèmes complexes. Cela a conduit
+%certains à adopter des approches hybrides de \emph{model-checking} à
+%l'exécution sur des applications réelles simulées \ttodo{réf. à ceux qui font
+%du MC sur des binaires à run-time par ex ? domaine différent, mais un peu lié}.
+%
+%Dans le cadre du développement de logiciels critiques, la vérification des
+%applications est imposée par la loi et des normes à respecter. Ainsi, tout
+%logiciel critique devant être embarqué dans un avion doit suivre une procédure
+%de certification.
+%
+%\todo{problèmes : \begin{itemize}
+%    \item outils de modélisation non qualifiés et non certifiés => certifier
+%      des outils ou aider à certifier
+%    \item pb {\mde} : beaucoup d'outils dans les chaînes de développement => introduction des
+%outils "certifieurs" automatiques, problématique
+%\end{itemize}}
+%
+%\subsection{Qualification}
+%\ttodo{définir, expliquer, donner les normes, dont DO-XXX}
+%
+%La qualification d'un logiciel participe à atteindre un objectif.
+%
+%
+%
+%\subsection{Certification}
+%\ttodo{définir, expliquer.}
+%
+%
+%\ttodo{Différences entre qualification et certification.}
+%Problématiques : traçabilité, séparer spécification/implémentation/vérification
+%
+%
+%\section{Traçabilité}
+%ici ? traçabilité interne vs traçabilité de spécification ; intérêt (contrainte
+%des précédentes sous-sous-sections). Souvent traçabilité interne ou fortement
+%liée à l'implémentation de la transformation. Se fait bien techniquement.
+%
+\section{Limitations actuelles et points d'amélioration}
+
+Le lancement de l'initiative {\mda} a donné un véritable élan à l'{\idm} et de
+nombreux outils ont vu le jour. Cependant, malgré l'intérêt indéniable de
+cette approche pour le développement logiciel, l'{\idm} n'est pas encore
+fortement établie dans les chaînes de développement industrielles et gagne
+lentement du terrain.
+
+La complexité des systèmes s'accroissant, l'industrie voit dans l'{\idm} une
+solution pour améliorer leur développement tout en diminuant leurs coûts. En
+effet, pour appréhender cette complexité, il est nécessaire pour les
+développeurs d'abstraire les problèmes. Pour ce faire, il faut des outils
+accessibles et utilisables dans un cadre industriel. 
+
+La grande diversité des outils peut aussi être un frein à l'adoption des
+techniques de l'{\idm} : un trop grand nombre d'outils et de technologies
+segmente le domaine, ce qui peut empêcher que les communautés atteignent une
+masse critique. De plus, beaucoup d'outils adoptant les concepts de l'{\idm}
+sont issus de la recherche et sont utilisés par un public académique.  N'ayant
+pas forcément vocation à industrialiser les prototypes développés, le monde de
+la recherche produit souvent des outils peu accessibles tant sur leur forme
+(ergonomie, non conformité aux pratiques industrielles habituelles) que sur le
+fond (concepts peu connus et maîtrisés par peu de monde, expertise nécessaire).
+Ce frein lié à la multiplicité des outils peu accessibles peut être levé par
+l'établissement de standards tels que ceux proposés par l'{\omg}, ainsi que par
+le déploiement d'environnements comme {\eclipse} pour pousser à la
+cristallisation et au développement de communautés autour des technologies
+liées. 
+
+Un autre aspect limitant vient de l'adaptation des chaînes de développement
+logicielles existantes à ces nouvelles méthodes de développement et à ces
+nouveaux outils. Compte tenu de leur coût d'intégration et des
+changements induits par une telle modification d'un processus de développement,
+il n'est pas raisonnable d'adopter un nouvel outil encore à l'état de prototype
+ou nécessitant des compétences spécifiques maîtrisées par un petit nombre 
+d'experts ou encore n'ayant aucun lien avec des technologies déjà présentes
+dans la chaîne de développement existante. Il faut donc mettre en œuvre des
+ponts entre les technologies pour les rendre plus attrayantes et plus
+facilement intégrables, afin de faciliter ce processus fortement consommateur
+de ressources.
+
+Outre l'adaptation normale des chaînes de développement aux nouveaux outils,
+certains domaines ont des contraintes strictes de qualité concernant les outils
+de production du logiciel. C'est le cas des chaînes de développement des
+systèmes critiques que l'on retrouve notamment en aéronautique, dans le secteur
+automobile, ainsi que dans celui de la santé. Les logiciels produits et servant
+à produire sont soumis à des exigences légales nécessitant des processus lourds
+de validation du logiciel. Le domaine de l'{\idm} étant relativement
+jeune, il n'est pas encore pleinement adopté dans ce type d'industrie qui a
+besoin d'outils adaptés à ses contraintes permettant de faciliter la validation
+du logiciel à moindre coût (et présenter ainsi un intérêt supérieur par rapport
+à l'existant).
+
+L'un des aspects les plus intéressants est l'usage de l'{\idm} dans le cadre du
+développement fiable : pour les problématiques légales évoquées précédemment, la
+demande industrielle est très forte, et peu de réponses concrètes existent ou
+alors pour des coûts déraisonnables. C'est dans ce contexte que nous nous
+proposons d'apporter un élément de solution avec ce travail, afin d'accompagner
+l'adoption de nouveaux outils tout en améliorant la qualité du logiciel. Nous
+abordons la problématique de la validation du logiciel dans le
+chapitre~\ref{ch:verification}.
+
+%\todo{limitations dans quel contexte ? 
+%\begin{itemize}
+%\item {\idm} : multiplication des outils
+%\item souci validation avec beaucoup d'outils (contexte)
+%\item approches actuelles coûteuses
+%\item on pourrait apporter des outils pour faciliter la validation, et
+%augmenter la confiance dans le logiciel
+%\item technique : choix des outils ; DSL vs GPL ; framework
+%\item traçabilité : trace exploitable -> on va en parler plus tard, dans le
+%  chapitre suivant
+%\end{itemize}}
+
+
+
+
+% vim:spell spelllang=fr

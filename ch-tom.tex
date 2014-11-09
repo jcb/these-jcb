@@ -1,0 +1,1342 @@
+% vim:spell spelllang=fr
+\chapter{Un langage basé sur la réécriture : Tom}
+\label{ch:tom}
+%15p
+
+\index{\tom|(}
+%\ttodo{Autres points à voir :
+%  \begin{itemize}
+    %\item autres : notation implicite vs explicite (parenthèses vs crochets
+    %  dans filtrage, dans backquote) ; alias -> sous-partie notations diverses,
+    %  ou à diluer dans le reste ?
+    %\item théories (utile ici ?)
+    %\item règles de normalisation (module rule utile ici ?)
+    %\item intro DSL ?, topo fonctionnement global de {\tom}, schéma compilateur
+    %  {\tom} pour expliquer, phases ?
+    %\item exemple simple : Peano ? toujours le même mais connu ; Nat tout le
+    %  temps ou implém' directement par des int ? (mappings)
+%\end{itemize}}
+
+Dans ce chapitre, nous abordons les notions élémentaires utiles à la lecture de
+ce document. Nous présentons d'abord la réécriture de termes, puis nous
+décrivons le langage {\tom}~\cite{Moreau2003,Balland2007} et nous terminons par
+les ancrages formels. 
+
+%\ttodo{ref bibtex d'un ouvrage de référence pour les déf}
+
+%nous présentons le langage {\tom} ainsi que les notions
+%élémentaires utiles à la lecture de ce tapuscrit. 
+%\ttodo{tom == adjonction catégorique}
+
+\section{Réécriture}
+
+\subsection{Signature algébrique et termes}
+
+Cette section traite des notions de base concernant les algèbres de termes du
+premier ordre.
+
+\begin{definition}[Signature]
+Une signature \caF est un ensemble fini d'opérateurs (ou symboles de fonction),
+dont chacun est associé à un entier naturel par la fonction d'arité, $ar : \caF
+\rightarrow \nat$. $\caF_n$ désigne le sous-ensemble de symboles d'arité n,
+c'est-à-dire $\caF_n = \{ f \in \caF \mid ar(f) = n\}$.
+L'ensemble des constantes est désigné par $\caF_0$.
+\end{definition}
+
+
+%\ttodo{Signature algébrique multi-sortée à définir comme j'en parle plus tard +
+%sorte aussi donc, juste ici ; sorte = type de type, définition ci-après suffit
+%?}
+On classifie parfois les termes selon leur type dans des \emph{sortes}. On
+parle alors de signature multi-sortée.
+
+\begin{definition}[Signature algébrique multi-sortée]
+Une signature multi-sortée est un couple \SF où \caS est un ensemble de sortes
+et \caF est un ensemble d'opérateurs sortés défini par $\caF = \bigcup
+ \limits_{S_1,\ldots,S_n, S \in \caS} \caF_{S_1,\ldots,S_n,S}$. Le rang d'un
+symbole de fonction $f \in \caF_{S_1,\ldots,S_n,S}$ noté $rank(f)$ est défini
+par le tuple ($S_1$,\ldots,$S_n$,S) que l'on note souvent $f : S_1 \times
+\ldots \times S_n \rightarrow S$
+\end{definition}
+
+\begin{definition}[Terme]
+Étant donné un ensemble infini dénombrable de variables \caX et une signature
+\caF, on définit l'ensemble des termes \TFX comme le plus petit ensemble tel
+que :
+\begin{itemize}
+\item \caX $\subseteq$ \TFX : toute variable de \caX est un terme de \TFX ;
+\item pour tous $t_1,\ldots,t_n$ éléments de \TFX et pour tout opérateur $f \in
+  \caF$ d'arité n, le terme $f(t_1,\ldots,t_n)$ est un élément de \TFX.
+\end{itemize}
+\end{definition}
+%\ttodo{donc définir ce qu'est une variable}
+Pour tout terme $t$ de la forme $f(t_1,\ldots,t_n)$, le symbole de tête de $t$,
+noté $symb(t)$ est, par définition, l'opérateur $f$.\\
+Un symbole de fonction dont l'arité est variable est appelé \emph{opérateur
+variadique}, c'est-à-dire qu'il prend un nombre arbitraire d'arguments.
+
+
+
+\begin{definition}[Variables d'un terme]
+L'ensemble \var{t} des variables d'un terme t est défini inductivement comme
+suit :
+\begin{itemize}
+  \item \var{t} = $\emptyset$, pour t $\in \caF_0$ ;
+  \item \var{t} = \{t\}, pour t $\in \caX$ ;
+  %\item \var{t} = $\bigcup \limits_{i=1}^n \var{t_i}$, pour $t = f(t_1, \ldots, t_n)$.
+  \item \var{t} = $\bigcup_{i=1}^n \var{t_i}$, pour $t = f(t_1, \ldots, t_n)$.
+\end{itemize}
+\end{definition}
+
+On note souvent $a,b,c,\ldots$ les constantes et $x,y,z,\ldots$ les
+variables.\\
+On représente les termes sous forme arborescente. Par exemple, 
+%la figure~\ref{fig:ex_terme} illustre la représentation du terme $f(x,g(a))$ : 
+on peut
+représenter le terme $f(x,g(a))$ comme dans la figure~\ref{fig:ex_terme} :
+\begin{figure}[H]
+  \begin{center}
+  \input{figures/ex_terme}
+    \caption{Exemple de représentation arborescente d'un terme.}
+    \label{fig:ex_terme}
+  \end{center}
+\end{figure}
+
+%\ttodo{donc définir aussi la position}
+
+\begin{definition}[Terme clos]
+Un terme t est dit clos s'il ne contient aucune variable, c'est-à-dire si $\var{t} = \emptyset$. On note \TF l'ensemble des termes clos.
+\end{definition}
+
+Chaque nœud d'un arbre peut être identifié de manière unique par sa position.
+
+\begin{definition}[Position]
+Une position dans un terme t est représentée par une séquence $\omega$
+d'entiers naturels, décrivant le chemin de la racine du terme jusqu'à un nœud
+$t_{|\omega}$ du terme. Un terme $u$ a une occurrence dans $t$ si $u =
+t_{|\omega}$ pour une position $\omega$ dans $t$.
+\end{definition}
+On notera ${\caP}os(t)$ l'ensemble des positions d'un terme $t$ et
+$t[t']_{\omega}$ le remplacement du sous-terme de $t$ à la position $\omega$
+par $t'$.
+
+Par exemple, la figure~\ref{fig:ex_positions} illustre la notation des
+positions pour le terme $t = f(x,g(a))$. On obtient l'ensemble des positions
+${\caP}os(t)$ = $\{\epsilon, 1, 2, 21\}$ ce qui correspond respectivement aux
+sous-termes $t_{|\epsilon} = f(x,g(a))$, $t_{|1} = x$, $t_{|2} = g(a)$ et
+$t_{|21} = a$.
+
+\begin{figure}[H]
+  \begin{center}
+  \input{figures/ex_positions}
+    \caption{Notation des positions dans un terme.}
+    \label{fig:ex_positions}
+  \end{center}
+\end{figure}
+
+
+
+%\textbf{Notations :}
+%\begin{itemize}
+%  \item ${\caP}os(t)$ est l'ensemble des positions d'un terme $t$ ; 
+%  \item $t[t']_{\omega}$ indique le remplacement du sous-terme de $t$ à la
+%    position $\omega$ par $t'$ 
+%  \item $t[\omega \hookleftarrow \sigma(r)]$ signifie que le sous-terme de $t$
+%    à la position $\omega$ a été remplacé par $\sigma(r)$.
+%\end{itemize}
+
+
+\subsection{Filtrage}
+\label{subsec:filtrage}
+
+%FIXME\ttodo{ajouter une phrase de liant}
+Une substitution est une opération de remplacement, uniquement définie par une
+fonction des variables vers les termes clos.
+
+\begin{definition}[Substitution]
+Une substitution $\sigma$ est une fonction de \caX vers \TF, notée lorsque son
+domaine $\dom{\sigma}$ est fini, $\sigma = \{x_1 \mapsto t_1, \ldots, x_k
+\mapsto t_k\}$. Cette fonction s'étend de manière unique en un endomorphisme
+$\sigma' : \TFX \rightarrow \TFX$ sur l'algèbre des termes, qui est défini
+inductivement par : 
+\begin{itemize}
+\item $\sigma'(x) = \left\{
+			\begin{array}{l}
+				\sigma(x) \text{ si } x \in \dom{\sigma}\\
+				x \text{ sinon}\\
+			\end{array} \right.$
+\item $\sigma'(f(t_1,\ldots,t_n)) = f(\sigma'(t_1),\ldots,\sigma'(t_n))$ pour
+tout symbole de fonction $f \in \caF_n$.
+\end{itemize}
+\end{definition}
+%\ttodo{donc définir aussi algèbre de termes T(S,F,V) ?}
+
+\begin{definition}[Filtrage]
+Étant donnés un motif p $\in$ \TFX et un terme clos t $\in$ \TF, p filtre t,
+noté $p \match t$, si et seulement s'il existe une substitution $\sigma$ telle que
+$\sigma(p) = t$ :
+	$$ p \match t \Leftrightarrow \exists \sigma, \sigma(p) = t $$
+\end{definition}
+
+%\ttodo{remarques de PEM : algo de filtrage, existe ?, décidabilité ?\\ filtrage
+%unitaire, filtrage syntaxique}
+%
+%\ttodo{oui, il existe des algos de filtrage :\\
+%filtrage syntaxique $\Rightarrow$ algo récursif, solution unique si existe,
+%thèse de Gérard Huet~\cite{Huet1976}}
+
+On parle de \emph{filtrage unitaire} lorsqu'il existe une unique solution à
+l'équation de filtrage. Si plusieurs solutions existent, le filtrage est
+\emph{non unitaire}.
+
+%Le filtrage peut aussi être \emph{syntaxique} ou \emph{modulo une théorie
+%équationnelle}. Dans ce second cas, cela signifie que l'on a associé une
+Le filtrage peut aussi être \emph{modulo une théorie équationnelle}. Cela
+signifie que l'on a associé une théorie équationnelle au problème de filtrage.
+
+\begin{definition}[Filtrage modulo une théorie équationnelle]
+  Étant donnés une théorie équationnelle \caE, un motif $p$ $\in$ \TFX et un
+  terme clos $t$ $\in$ \TF, $p$ filtre $t$ modulo \caE,
+noté $p \match_{\caE} t$, si et seulement s'il existe une substitution $\sigma$ telle que
+$\sigma(p) =_{\caE} t$, avec $=_{\caE}$ l'égalité modulo $\caE$ :
+	$$ p \match_{\caE} t \Leftrightarrow \exists \sigma, \sigma(p) =_{\caE} t $$
+\end{definition}
+
+Dans la suite de cette section, nous allons expliquer ce concept, donner des
+exemples de théories équationnelles et illustrer notre propos.
+%\subsection{Théorie équationnelle}
+
+Une paire de termes $(l,r)$ est appelée \emph{égalité}, \emph{axiome
+équationnel} ou \emph{équation} selon le contexte, et est notée $(l=r)$. Une
+théorie équationnelle peut être définie par un ensemble d'égalités. Elle
+définit une classe d'équivalence entre les termes.
+Dans la pratique, les théories équationnelles les plus communes sont
+l'associativité, la commutativité et l'élément neutre (ainsi que leurs
+combinaisons).
+
+\begin{definition}[Opérateur associatif]
+Un opérateur binaire $f$ est associatif si $\forall x,y,z \in \TFX, f(f(x,y),z) =
+f(x,f(y,z))$.
+\end{definition}
+
+Par exemple, l'addition et la multiplication sont associatives sur l'ensemble
+des réels $\mathbb{R}$ : $((x+y)+z) = (x+(y+z))$ et $((x\times y)\times z)) =
+(x\times (y\times z))$. En revanche, la soustraction sur $\mathbb{R}$ n'est pas
+associative : $((x-y)-z) \neq (x-(y-z))$.
+
+\begin{definition}[Opérateur commutatif]
+  Un opérateur binaire $f$ est commutatif si $\forall x,y \in \TFX f(x,y) =
+  f(y,x)$.
+\end{definition}
+
+Par exemple, l'addition et la multiplication sont commutatives sur
+$\mathbb{R}$, ainsi $x+y = y+x$ et $x\times y = y\times x$. Ce qui n'est pas le
+cas de la soustraction sur $\mathbb{R}$, en effet $x-y \neq y-x$.
+
+\begin{definition}[Élément neutre]
+Soit un opérateur binaire $f$ et $x \in \TFX$, la constante $e \in \TF$ est :
+\begin{itemize}
+  \item neutre à gauche pour $f$ si $f(e,x) = x$ ;
+  \item neutre à droite pour $f$ si $f(x,e) = x$ ;
+  \item neutre si elle est neutre à gauche et neutre à droite pour $f$.
+\end{itemize} 
+\end{definition}
+%Pour illustrer la notion d'élément neutre
+%Ainsi, 0 est neutre pour l'addition sur $\mathbb{R}$ car : $0+x = x$ et $x+0 = x$.
+Pour illustrer cette notion d'élément neutre, examinons la constante 0 avec
+l'addition sur l'ensemble des réels $\mathbb{R}$ :
+\begin{itemize}
+  \item $0+x = x$, 0 est donc neutre à gauche pour l'addition ; 
+  \item $x+0 = x$, 0 est donc neutre à droite pour l'addition ;
+  \item on en déduit que 0 est neutre pour l'addition sur $\mathbb{R}$.
+\end{itemize}
+
+On note généralement $A$, $U$ et $C$ les théories équationnelles engendrées
+respectivement par l'équation d'associativité, l'équation de neutralité et
+celle de commutativité. On note $AU$ la théorie engendrée par les équations
+d'associativité et de neutralité.
+
+La théorie associative est associée aux opérateurs binaires. Pour des raisons
+techniques, elle est souvent associée à une syntaxe variadiques dans les
+langages de programmation fondés sur la réécriture. Par exemple, l'opérateur
+variadique $list$ est simulé par l'opérateur $nil$ d'arité nulle, ainsi que par
+l'opérateur binaire $cons$. Cela permet d'écrire que le terme $list(a,b,c)$ est
+équivalent au terme $list(list(a,b),c)$, et qu'ils peuvent être représentés par
+$cons(a,cons(b,cons(c,nil)))$.
+
+On peut alors définir des opérations modulo une théorie équationnelle : on
+parlera de \emph{filtrage équationnel} lorsque le filtrage sera associé à une
+telle théorie. Pour illustrer cette notion, prenons deux exemples simples de
+filtrage.
+
+\paragraph{Exemple 1 :} Le filtrage associatif avec élément neutre ($AU$)
+---~aussi appelé filtrage de liste~--- est un problème bien connu en
+réécriture. Il permet d'exprimer facilement des algorithmes manipulant des
+listes. En considérent $X1*$ et $X2*$ comme ides variables représentant 0 ou
+plusieurs éléments d'une liste, le problème de filtrage $list(X1*,x,X2*) \ll
+list(a,b,c)$ admet trois solutions : $\sigma_1 = \{ x\rightarrow a\}$,
+$\sigma_2 = \{ x\rightarrow b\}$ et $\sigma_3 = \{ x\rightarrow c\}$.
+
+%\paragraph{Exemple 1 :} Le filtrage associatif avec élément neutre ($AU$)
+%---~aussi appelé filtrage de liste~--- est un problème bien connu en
+%réécriture. Il permet d'exprimer facilement des algorithmes manipulant des
+%listes. Considérons l'opérateur associatif $list$ avec élément neutre noté $e$.
+%Le problème de filtrage $list(x,y,z) \ll list(a,b)$ admet trois solutions :
+%$\sigma_1 = \{ x\rightarrow a, y\rightarrow b, z\rightarrow e\}$, $\sigma_2 =
+%\{ x\rightarrow a, y\rightarrow e, z\rightarrow b\}$ et $\sigma_3 = \{
+%x\rightarrow e, y\rightarrow a, z\rightarrow b\}$.
+
+
+\paragraph{Exemple 2 :} Illustrons le filtrage associatif-commutatif ($AC$) et
+l'addition, dont les axiomes d'associativité et commutativité sont les suivants
+:
+%Pour illustrer cette notion, prenons l'exemple du filtrage
+%associatif-commutatif ($AC$) et de l'addition, dont les axiomes d'associativité
+%et commutativité sont les suivants :
+\begin{itemize}
+  \item $\forall x,y,~ plus(x,y) = plus(y,x)$ ;
+  \item $\forall x,y,~ plus(x,plus(y,z))=plus(plus(x,y),z)$.
+\end{itemize}
+Le problème de filtrage $plus(x,y) \ll plus(a,b)$ présente deux solutions
+distinctes modulo AC : $\sigma_1 = \{ x\rightarrow a,y\rightarrow b\}$ et
+$\sigma_2=\{ x\rightarrow b, y\rightarrow a\}$.
+
+%Prenons l'exemple du filtrage associatif-commutatif ($AC$) permettant de
+%modéliser le calcul dans les groupes et dans d'autres structures algébriques
+%dotées de lois commutatives et associatives, notamment l'addition sur les
+%entiers. $plus$ est associatif-commutatif et les axiomes d'associativité et
+%commutativité sont les suivants :
+%$$\forall x,y ; plus(x,y) = plus(y,x)$$
+%$$\forall x,y ; plus(x,plus(y,z))=plus(plus(x,y),z)$$
+%\begin{itemize}
+%  \item le problème de filtrage $plus(a,b) \ll plus(x,y)$ possède deux solutions
+%    distinctes modulo $AC$ : $\sigma_1 = \{ x\rightarrow a,y\rightarrow b\}$ et
+%    $\sigma_2=\{ x\rightarrow b, y\rightarrow a\}$
+%
+%  \item le problème de filtrage $plus(x,y) \ll plus(plus(plus(a,b),c)$ possède
+%    six solutions modulo $AC$ : 
+%\end{itemize}
+
+
+\subsection{Réécriture}
+
+En réécriture, on oriente des égalités que l'on appelle des \emph{règles de
+réécriture} et qui définissent un calcul.
+
+\begin{definition}[Règle de réécriture]
+Une règle de réécriture est un couple (l,r) de termes dans \TFX, notée l
+$\rightarrow$ r. l est appelé membre gauche de la règle, et r membre droit.
+\end{definition}
+
+Un exemple de règle de réécriture est l'addition de n'importe quel entier $x$
+avec $0$ : $$x+0~\rightarrow~x$$
+Un autre exemple un peu plus complexe de règle de réécriture est la
+distributivité de la multiplication par rapport à l'addition dans un anneau,
+comme illustré par la figure~\ref{fig:ex_rwRule_distrib}. %ci-dessous :
+%\todo{[x*(y+z) -> (x*y)+(x*z)]}
+\begin{figure}[!h]
+  \begin{center}
+    \input{figures/ex_rwRule_distrib}
+    \caption{Exemple de règle de réécriture : distributivité de la
+    multiplication par rapport à l'addition dans un anneau, à savoir $x\times(y+z)
+  \rightarrow (x\times y)+(x\times z)$.}
+    \label{fig:ex_rwRule_distrib}
+  \end{center}
+\end{figure}
+
+\begin{definition}[Système de réécriture]
+Un système de réécriture sur les termes est un ensemble de règles de réécriture
+(l,r) tel que :
+\begin{itemize}
+  \item les variables du membre droit de la règle font partie  des variables du
+  membre gauche ($\var{r} \subseteq \var{l}$) ;
+  \item le membre gauche d'une règle n'est pas une variable ($l \notin \caX$).
+\end{itemize}
+%\todo{À voir : plus « formel » (à la Cláudia) ou alors cette définition est
+%suffisante ?}
+\end{definition}
+
+
+\begin{definition}[Réécriture]
+Un terme $t \in \TFX$ se réécrit en $t'$ dans un système de réécriture \caR, ce
+que l'on note $t \rarrow t'$, s'il existe :
+\begin{itemize}
+  \item une règle $l \rightarrow r \in \caR$ ;
+  \item une position $\omega$ dans $t$ ;
+  \item une substitution $\sigma$ telle que $t_{|\omega} = \sigma(l)$ et $t' =
+    t[\sigma(r)]_{\omega}$. %t[\omega \hookleftarrow \sigma(r)]
+\end{itemize}
+\end{definition}
+
+On appelle \emph{radical} le sous-terme $t_{|\omega}$.
+
+Pour une relation binaire $\rightarrow$, on note $\refltransclo$ sa fermeture
+transitive et réflexive. La fermeture transitive, réflexive et symétrique de
+$\rightarrow$ ---~qui est alors une relation d'équivalence~--- est notée
+$\symrefltransclo$.
+
+
+\begin{definition}[Forme normale]
+Soit $\rightarrow$ une relation binaire sur un ensemble T.
+%\begin{itemize}
+%\item un élément $t \in T$ est une forme normale s'il n'existe pas
+%  d'élément $t' \in T $ tel que $t \rightarrow t'$. On dit alors que t est
+%  irréductible ;
+%\item $t \in T$ a une forme normale si $t \refltransclo t'$ pour une forme
+%  normale $t'$ notée $t\downarrow$.
+%\end{itemize}
+Un élément t $\in$ T est réductible par $\rightarrow$ s'il existe $t' \in T$
+tel que $t \rightarrow t'$. Dans le cas contraire, on dit qu'il est
+irréductible. On appelle forme normale de $t$ tout élément $t'$ irréductible de
+T tel que $t \refltransclo t'$. Cette forme est unique.
+\end{definition}
+
+Deux propriétés importantes d'un système de réécriture sont la
+\emph{confluence} et la \emph{terminaison}. Lorsque l'on souhaite savoir si
+deux termes sont équivalents, on cherche à calculer leurs formes normales et à
+vérifier si elles sont égales. Cela n'est possible que si la forme normale
+existe et qu'elle est unique. Une forme normale existe si $\rightarrow$
+\emph{termine}, et son unicité est alors assurée si $\rightarrow$ est
+\emph{confluente}, ou si elle vérifie la \emph{propriété de Church-Rosser}, qui
+est équivalente.
+
+\begin{definition}[Terminaison]
+Une relation binaire $\rightarrow$ sur un ensemble T est dite terminante s'il
+n'existe pas de suite infinie $(t_i)_{i\ge 1}$ d'éléments de T telle que $t_1
+\rightarrow t_2 \rightarrow~\cdotp\cdotp\cdotp$.
+\end{definition}
+
+\begin{definition}[Confluence]
+Soit une relation binaire $\rightarrow$ sur un ensemble T. %$\rightarrow$ est
+%confluente si et seulement si : $$\forall t,t_1,t_2 (t \refltransclo t_1~et~t
+%\refltransclo t_2) \Rightarrow \exists t', (t_1 \refltransclo t'~et~t_2 \refltransclo
+%t')$$
+\begin{itemize}
+  \item[(a)] $\rightarrow$ est \emph{confluente} si et seulement si :
+    $$\forall t,u,v ~(t \refltransclo u~et~t \refltransclo v) \Rightarrow
+    \exists w, (u \refltransclo w~et~v \refltransclo w)$$
+  \item[(b)] $\rightarrow$ vérifie la \emph{propriété de Church-Rosser} si et seulement si :
+    $$\forall u,v,~u \symrefltransclo v \Rightarrow
+    \exists w, (u \refltransclo w~et~v \refltransclo w)$$
+\item[(c)] $\rightarrow$ est \emph{localement confluente} si et seulement si :
+    $$\forall t,u,v ~(t \rightarrow u~et~t \rightarrow v) \Rightarrow
+    \exists w, (u \refltransclo w~et~v \refltransclo w)$$
+\end{itemize}
+\end{definition}
+
+%La figure~\ref{fig:confluence} illustre cette propriété de confluence.
+%\begin{figure}[H]
+%  \begin{center}
+%  \input{figures/confluence}
+%    \caption{Propriété de confluence.}
+%    \label{fig:confluence}
+%  \end{center}
+%\end{figure}
+
+La figure~\ref{fig:proprietes_binRel} illustre ces propriétés.
+\begin{figure}[H]
+  \begin{center}
+  \input{figures/proprietes_binRel}
+    \caption{Propriétés sur les relations binaires.}
+    \label{fig:proprietes_binRel}
+  \end{center}
+\end{figure}
+
+
+\subsection{Stratégies de réécriture}
+%\ttodo{1. intuition 2. définitions formelles : Stratégie et réécriture sous
+%stratégie ; évaluation en lambda calcul ; stratégie abstraite -> ARS ; }
+
+En réécriture, on applique habituellement de manière exhaustive toutes les
+règles sur le terme pour calculer sa forme normale, c'est-à-dire que l'on
+applique toutes les règles jusqu'à ce qu'aucune règle ne puisse plus être
+appliquée. Il est cependant courant d'écrire des systèmes de réécriture ne
+terminant pas ou n'étant pas confluents. La méthode d'application des règles
+adoptée prend donc de l'importance, car elle a, dans ce cas, un effet sur le
+résultat. Il est par conséquent important d'avoir un contrôle sur l'application
+des règles du système de réécriture. C'est l'objet du concept de
+\emph{stratégie} que nous allons décrire dans cette section.
+%On va donc définir des \emph{stratégies} pour spécifier le parcours à suivre
+%dans l'arbre des dérivations.
+
+Illustrons ce problème par un exemple où l'on considère le système de
+réécriture suivant avec la signature $\{a,f\}$, $a$ étant d'arité 0 et $f$
+d'arité 1 :\\
+%ex confluent non-terminant extrait du manuscrit de Antoine -> permet de donner
+%une bonne intuition
+$\left\{\begin{array}{lclr}
+  f(x) & \rightarrow & f(f(x)) & (r1)\\
+  f(a) & \rightarrow & a & (r2)\\
+  \end{array} \right. $\\
+Sans aucune précision sur la manière d'appliquer les règles, nous remarquons
+qu'il existe une suite infinie de pas de réécriture partant de $f(a)$ si l'on
+applique toujours la règle $r1$ :\\
+$f(a) \overset{r1}{\longrightarrow} f(f(a)) \overset{r1}{\longrightarrow}
+f(f(f(a))) \overset{r1}{\longrightarrow} \cdots $\\
+Le calcul ne termine pas. Si l'on applique les règles de réécriture $r1$ et $r2$
+différemment, nous constatons que $f(a)$ se réduit en $a$ :\\
+%$f(a) \overset{r1}{\longrightarrow} f(f(a)) \overset{r2}{\longrightarrow} f(f(a))$
+$\begin{array}{lllllll}
+  f(a) & \overset{r1}{\longrightarrow} & f(f(a)) &
+  \overset{r2}{\longrightarrow} & f(a) & \overset{r2}{\longrightarrow}& a\\
+  \downarrow {\vspace{-1.0em}\footnotesize ^{r2}} &&&&&&\\
+  a&&&&&&\\
+\end{array}$\\
+Cet exemple illustre clairement le fait que les résultats du calcul ne sont pas
+les mêmes selon la méthode d'application des règles. Pour avoir des calculs qui
+terminent, on pourrait alors adopter une \emph{stratégie} d'application des
+règles donnant la priorité à la règle $r2 : f(a) \rightarrow a$ par rapport à
+la règle $r1 : f(x) \rightarrow f(f(x))$.
+
+%On constate qu'il est confluent et non-terminant : il existe une suite infinie
+%de pas de réécriture partant de $f(a)$ ou $g(a)$, mais ils se réduisent
+%cependant tous deux en $a$. Pour avoir des calculs qui terminent, on pourrait
+%adopter une stratégie d'application des règles donnant la priorité aux deux
+%règles $f(a) \rightarrow a$ et $g(a) \rightarrow a$ par rapport aux deux
+%premières règles.
+
+%~\cite{Kirchner1996}
+
+Après cette intuition de ce qu'est une stratégie, nous pouvons donner des
+définitions plus formelles des concepts liés. La notion de système abstrait de
+réduction (\emph{Abstract Reduction System} -- ARS)~\cite{Bezem2003} est une
+manière abstraite de modéliser les calculs par transformations pas à pas
+d'objets, indépendamment de la nature des objets qui sont réécrits. Un ARS peut
+se définir comme un couple $(\caT,\rightarrow)$, où $\rightarrow$ est une
+relation binaire sur l'ensemble \caT. De là,~\cite{Kirchner2008} donne une
+représentation des ARS sous forme de graphe et introduit le concept de
+stratégie abstraite.
+
+%définitions formelles -> obligé de les mettre ? -> oui, cf cohérence avec le
+%reste + déf ARS et dérivation nécessaires en cascade car déf de stratégie
+%abstraite. Trouver une définition un peu plus light ?
+
+%\begin{definition}[Système abstrait de réduction]%\cite{Bezem2003}
+%  Un système abstrait de réduction (ARS) est un couple $(\caT,\rightarrow)$ où
+%  $\rightarrow$ est une relation binaire sur l'ensemble \caT
+%\end{definition}
+\begin{definition}[Système abstrait de réduction]%\cite{Kirchner2008}
+  Un système abstrait de réduction (ARS) est un graphe orienté étiqueté
+  $(\caO, \caS)$. Les nœuds \caO sont appelés objets, les arêtes orientées \caS
+  sont appelées pas.\\
+\end{definition}
+
+Pour un ensemble de termes \TFX, le graphe (\TFX, \caS) est l'ARS correspondant
+à un système de réécriture \caR. Les arêtes correspondent à des pas de
+réécriture de \caR et sont étiquetées par le nom des règles de \caR. 
+
+\begin{definition}[Dérivation]
+  Soit un ARS \caA :
+  \begin{itemize}
+
+    \item[1.] un \emph{pas de réduction} est une arête étiquetée $\phi$ complétée de sa
+      source a et de sa destination b. On note un pas de réduction
+      $a \aphiarrow{} b$, ou simplement $a \phiarrow{} b$ lorsqu'il n'y a pas
+      d'ambiguïté ;
+
+    \item[2.] une \emph{\caA-dérivation} (ou \emph{séquence de
+      \caT-réductions}) est un chemin $\pi$ dans le graphe \caA ;
+
+    \item[3.] lorsque cette dérivation est finie, $\pi$ peut s'écrire $a_0
+      \phiarrow{0} a_1 \phiarrow{1} a_2 \cdots \phiarrow{n-1} a_n$ et on dit
+      que $a_0$ se réduit en $a_n$ par la dérivation $\pi =
+      \phi_0\phi_1\ldots\phi_{n-1}$ ; notée aussi $a_0
+      \rightarrow^{\phi_0\phi_1\ldots\phi_{n-1}} a_n$ ou simplement $a_0
+      \piarrow a_n$. n est la \emph{longueur} de $\pi$ ;
+      \begin{itemize}
+        \item[(a)] la source de $\pi$ est le singleton \{$a_0$\}, notée
+          $dom(\pi)$ ;
+        \item[(b)] la destination de $\pi$ est le singleton $\{a_n\}$, 
+          notée $\pi[a_0]$.
+      \end{itemize}
+    \item[4.] une dérivation est vide si elle n'est formée d'aucun pas de
+      réduction. La dérivation vide de source a est notée $id_a$.
+
+  \end{itemize}
+\end{definition}
+
+\begin{definition}[Stratégie abstraite]%definition de \cite{Kirchner2008}, p5-6
+  Soit un ARS \caA :
+  \begin{itemize}
+    \item[1.] une stratégie abstraite  est un sous-ensemble de toutes les
+      dérivations de \caA ;
+
+    \item[2.] appliquer la stratégie $\zeta$ sur un objet a, noté par $\zeta[a]$, est
+      l'ensemble de tous les objets atteignables depuis a en utilisant une
+      dérivation dans $\zeta$ :
+      $\zeta[a] = \{\pi[a]~|~\pi \in \zeta\}$. Lorsqu'aucune dérivation dans
+      $\zeta$ n'a pour source a, on dit que l'application sur $a$ de la
+      stratégie a échoué ;
+
+    \item[3.] appliquer la stratégie $\zeta$ sur un ensemble d'objets consiste
+      à appliquer $\zeta$ à chaque élément $a$ de l'ensemble. Le résultat est
+      l'union de $\zeta[a]$ pour tous les $a$ de l'ensemble d'objets ;
+
+    \item[4.] le \emph{domaine} d'une stratégie est l'ensemble des objets qui
+      sont la source d'une dérivation dans $\zeta$ : $dom(\zeta) =
+      \bigcup \limits_{\delta \in \zeta} dom(\delta)$ ;
+
+    \item[5.] la stratégie qui contient toutes les dérivations vides est $Id = \{
+      id_a ~|~ a \in \caO\}$.
+  \end{itemize}
+\end{definition}
+
+%\ttodo{transition section suivante : lien vers le langage}
+
+Concrètement, on peut exprimer ces stratégies de manière déclarative grâce aux
+langages de stratégies que proposent la plupart des langages à base de règles
+tels que {\elan}~\cite{Vittek1994,Borovansky1998,Borovansky1996},
+{\stratego}~\cite{Visser1998,Visser01},
+{\maude}~\cite{Clavel1996a,Clavel2002,Clavel2011} et {\tom}, que
+nous allons présenter dans la section suivante.
+
+\paragraph{{\elan}.} {\elan} propose deux types de règles : les
+règles anonymes systématiquement appliquées (servant à la normalisation de
+termes) et les règles étiquetées pouvant être déclenchées à la demande
+sous contrôle d'une stratégie.  Le résultat de l'application d'une telle règle
+sur un terme est un multi-ensemble de termes, ce qui permet de gérer le
+non-déterminisme. {\elan} a introduit la notion de stratégie en proposant un
+langage de combinateurs permettant de composer les stratégies et de contrôler
+leur application. Parmi ces combinateurs, on retiendra notamment l'opérateur de
+séquence, des opérateurs de choix non-déterministes et des opérateurs de
+répétition.
+
+\paragraph{{\stratego}.} S'inspirant d'{\elan}, {\stratego} se concentre sur un
+nombre restreint de combinateurs élémentaires, ainsi que sur leur combinaison.
+À ces combinateurs (séquence, identité, échec, test, négation, choix
+déterministe et non-déterministe) sont ajoutés un opérateur de récursion
+($\mu$) et des opérateurs permettant d'appliquer la stratégie : sur le
+$i^{\text{\textit{ème}}}$ fils du sujet (\emph{i(s)}), sur tous les sous-termes
+du sujet (\emph{All(s)}), sur le premier fils du sujet sans échec
+(\emph{One(s)}), sur tous les sous-termes du sujet sans échec (\emph{Some(s)}).
+Grâce à ces opérateurs, il est possible d'élaborer des stratégies de haut
+niveau telles que \emph{TopDown} et \emph{BottomUp}.
+
+\paragraph{{\maude}.} L'approche de {\maude} est un peu différente : le
+contrôle sur l'application des règles s'opère grâce à la réflexivité du
+système~\cite{Clavel1996,Clavel2002a}. Les objets du langage {\maude} ayant une
+représentation \emph{meta}, il est possible d'utiliser un opérateur
+(\texttt{meta-apply}) pour appliquer les règles. Cet opérateur évalue les
+équations, normalise le terme, et retourne la \emph{meta-représentation} du
+terme résultant de l'évaluation. On peut contrôler l'application des règles de
+réécriture par un autre programme défini par réécriture. Pour des raisons
+pratiques, des travaux ont été menés plus
+récemment~\cite{MartiOliet2005,Eker2007} pour offrir un langage de stratégies
+plus proche de ce que {\elan}, {\stratego} et {\tom} proposent.
+
+
+\paragraph{{\tom}.} À partir du concept de stratégie et en s'inspirant de ces
+langages, {\tom} implémente lui aussi un langage de
+stratégies~\cite{BallandMR08,Balland2012}. Il est fondé sur des stratégies
+élémentaires (\emph{Identity} et \emph{Fail}), sur des combinateurs de
+composition (\emph{Sequence}, \emph{Recursion} ---$\mu$---, \emph{Choice},
+\emph{Not}, \emph{IfThenElse}) et de traversée (\emph{All}, \emph{One},
+\emph{Up} et \emph{Omega}). De ces combinateurs, à l'image de {\stratego}, des
+stratégies composées peuvent être élaborées (\emph{Try}, \emph{Repeat},
+\emph{Innermost}, etc.). Nous reviendrons sur les stratégies de {\tom} dans la
+section suivante, en particulier sur leur utilisation concrète au sein du
+langage.
+
+
+
+\section{Le langage Tom}
+
+
+{\tom}~\cite{Moreau2003,Balland2007} est un langage conçu pour enrichir des
+langages généralistes de fonctionnalités issues de la réécriture et de la
+programmation fonctionnelle. Il ne s'agit pas d'un langage \emph{stand-alone} :
+il est l'implémentation du concept des \og îlots formels \fg (\emph{formal
+islands})~\cite{Balland2006} qui sont ajoutés au sein de programmes écrits dans
+un langage hôte. Les constructions {\tom} sont transformées et compilées vers
+le langage hôte. Parmi les fonctionnalités apportées par {\tom}, on compte le
+filtrage de motif (\emph{pattern-matching}), les règles de réécriture, les
+stratégies, ainsi que les ancrages algébriques (\emph{mappings}). 
+
+%Le compilateur {\tom} est lui-même écrit en {\tom} (\emph{bootstrap}). 
+
+%\ttodo{Fonctionnement de {\tom} : faire le schéma chaîne de compilation, ou
+%alors tout à la fin ? Plutôt à la fin vu qu'il faut faire apparaître les
+%mappings, etc.}
+
+Dans la suite de cette section, nous décrirons le langage {\tom} en illustrant
+ses fonctionnalités et constructions par des exemples simples. Sauf indication
+contraire, les extraits de code hôte seront en {\java}. Pour une documentation
+complète et détaillée, le lecteur intéressé pourra se référer au manuel
+disponible en téléchargement~\cite{Bach2009} ou directement en
+ligne~\cite{TomManual-2.10}. Les outils sont tous accessibles {\via} le site
+officiel du projet {\tom}\footnote{Voir \url{http://tom.loria.fr/}.}.
+
+
+\subsection{Signature algébrique}
+\label{subsec:signalg}\index{signature algébrique}
+{\tom} permet à l'utilisateur de spécifier des signatures algébriques
+multi-sortées {\via} l'outil {\gom}~\cite{Reilles2007}. Le langage
+{\gom}\index{\gom} permet de décrire une structure de données et d'en générer
+l'implémentation typée en {\java}. Le listing~\ref{code:gomPeanoSimple}
+illustre une définition de signature {\gom} :
+
+\input{code/gomPeanoSimple}
+
+Un module {\gom} est composé d'un préambule comportant un nom
+---~\texttt{Peano} dans cet exemple~--- précédé du mot-clef \texttt{module}
+(ligne 1). Le début de la signature est annoncé par le mot-clef
+\texttt{abstract syntax} (ligne 2). Cet exemple étant extrêmement simple, le
+préambule est composé uniquement de ces deux lignes. Pour un module plus
+complexe qui utiliserait des types définis dans une autre signature, la clause
+\texttt{imports} suivie des signatures à importer peut être intercalée entre
+les deux clauses précédentes. Le projet {\tom} fournit notamment une
+bibliothèque de signatures pour les types primitifs (types \emph{builtin}) tels
+que les \emph{entiers} (\texttt{int}), les \emph{caractères} (\texttt{char}),
+les \emph{flottants} (\texttt{float}) et les \emph{chaînes de caractères}
+(\texttt{String}). La signature en elle-même est composée d'un ensemble de
+sortes ---~\texttt{Nat} dans notre exemple~--- ayant des constructeurs
+---~\texttt{zero} et \texttt{suc} ici.
+
+Ce générateur propose un typage fort au niveau de la structure de données
+{\java} générée, ce qui garantit que les objets créés sont conformes à la
+signature multi-sortée. Un second aspect intéressant de cet outil est le fait
+qu'il offre le partage maximal~\cite{Appel1993}, rendant les structures
+générées très efficaces en temps (tests d'égalité en temps constant) et en
+espace. Les classes générées peuvent être modifiées par l'intermédiaire de la
+fonctionnalité de \emph{hooks}. Ce mécanisme permet d'ajouter des blocs de code
+{\java} aux classes générées (par exemple, intégration d'attributs invisibles
+au niveau algébrique, mais manipulables par la partie {\java} de l'application)
+ou d'associer une théorie équationnelle telle que A, AC, ACU à certains
+opérateurs. Il est même possible de spécifier cette théorie équationnelle par
+des règles de normalisation. Les termes construits sont ainsi toujours en forme
+normale.
+
+La signature est compilée en une implémentation {\java} ainsi qu'un ancrage
+permettant l'utilisation de cette structure dans les programmes {\tom}. Dans un
+premier temps, pour présenter les constructions du langage {\tom}, nous ne nous
+préoccuperons pas de ces ancrages ni de l'implémentation concrète {\java}.
+
+\subsection{Construction \emph{backquote} « ` »}
+\index{\tom!backquote, \lex{`}|(}
+La construction \lex{`} (\emph{backquote}) permet de créer la structure de
+données représentant un terme algébrique en allouant et initialisant les objets
+en mémoire. Elle permet à la fois de construire un terme et de récupérer la
+valeur d'une variable instanciée par le filtrage de motif.  Ainsi, on peut
+construire des termes de type \texttt{Nat} de l'exemple précédent avec des
+instructions \emph{backquote}. L'instruction {\tomjava} \og\texttt{Nat un =
+`suc(zero());}\fg déclare une variable \texttt{un} dont le type est \texttt{Nat},
+ayant pour valeur le représentant algébrique \emph{suc(zero())}.
+
+Un terme \emph{backquote} peut aussi contenir des variables du langage hôte,
+ainsi que des appels de fonctions. Ainsi, l'instruction \texttt{Nat deux =
+`suc(un);} permet de créer le terme \texttt{deux} à partir de \texttt{un} créé
+précédemment. Le compilateur {\tom} n'analysant pas du tout le code hôte,
+notons que nous supposons que la partie hôte ---~\texttt{un} dans l'exemple~---
+est conforme à la signature algébrique et que le terme est donc bien formé.
+L'utilisation du \emph{backquote} permet à l'utilisateur %de ne pas se soucier
+%de l'implémentation concrète du type du langage hôte et de ne manipuler que sa
+%vue algébrique.
+de créer un terme et de manipuler sa vue algébrique sans se soucier de
+son implémentation concrète dans le langage hôte.
+\index{\tom!backquote, \lex{`}|)}
+
+
+
+\subsection{Filtrage de motif}
+\label{subsec:matching}\index{Filtrage|(}\index{Pattern-matching|(}
+
+Dans la plupart des langages généralistes tels que {\C} ou {\java}, on ne
+trouve pas les notions de type algébrique et de terme, mais uniquement celle de
+types de données composées (structures {\C} et objets {\java}). De même, la
+notion de filtrage de motif (\emph{pattern-matching}) que l'on retrouve dans
+les langages fonctionnels tels que {\caml} ou {\haskell} n'existe généralement
+pas dans la plupart des langages impératifs classiques. Le filtrage permet de
+tester la présence de motifs (\emph{pattern}) dans une structure de données et
+d'instancier des variables en fonction du résultat de l'opération de filtrage.
+
+Ces constructions sont apportées par {\tom} dans des langages généralistes. Il
+devient donc possible de filtrer des motifs dans {\java}. En outre, les
+constructions de filtrage de {\tom} étant plus expressives que dans {\caml}
+(notamment le filtrage équationnel et le filtrage non linéaire), il
+est possible de les employer aussi en son sein pour utiliser le filtrage
+équationnel.
+
+
+Le lexème \lex{\%match}\index{\tom!\lex{\%match}} introduit la construction de
+filtrage de {\tom}. Celle-ci peut être vue comme une généralisation de la
+construction habituelle \emph{switch-case} que l'on retrouve dans beaucoup de
+langages généralistes.  Cependant, plutôt que de filtrer uniquement sur des
+entiers, des caractères, voire des chaînes de caractères, {\tom} filtre sur des
+\emph{termes}. Les motifs permettent de discriminer et de récupérer
+l'information contenue dans la structure de données algébrique sur laquelle on
+filtre.
+
+Dans le listing~\ref{code:matchPeanoPlus} suivant, nous reprenons l'exemple des
+entiers de Peano pour lesquels nous encodons l'addition avec {\tom} et {\java}.
+Pour ce premier exemple où les deux langages apparaissent en même temps, nous
+adoptons un marquage visuel pour désigner {\java} (noir) et {\tom} (gris). Cela
+permet de visualiser le tissage étroit entre le langage {\tom} et le langage
+hôte dans lequel il est intégré. Par la suite, le principe étant compris, nous
+n'adopterons plus ce code visuel.
+ %\ttodo{voir quelle version garder : JNat, ou la simple avec Nat ?}
+\input{code/matchPeanoPlus}
+ 
+Dans cet exemple, la fonction \texttt{peanoPlus} prend en arguments deux termes
+\texttt{t1} et \texttt{t2} de type \texttt{Nat}
+représentant deux entiers de Peano, et retourne la
+somme des deux. 
+%\todo{[Ou alors je passe la phrase suivante sous silence, et j'en reparle dans les mappings] }
+%\texttt{t1} et \texttt{t2} sont du type {\tom} \texttt{Nat}, implémenté par le type {\java} \texttt{JNat}. 
+Le calcul est opéré par filtrage en utilisant la construction \lex{\%match} :
+\begin{itemize}
+  \item elle prend un ou plusieurs arguments ---~deux dans notre exemple~---
+    entre parenthèses ;
+  \item elle est composée d'un ensemble de \emph{règles} de la forme
+    \texttt{membre gauche -> \{membre droit\}} ;
+  \item le membre gauche est composé du ou des motifs séparés les uns des autres
+    par une virgule ;
+  \item le membre droit est un bloc de code mixte (hôte + \textsf{Tom}).
+\end{itemize}
+Dans notre exemple, le calcul de filtrage est le suivant : 
+\begin{itemize}
+%  \item si \texttt{x} filtre \texttt{t1}, alors \texttt{zero()} et
+%    \texttt{succ(y)} peuvent éventuellement filtrer \texttt{t2} ;
+  \item si \texttt{zero()} filtre \texttt{t2}, alors le résultat de
+    l'évaluation de la fonction \texttt{peanoPlus} est \texttt{x}, instancié par
+    \texttt{t1} par filtrage ;
+  \item si \texttt{suc(y)} filtre \texttt{t2}, alors le symbole de tête du
+    terme \texttt{t2} est \emph{suc}. Le sous-terme \texttt{y} est ajouté à
+    \texttt{x} et le résultat de l'évaluation de \texttt{peanoPlus} est donc
+    \texttt{suc(peanoPlus(x,y))}.
+\end{itemize}
+%Bien que l'expression de la fonction \texttt{peanoPlus} soit donnée de manière
+%fonctionnelle, elle définit bien une fonction {\java} qui peut être utilisée
+%comme toute autre fonction {\java} dans le programme. 
+L'expression de la fonction \texttt{peanoPlus} est donnée par filtrage et
+définit une fonction {\java} qui peut être utilisée comme toute autre fonction
+{\java} dans le programme.
+Notons cette
+particularité qu'a le langage {\tom} de complètement s'intégrer au langage hôte
+sans pour autant être intrusif. Ainsi, le compilateur {\tom} n'analyse que le
+code {\tom} (parties grisées dans le listing~\ref{code:matchPeanoPlus}), les
+instructions hôtes n'étant pas examinées et ne fournissant aucune information
+au compilateur. Les instructions {\tom} sont traduites vers le langage hôte
+et remplacées en lieu et place, sans modification du code hôte existant.
+
+Une deuxième particularité des constructions de filtrage du langage {\tom} est
+liée à la composition des membres droits des règles : plutôt qu'être de simples
+termes, il s'agit en fait d'instructions du langage hôte qui sont exécutées
+lorsqu'un filtre est trouvé. Si aucune instruction du langage hôte ne rompt le
+flot de contrôle, toutes les règles peuvent potentiellement être exécutées.
+Pour interrompre ce flot lorsqu'un filtre est trouvé, il faut utiliser les
+instructions {\adhoc} du langage hôte, telles que \texttt{break} ou
+\texttt{return}, comme dans le listing~\ref{code:matchPeanoPlus}.
+
+%\ttodo{match alternatif ?~\ref{code:matchAltPeanoPlus} :
+%\input{code/matchPeanoPlus}}
+
+
+\index{Filtrage!associatif|(}
+
+\paragraph{Filtrage associatif.} Dans le cas d'un filtrage non unitaire
+(filtrage pour lequel il existe plusieurs solutions,
+voir~\ref{subsec:filtrage}), l'action est exécutée pour chaque filtre
+solution. Le filtrage syntaxique étant unitaire, il n'est pas possible
+d'exprimer ce comportement. Le langage {\tom} dispose de la possibilité
+d'opérer du \emph{filtrage associatif avec élément neutre} (ou \emph{filtrage
+de liste}, noté $AU$ dans la section~\ref{subsec:filtrage}) qui n'est pas
+unitaire et qui permet d'exprimer aisément des algorithmes opérant du filtrage
+sur des listes. Il est ainsi possible de définir des opérateurs variadiques
+(opérateurs d'arité variable, par exemple les opérateurs de listes), comme nous
+l'avons vu dans la section précédente (\ref{subsec:filtrage}). Dans le
+listing~\ref{code:gomPeano} suivant, nous reprenons notre exemple des entiers
+de Peano que nous augmentons d'un nouveau constructeur, \texttt{concNat} de
+sorte \texttt{NatList} et dont les sous-termes sont de type \texttt{Nat}.
+%\pagebreak
+
+\input{code/gomPeano}
+
+L'opérateur \texttt{concNat} peut être vu comme un opérateur de concaténation
+de listes de \texttt{Nat} : \texttt{concNat()} représente la liste vide
+d'entiers naturels, \texttt{concNat(zero())} la liste ne contenant que
+\texttt{zero()} et \texttt{concNat(zero(),suc(zero()),suc(suc(zero())))} la
+liste contenant trois entiers naturels : 0, 1 et 2. La liste vide est
+l'élément neutre.
+{\tom} distingue syntaxiquement les variables de filtrage représentant un
+élément ---~par exemple \texttt{x} dans le
+listing~\ref{code:matchPeanoPlus}~--- et les variables représentant une
+sous-liste d'une liste existante en ajoutant le caractère \texttt{*}.
+
+Le filtrage associatif permet d'opérer une itération sur les éléments d'une
+liste comme l'illustre l'exemple du
+listing~\ref{code:listmatchingAfficherPeano} :
+
+\input{code/listmatchingAfficherPeano}
+
+Dans cet exemple, \texttt{liste} est une liste d'entiers naturels, de type
+\texttt{NatList} implémenté par le type {\java} \texttt{NatList}.  Nous
+souhaitons afficher ces entiers avec leur position dans la liste. L'action est
+exécutée pour chaque filtre trouvé, et les variables de listes \texttt{X1*} et
+\texttt{X2*} sont instanciées pour chaque sous-liste préfixe et suffixe de la
+liste \texttt{liste}. \texttt{X1} correspond à un objet {\java} de type
+\texttt{NatList}, la méthode \texttt{length()} retournant la longueur de la
+liste peut donc être utilisée pour obtenir l'indice de l'élément \texttt{x}.
+L'énumération s'opère tant que le flot d'exécution n'est pas interrompu. Dans
+notre exemple, nous nous contentons d'afficher l'élément et sa position.
+L'exécution de la procédure \texttt{afficher} sur l'entrée \texttt{liste =
+`conc(zero(), zero(), suc(suc(zero())), zero())} donne :
+
+\input{code/outputAfficherPeano}
+\index{Filtrage!associatif|)}
+
+\index{Filtrage!non\ linéaire|(}
+Le langage {\tom} offre aussi la possibilité de procéder à du filtrage
+\emph{non-linéaire} (motifs pour lesquels une même variable apparaît plusieurs
+fois). Le listing~\ref{code:nonlinearlistmatchingSupprimerDoublon} ci-après
+illustre ce mécanisme : dans la fonction \texttt{supprimerDoublon}, la variable
+\texttt{x} apparaît à plusieurs reprises dans le motif.
+\index{Filtrage!non\ linéaire|)}
+
+\input{code/nonlinearlistmatchingSupprimerDoublon}
+
+Parmi les notations disponibles dans le langage, certaines sont très couramment
+utilisées et apparaîtront dans les extraits de code de ce document. Nous les
+illustrons dans le 
+%Ajoutons aussi des notations disponibles dans le langage que nous utiliserons
+%couramment, que nous illustrons dans le
+listing~\ref{code:aliasunderscoreAfficherPeano} dont le but est d'afficher un
+sous-terme de la liste \texttt{liste} ayant la forme \texttt{suc(suc(y))},
+ainsi que sa position dans la liste, s'il existe :
+
+\input{code/aliasunderscoreAfficherPeano}
+
+Les notations \texttt{\_} et \texttt{\_*} pour les sous-listes désignent des
+variables dites anonymes : c'est-à-dire que leur valeur ne peut être utilisée
+dans le bloc action de la règle.  La notation \texttt{@} permet de créer des
+alias : ainsi, on peut nommer des sous-termes obtenus par filtrage. L'alias
+permet de vérifier qu'un motif filtre ---~\texttt{suc(suc(\_))} dans notre
+exemple~--- tout en instanciant une variable ---~\texttt{x}~--- avec la valeur
+de ce sous-terme. Si on applique la procédure \texttt{chercher} à l'entrée
+précédente définie comme \texttt{liste = `conc(zero(), zero(),
+suc(suc(zero())), zero())}, on obtient le résultat suivant :
+\begin{tomcode4}
+  suc(suc(zero())) trouv#\texttt{é}#, en position 2
+\end{tomcode4}
+
+\index{Filtrage|)}\index{Pattern-matching|)}
+
+\subsection{Notations implicite et explicite}
+%\todo{notation implicite vs explicite ? ou alors au fil de l'eau plus tard ? ou
+%pas trop utile ?}
+
+Lorsque l’on écrit un \emph{pattern} dans le membre gauche d'une règle, il est
+possible d'écrire l'opérateur et ses champs de deux manières. %En effet, les
+%champs des opérateurs {\tom} 
+Ces derniers étant nommés, plutôt qu'écrire l'opérateur avec tous ses arguments
+(\emph{notation explicite}), on peut utiliser leurs noms dans le motif pour
+expliciter des sous-termes particuliers et en omettre d'autres. Ces derniers
+sont alors ignorés lors du filtrage. Cette notation est dite \emph{implicite}
+et s'utilise {\via} les lexèmes \lex{[} et \lex{]}. Il existe également une
+notation à base de contraintes qui peut rendre l'écriture implicite plus
+naturelle dans certains cas.
+
+Considérons un exemple simple pour illustrer ces deux notations : si on définit
+les personnes comme des termes construits en utilisant l'opérateur
+\emph{Personne}, d'arité \emph{3} et de type \emph{Personne}, ayant les
+arguments nommés \emph{nom} et \emph{prenom} de type « chaîne de caractères »,
+et \emph{age} de type entier, les trois fonctions suivantes du
+listing~\ref{code:implicitExplicitNotations} sont équivalentes :
+
+\input{code/implicitExplicitNotations}
+
+Outre l'indéniable gain en lisibilité du code qu'elle apporte de par
+l'utilisation des noms, la notation implicite améliore la maintenabilité du
+logiciel développé. En effet, dans le cas d'une extension de la signature
+(ajout d'un champ \emph{numTelephone}, par exemple), l'usage de la notation
+explicite impose d'ajouter un \texttt{\_} dans toutes les règles où l'opérateur
+\emph{Personne} est utilisé. Dans notre exemple, la première fonction
+---~\texttt{peutConduireExplicite()}~--- devrait donc être modifiée,
+contrairement aux deux autres ---~\texttt{peutConduireImplicite()} et
+\texttt{peutConduireImplicite2()}. Avec cette
+notation, seuls les motifs manipulant explicitement les champs ayant été
+changés doivent être modifiés, d'où une plus grande robustesse au changement.\\
+Dans la suite de ce manuscrit, nous utiliserons indifféremment l'une ou l'autre
+des notations dans les extraits de code proposés.
+
+
+\subsection{Stratégies : maîtriser l'application des règles de réécriture}
+\label{subsec:strategy}\index{Stratégie|(}\index{\tom!\lex{\%strategy}}
+
+On peut analyser la structure de termes et encoder des règles de transformation
+grâce à la construction \lex{\%match}. Le contrôle de l'application de ces
+règles peut alors se faire en {\java} en utilisant par exemple la récursivité.
+Cependant, traitement et parcours étant entrelacés, cette solution n'est pas
+robuste au changement et le code peu réutilisable. En outre, il est difficile
+de raisonner sur une telle transformation. Une autre solution est d'utiliser
+des \emph{stratégies}~\cite{BallandMR08,Balland2012}, qui sont un moyen
+d'améliorer le contrôle qu'a l'utilisateur sur l'application des règles de
+réécriture. Le principe de programmation par stratégies permet de séparer le
+traitement (règles de réécriture, partie métier de l'application) du parcours
+(traversée de la structure de données arborescente), et de spécifier la manière
+d'appliquer les règles métier.
+
+{\tom} fournit un puissant langage de stratégies, inspiré de
+{\elan}~\cite{Borovansky1998}, {\stratego}~\cite{Visser1998},
+%\cite{Kats2010}\cite{Hemel2010}
+et {\jjtrav}~\cite{Visser2001}. Ce langage permet d'élaborer des stratégies
+complexes en composant des combinateurs élémentaires tels que
+\texttt{Sequence}, \texttt{Repeat}, \texttt{TopDown} et la récursion. Il sera
+donc en mesure de contrôler finement l'application des règles de réécriture en
+fonction du parcours défini. Le listing~\ref{code:strategyPeanoTransform}
+illustre la construction \lex{\%strategy}, ainsi que son utilisation :
+\input{code/strategyPeanoPlus}
+
+Dans cet exemple, nous supposons que notre signature contient d'autres
+opérateurs : \texttt{plus} et \texttt{one} de type \texttt{Nat}. La stratégie
+\texttt{transformationPeano} réécrit les constructeurs \texttt{one} en
+\texttt{suc(zero())} et les constructeurs \texttt{plus(zero(),x)} en
+\texttt{x}. Ligne 1, \texttt{additionPeano} étend \texttt{Identity}, ce qui
+donne le comportement par défaut de la stratégie : si aucune
+règle ne s'applique, aucune transformation n'a lieu, par opposition à
+\texttt{Fail} qui spécifie que la transformation échoue si la règle ne peut
+être appliquée. La construction \lex{visit} (ligne 2) opère un premier filtre
+sur les sortes de type \texttt{Nat} sur lesquelles les règles doivent
+s'appliquer. Les règles sont quant à elles construites sur le même modèle que
+les règles de la construction \lex{\%match}, décrite dans la
+section~\ref{subsec:matching}. Le membre gauche est un \emph{pattern}, tandis
+que le membre droit est un bloc action composé de code {\tomjava}. Ensuite, la
+stratégie est composée avec une stratégie de parcours fournie par une
+bibliothèque appelée \texttt{sl}. Le terme la représentant est créé, et sa
+méthode \texttt{visit} est appliquée sur le nombre que nous souhaitons
+transformer. Pour l'entrée donnée, le résultat affiché est le suivant (les 
+couleurs ont été ajoutées pour faire apparaître clairement les sous-termes
+transformés) :
+\begin{tomcode4}
+  plus(plus(suc(suc(#\colcode{darkgreen}{one()}#)), #\tomred{one()}#), #\javablue{plus(suc(one()),zero())}#) 
+    a #\texttt{é}#t#\texttt{é}# transform#\texttt{é}# en 
+  plus(plus(suc(suc(#\colcode{darkgreen}{suc(zero())}#)), #\tomred{suc(zero())}#), #\javablue{suc(suc(zero()))}#)
+\end{tomcode4}
+
+Pour des informations plus détaillées sur les stratégies {\tom} ainsi que sur
+leur implémentation dans le langage, nous conseillons la lecture
+de~\cite{Balland2009, BallandMR08, Balland2012} ainsi que la page dédiée du
+site officiel du projet
+{\tom}\footnote{Voir
+  \url{http://tom.loria.fr/wiki/index.php5/Documentation:Strategies/}.}.
+
+%\ttodo{est-il nécessaire de lister les stratégies disponibles ? Est-il
+%nécessaire d'écrire ce que sont chacune d'entre elles ?}
+%\ttodo{ ?? mettre une explication formelle : fonction, composition, énumération
+%  de positions, etc. ; ? -> oui, certainement}
+
+\index{Stratégie|)}
+
+\section{Ancrages formels}
+\label{subsec:mapping}\index{Ancrages algébriques|(}\index{Mappings|(}
+
+Précédemment, nous avons vu que nous pouvons ajouter des constructions de
+filtrage au sein de langages hôtes et que nous sommes en mesure de filtrer des
+termes. %objets arbitraires. 
+
+Les constructions de filtrage sont compilées indépendamment des implémentations
+concrètes des termes. Ainsi, dans les exemples, nous filtrons sur des termes
+de type \texttt{Nat} et \texttt{NatList}, définis dans la signature {\gom}.
+Cependant, les fonctions {\java} prennent des paramètres d'un type donné que
+le compilateur {\java} est censé comprendre, et nous n'avons pas détaillé la
+manière dont le lien entre les types {\tom} et les types {\java} est assuré.
+%Cependant, les fonctions {\java} prenaient des paramètres de type
+%\texttt{JNat} et \texttt{JNatList}. 
+À la compilation, les instructions sur les
+termes algébriques sont traduites en instructions sur le type de données
+concret représentant ces termes algébriques. Le mécanisme permettant d'établir
+cette relation entre les structures de données algébriques et concrètes
+s'appelle le mécanisme d'\emph{ancrage}, ou \emph{mapping}. Il permet de donner une
+vue algébrique d'une structure de données quelconque afin de pouvoir la
+manipuler à l'aide des constructions {\tom}, sans modifier l'implémentation
+concrète.
+
+On spécifie les \emph{mappings} à l'aide des constructions {\tom}
+\lex{\%typeterm}\index{\tom!\lex{\%typeterm}},
+\lex{\%op}\index{\tom!\lex{\%op}} et \lex{\%oplist}\index{\tom!\lex{\%oplist}}
+pour décrire respectivement les sortes, les opérateurs algébriques et les
+opérateurs variadiques. Dans la section~\ref{subsec:signalg}, nous avons défini
+une signature algébrique, et l'outil {\gom} génère une
+implémentation concrète ainsi que les ancrages. Cela nous permet de rendre
+ce mécanisme complètement transparent pour l'utilisateur. Pour expliquer les
+constructions constituant les \emph{mappings}, nous allons les expliciter 
+sans passer par la génération de {\gom}. Pour la suite de cette section, nous
+prenons l'exemple du type \texttt{Individu} et de l'opérateur
+\texttt{personne}, qui prend trois arguments : un nom et un prénom, de type
+\texttt{String}, et un âge de type \texttt{int}. Nous adoptons aussi une
+notation pour lever toute ambiguïté sur les types : nous préfixons les types
+{\java} de la lettre \texttt{J}, et nous utiliserons l'implémentation qui suit.
+%Nous utiliserons l'implémentation
+%{\java} suivante des entiers de Peano.
+%%Avant d'expliquer ces constructions, le
+%%listing~\ref{code:implementationJPeano} donne l'implémentation concrète des
+%%entiers de Peano que nous utilisons pour ces exemples :
+%%\input{code/implementationJPeano}
+%Avant d'expliquer ces constructions, donnons l'implémentation concrète des
+%entiers de Peano que nous utilisons pour ces exemples.
+Nous considérons les classes {\java} \texttt{JIndividu} et \texttt{JIndividuList}
+suivantes qui implémentent respectivement les types algébriques
+\texttt{Individu} et \texttt{IndividuList}.
+%\lstinputlisting[name=expeano,numberstyle=\tiny,numbers=left,numberblanklines=false,frame=tb,firstnumber=1,firstline=6,lastline=7]{code/ExamplePeano.t}%style=codesource,
+\lstinputlisting[name=exhumain,numberstyle=\tiny,numbers=left,numberblanklines=false,frame=tb,firstnumber=1,firstline=6,lastline=7]{code/ExempleHumain.t}%style=codesource,
+
+
+
+%Nous considérons ensuite les classes {\java} \texttt{Jzero}, \texttt{Jsuc} et
+Nous considérons ensuite les classes {\java} \texttt{Jpersonne} et
+\texttt{JconcJIndividu} suivantes qui implémentent les opérateurs algébriques :
+%\lstinputlisting[name=expeano,numberstyle=\tiny,numbers=left,numberblanklines=false,frame=tb,firstnumber=auto,linerange={9-10,11-22,30-30,48-59,72-72}]{code/ExamplePeano.t}%style=codesource,
+\lstinputlisting[name=exhumain,numberstyle=\tiny,numbers=left,numberblanklines=true,frame=tb,firstnumber=auto,linerange={19-22,24-28,235-256}]{code/ExempleHumain.t}%style=codesource, %9-17
+%avec head et tail
+%\lstinputlisting[name=exhumain,numberstyle=\tiny,numbers=left,numberblanklines=true,frame=tb,firstnumber=auto,linerange={19-22, 24-28,40-51,64-64}]{code/ExempleHumain.t}%style=codesource, %9-17
+
+
+Les sortes \texttt{Individu} et \texttt{IndividuList} sont exprimées {\via} le lexème
+\lex{\%typeterm} comme le montre le listing~\ref{code:typetermIndividu} suivant :
+%\input{code/typetermNat}
+\input{code/typetermIndividu}
+
+La construction \lex{\%typeterm} permet d'établir la relation entre le type
+algébrique \texttt{Individu} et le type concret {\java} \texttt{JIndividu}.
+Deux sous-constructions la composent :
+\begin{itemize}
+  \item \lex{implement} donne l'implémentation effective du langage hôte
+    à lier au type algébrique ; 
+  \item \lex{is\_sort} est utilisée en interne par le compilateur pour tester le
+    type d'un élément (optionnel) ;
+%  \item \lex{equals} définit comment comparer deux termes (optionnel).
+\end{itemize}
+
+La sorte \texttt{Individu} étant définie, il est nécessaire de spécifier à
+{\tom} comment \emph{construire} et comment \emph{détruire} (décomposer) les
+termes de ce type. Pour cela, nous utilisons la construction \lex{\%op}, comme
+illustré par le listing~\ref{code:opIndividu} où l'opérateur \texttt{personne}
+est défini :
+
+%\input{code/opNat}
+\input{code/opIndividu}
+
+La définition d'opérateurs passe par une construction composée de quatre
+sous-cons\-tructions :
+\begin{itemize}
+  \item \lex{is\_fsym} spécifie la manière de tester si un objet donné
+    représente bien un terme dont le symbole de tête est l'opérateur ;
+  \item \lex{make} spécifie la manière de créer un terme ;
+  \item \lex{get\_slot} (optionnel) spécifie la manière de récupérer la valeur
+    d'un champ du terme ;
+  \item \lex{get\_default} (optionnel) donne la valeur par défaut de l'attribut.
+\end{itemize}
+%\todo{[utile ?]}
+Notons que {\tom} ne permet pas la surcharge d'opérateurs, c'est-à-dire
+qu'il n'est pas possible de définir plusieurs opérateurs ayant le même nom, mais
+des champs différents.
+
+La construction \lex{\%oplist} est le pendant de \lex{\%op} pour les opérateurs
+variadiques. Ainsi, dans le listing~\ref{code:opIndividuList}, nous pouvons
+définir un opérateur de liste d'individus \texttt{concIndividu}, de type
+\texttt{IndividuList}, et acceptant un nombre variable de paramètres de type
+\texttt{Individu}.
+%\input{code/typetermNatList} %inutile
+%\input{code/opNatList}
+\clearpage %pour éviter une coupure
+\input{code/opIndividuList}
+
+Les sous-constructions suivantes la composent :
+\begin{itemize}
+  \item \lex{is\_fsym} spécifie la manière de tester si un objet donné
+    représente bien un terme dont le symbole de tête est l'opérateur ;
+  \item \lex{make\_empty} spécifie la manière de créer un terme vide;
+  \item \lex{make\_insert} spécifie la manière d'ajouter un fils en
+    première position à la liste ;
+  \item \lex{get\_head} spécifie la manière de récupérer le premier élément de
+    la liste;
+  \item \lex{get\_tail} spécifie la manière de récupérer la queue de la liste
+    (sous-liste constituée de la liste privée du premier élément) ;
+  \item \lex{is\_empty} spécifie la manière de tester si une liste est vide.
+\end{itemize}
+
+
+Notons que le langage {\tom} supporte aussi le
+sous-typage~\cite{tavares09,Tavares2012}. Il est donc possible de spécifier un
+type comme sous-type d'un autre type déjà exprimé. Cette relation de
+sous-typage exprimée dans les types {\tom} doit évidemment être cohérente avec
+celle exprimée dans l'implémentation concrète en {\java}. Reprenons l'exemple
+précédent des \emph{individus} et considérons différents sens possibles :
+\emph{être vivant} (sens couramment utilisé, d'où le constructeur
+\texttt{personne}), \emph{spécimen vivant d'origine animale ou végétale} (en
+biologie) et \emph{élément constituant un ensemble} (en statistiques). Le type
+\emph{Individu} pouvant être ambigu, nous décidons de le préciser en intégrant
+des sous-types. Pour cela, il existe une construction {\tom} permettant de
+spécifier un sous-type dans un ancrage algébrique : \lex{extends}, qui complète
+la construction \lex{\%typeterm}.
+
+\input{code/subtype.tex}
+
+Dans le listing~\ref{code:subtypeIndividu}, nous déclarons donc un nouveau
+type, \texttt{IndividuBiologie}, sous-type de \texttt{Individu} (lignes 1 à 5).
+Il est implémenté par le type {\java} \texttt{JIndividuBiologie} dont la
+relation de sous-typage avec \texttt{JIndividu} est exprimée par la
+construction {\java} consacrée à l'héritage : \lex{extends} (ligne 7). Il est
+ensuite possible de définir de manière classique des opérateurs de type
+\texttt{IndividuBiologie} comme l'illustre le listing~\ref{code:opSubtype}.
+
+\input{code/opSubtype}
+
+\index{Ancrages algébriques|)}\index{Mappings|)}
+
+\section{Domaines d'applications}
+
+{\tom} est particulièrement utile pour parcourir et transformer les structures
+arborescentes comme {\xml} par exemple. Il est donc tout à fait indiqué pour
+écrire des compilateurs ou interpréteurs, et plus généralement des outils de
+transformation de programmes ou de requêtes. Outre son utilisation pour écrire
+le compilateur {\tom} lui-même, nous noterons son usage dans les cadres
+académiques et industriels suivants :
+\begin{itemize}
+
+  \item implémentation d'un mécanisme défini par Guillaume Burel dans sa
+    thèse~\cite{burel09} pour une méthode des tableaux particulière appelée
+    {\tamed}~\cite{bonichon04} ;
+    
+  \item prototypage de langages tels que {\miniml} dont la compilation a été
+    décrite par Paul Brauner dans sa thèse~\cite{brauner10} ; 
+
+  \item implémentation d'un assistant à la preuve tel que {\lemuridae}
+    développé par Paul Brauner pour un calcul des séquents nommé
+    {\lkms}~\cite{brauner10} ;
+
+  \item implémentation de compilateurs ou interpréteurs, comme le
+  compilateur {\pluscaltwo}
+  \footnote{Voir \url{https://gforge.inria.fr/projects/pcal2-0/}.} qui traduit des
+  algorithmes exprimés en {\pluscal} en {\tlaplus} pour faire du
+  \emph{model-checking} ;
+
+  \item raisonnement formel sur la plateforme
+    {\rodin}~\footnote{Voir \url{http://www.event-b.org/}.}. Il s'agit d'un outil
+    industriel \emph{open source} développé par
+    Systerel\footnote{Voir \url{http://www.systerel.fr/}.} qui permet de formaliser,
+    d'analyser et de prouver les spécifications de systèmes complexes ;
+
+    %http://ovado.fr/
+
+%Tom est utilisé pour la plateforme Rodin (http://www.event-b.org/), notamment
+%pour faire du raisonnement formel. La plateforme Rodin est un outil industriel
+%open-source qui permet de formaliser, d'analyser et de prouver les
+%spécifications de systèmes complexes.
+
+  \item outil de transformation de requêtes OLAP (\emph{OnLine Analytical
+    Processing}) en requêtes {\sql} (\emph{Structured Query Language}) pour
+    assurer la rétro-compatibilité entre les versions du logiciel
+    {\crystalreports}\footnote{Voir \url{http://crystalreports.com/}.} développé par
+    Business Object\footnote{Voir \url{http://www.businessobjects.com/}.} ;
+    
+  \item transformations de modèles qualifiables pour les systèmes embarqués
+  temps-réel dans le projet
+{\quarteft}\footnote{Site du projet : \url{http://quarteft.loria.fr/}.} porté par le LAAS-CNRS
+\footnote{Laboratoire d'Analyse et d'Architecture des Systèmes :
+  \url{http://www.laas.fr/}.}, l'IRIT \footnote{Institut de Recherche en
+  Informatique de Toulouse : \url{http://www.irit.fr/}.}, l'ONERA-DTIM
+  \footnote{Office national d'études et de recherches aérospatiales :
+    \url{http://www.onera.fr/fr/dtim/}.} et Inria Nancy ainsi que nos partenaires
+    industriels Airbus\footnote{Voir \url{http://www.airbus.com/}.} et Ellidiss
+    Software\footnote{Voir \url{http://www.ellidiss.com/}.}. C'est dans ce cadre que
+    s'inscrit cette thèse.
+
+\end{itemize}
+
+\index{\tom|)}
+
+
+
+\section{Apport de la thèse au projet {\tom}}
+\label{sec:contrib}
+%\ttodo{contrib technique : extension \%transformation, \%resolve, \%tracelink,
+%participation/évolution de {\tom}-{\emf} (prototype développé avant ma thèse),
+%schéma pour que ce soit plus clair ; contribution : expression de
+%transformations haut-niveau accessibles à tous ; expression de modèles EMF
+%Ecore ; traçabilité}
+
+Durant cette thèse, j'ai contribué techniquement au projet {\tom}. La
+figure~\ref{fig:wholeTomProcessBeforeThesis} illustre le fonctionnement global
+du système {\tom} au début de ma thèse, et sert de point de comparaison avec la
+figure~\ref{fig:wholeTomProcessContrib} pour illustrer cet apport de
+développement. 
+
+\begin{figure}[h]
+  \begin{center}
+%    \begingroup
+%    \tikzset{every picture/.style={scale=0.9}}
+    \input{figures/wholeTomProcessBeforeThesis}
+%    \endgroup
+  \end{center}
+  \caption{Fonctionnement global du projet {\tom} en début de thèse.}
+  \label{fig:wholeTomProcessBeforeThesis}
+\end{figure}
+
+La contribution technique de cette thèse au projet {\tom} a consisté en
+l'extension du langage {\tom} par l'ajout de constructions haut-niveau dédiées
+à la transformation de modèles. Ces constructions haut niveau
+(\lex{\%transformation}, \lex{\%resolve} et \lex{\%tracelink}) sont détaillées
+dans le chapitre~\ref{ch:outils}. La construction \lex{\%transformation}
+implémente une méthode proposée dans~\cite{Bach2012} pour transformer des
+modèles {\emf} {\ecore}, tout en simplifiant l'écriture de la transformation
+pour l'utilisateur. Cette méthode se déroule en deux phases :
+\begin{itemize}
+  \item une phase de \emph{décomposition} de la transformation en
+    transformations élémentaires encodées par des stratégies {\tom} ;
+  \item une phase de \emph{réconciliation} durant laquelle le résultat
+    intermédiaire obtenu lors de la première phase est rendu cohérent et
+    conforme au métamodèle cible.
+\end{itemize}
+Les constructions \lex{\%resolve} et \lex{\%tracelink} servent à la phase de
+\emph{réconciliation} d'une transformation de modèle suivant la méthode
+proposée. En suivant cette approche, l'utilisateur peut écrire les
+transformations élémentaires de manière indépendante et sans aucune notion
+d'ordre d'application des pas d'exécution de la transformation.
+
+La construction \lex{\%tracelink} présente aussi un intérêt en termes de
+traçabilité de la transformation. Nous souhaitons générer des traces
+d'exécution de la transformation à la demande de l'utilisateur, ce pour quoi
+\lex{\%tracelink} a été conçue.
+
+Cela a eu pour conséquence l'ajout d'un nouveau greffon (voir la
+figure~\ref{fig:tomArchi}) dans la chaîne de compilation (\emph{transformer}),
+ainsi que l'adaptation de cette chaîne, du \emph{parser} au \emph{backend},
+afin de prendre en compte cette extension du langage.\\
+Outre l'évolution du langage {\tom} lui-même, le générateur d'ancrages
+algébriques {\tomemf} a aussi évolué et est maintenant disponible en
+version stable.
+%\todo{[schéma bof bof ; en fait ce schéma peut apparaitre plus loin, dans la
+%partie outillage avec les travaux d'implémentation, ici ce serait bien d'avoir
+%un schéma plus simple, ou alors pas de schéma ?] }
+
+%La figure~\ref{fig:wholeTomProcessContrib} permet de visualiser ces
+%contributions, les pointillés mettant en avant les points essentiels d'apport
+%de mon travail au projet {\tom}.
+
+Nos contributions au projet {\tom} apparaissent en pointillés sur la
+figure~\ref{fig:wholeTomProcessContrib}.
+
+%Les
+%pointillés dans la figure~\ref{fig:wholeTomProcessContrib} mettent en avant les
+%points essentiels d'apport de mon travail au projet {\tom}.
+
+\begin{figure}[h]
+  \begin{center}
+    \input{figures/wholeTomProcessContrib}
+  \end{center}
+  \caption{Fonctionnement global de {\tom} et contributions de ce travail de thèse au projet.}
+  \label{fig:wholeTomProcessContrib}
+\end{figure}
+
+
+%La figure~\ref{fig:wholeTomProcessContrib} illustre le fonctionnement global du
+%système {\tom}. Les zones en pointillés %fig:apportTheseTom}
+%mettent en avant les points essentiels d'apport de cette thèse au projet {\tom}.
+
+%\input{figures/wholeTomProcess}
+%\ttodo{faire la version précédente sans le dessous, puis la même avec les pointillés $\righarrow$ c'est wholeTomProcessContrib}
+%\input{figures/wholeTomProcess2}
+%\input{figures/tomSystemContrib}
+%\input{figures/tomEMFCompiler}
+
+% vim:spell spelllang=fr

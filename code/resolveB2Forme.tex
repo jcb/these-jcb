@@ -1,0 +1,13 @@
+\begin{mycode}
+#\tomblue{\%transformation}# Text2Picture(gp:GeoPicture):text.ecore->geopicture.ecore {
+  ...
+  #\tomblue{definition}# B2BluePentagon {
+    #\hlred{b}#@BText[...] -> {
+      GreenSquare square = #\tomblue{\%resolve}#(#\hlred{b}#:BText,square_connector:GreenSquare); 
+      BluePentagon pentagon = `Pentagon("blue",square); 
+      }
+    }
+  }
+  ...
+}
+\end{mycode}

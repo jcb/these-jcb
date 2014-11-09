@@ -1,0 +1,103 @@
+%\begin{figure}[H]
+
+  % Define the layers to draw the diagram
+  \pgfdeclarelayer{tomgombackground}
+  \pgfdeclarelayer{tombackground}
+  \pgfsetlayers{tomgombackground,tombackground,main}
+
+  % Define a new shape: page with a folded corner 
+  \makeatletter
+  \pgfdeclareshape{flippedpage}{
+    \inheritsavedanchors[from=rectangle] % this is nearly a rectangle
+    \inheritanchorborder[from=rectangle]
+    \inheritanchor[from=rectangle]{center}
+    \inheritanchor[from=rectangle]{north}
+    \inheritanchor[from=rectangle]{south}
+    \inheritanchor[from=rectangle]{west}
+    \inheritanchor[from=rectangle]{east}
+    % ... and possibly more
+    \backgroundpath{% this is new
+    % store lower left in xa/ya and upper right in xb/yb
+    \southwest \pgf@xa=\pgf@x \pgf@ya=\pgf@y
+    \northeast \pgf@xb=\pgf@x \pgf@yb=\pgf@y
+    % compute corner of ``flipped page''
+    \pgf@xc=\pgf@xb \advance\pgf@xc by-5pt % this should be a parameter
+    \pgf@yc=\pgf@yb \advance\pgf@yc by-5pt
+    % diagonal path of the corner 
+    \pgfpathmoveto{\pgfpoint{\pgf@xa}{\pgf@ya}}
+    \pgfpathlineto{\pgfpoint{\pgf@xa}{\pgf@yb}}
+    \pgfpathlineto{\pgfpoint{\pgf@xc}{\pgf@yb}}
+    \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@yc}}
+    \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@ya}}
+    \pgfpathclose
+    % add little corner
+    \pgfpathmoveto{\pgfpoint{\pgf@xc}{\pgf@yb}}
+    \pgfpathlineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+    \pgfpathlineto{\pgfpoint{\pgf@xb}{\pgf@yc}}
+    \pgfpathlineto{\pgfpoint{\pgf@xc}{\pgf@yc}}
+    }
+  }
+
+  % Define block styles
+  \tikzstyle{compiler}=[draw, fill=blue!20, text width=6em, text centered, minimum height=2.5em, rounded corners]
+  %\tikzstyle{compiler2}=[diamond, aspect=2, draw, fill=blue!20, text centered, rounded corners=1]
+  \tikzstyle{compiler2}=[diamond, aspect=2, draw, text centered, rounded
+  corners=1, text width=5.8em]
+  %\tikzstyle{code}=[draw,shape=flippedpage,text width=2.7em, text centered, minimum height=3.7em,fill=white]
+  \tikzstyle{code}=[draw,shape=flippedpage,text width=3em, text centered,
+  minimum height=4.2em,fill=white]
+  \tikzstyle{texttitle}=[fill=white, rounded corners, draw=black!50, dashed]
+  \tikzstyle{background}=[fill=yellow!20, rounded corners, draw=black!50, dashed]
+
+%  \begin{center}
+
+\definecolor{myred}{HTML}{d01e1e}
+\definecolor{mygreen}{HTML}{129d1c}
+\definecolor{myblue}{HTML}{0000FF}
+
+  %\begin{tikzpicture}[>=latex, node distance=3cm, on grid, auto]
+  \begin{tikzpicture}[>=latex, on grid, auto, node distance=2.5cm, scale=1.0]
+
+    % Draw diagram elements
+    \node (tomcomp) [compiler2] {\figcode{\textbf{Compilateur {\tom}}}};
+    \node (tomcode) [myblue, code, left of=tomcomp,xshift=-1.0cm] {\figcode{Tom
+    \\ \color{black}{+} \\ \color{myred}{Java}}};
+
+    \node (emfmapping) [myblue,code, above of=tomcomp] {\figcode{Ancrages algébriques}};
+    \node (tomemf) [compiler2, above of=javacode,yshift=1.5cm] {\figcode{\textbf{{\tomemf}}}};
+    \node (emfstruct) [myred,code, above of=javacomp,yshift=3cm] {\figcode{Structures Java EMF}};
+    
+    \node (emf) [compiler2, above of=emfmapping,yshift=0.5cm] {\figcode{\textbf{{\emf}}}};
+
+    \node (ecore) [mygreen,left of=emf,xshift=-1.5cm,text width=3em, text centered] {\figcode{MM .ecore}};
+
+\node (mm1)[mygreen,rectangle, minimum width=0.5cm, minimum height=0.5cm,draw,left of=ecore,yshift=0.8cm,xshift=2.2cm]{};
+\node (mm2)[mygreen,rectangle, minimum width=0.5cm, minimum height=0.5cm,draw,below of=mm1,yshift=1.4cm,xshift=-0.6cm]{};
+\node (mm3)[mygreen,rectangle, minimum width=0.5cm, minimum height=0.5cm,draw,right of=mm1,yshift=-0.3cm,xshift=-1.5cm]{};
+\path[mygreen,draw] (mm1) -- (mm2);
+\path[mygreen,draw] (mm1) -- (mm3);
+
+    \node (javacode) [myred,code, right of=tomcomp,xshift=1.0cm] {\figcode{Code Java}};
+    \node (javacomp) [compiler2, right of=javacode,xshift=1.0cm] {\figcode{\textbf{Compilateur {\java}}}};
+    %\node (bytecode) [code, right of=javacomp,xshift=1.0cm] {\figcode{110010}\\\figcode{101110}\\\figcode{010100}};
+    \node (bytecode) [code, below of=javacomp] {\figcode{110010}\\\figcode{101110}\\\figcode{010100}};
+    \path[->] (javacomp) edge (bytecode);
+
+    % Draw arrows between elements
+    \path[->] (mapping) edge (tomcomp);
+    \path[->] (tomemf) edge (emfmapping);
+    \path[->] (emfmapping) edge (tomcomp);
+    \path[->] (emfstruct) edge (tomemf);
+    \path[->] (tomcode) edge (tomcomp);
+    \path[->] (tomcomp) edge (javacode);
+    \path[->] (javacode) edge (javacomp);
+    \path[->] (emf) edge (emfstruct);
+    \path[->] (ecore) edge (emf);
+    %\draw[->] (emfstruct) -- ++(3.5,0) -- (javacomp);
+    \draw[->] (emfstruct) edge (javacomp);
+
+  \end{tikzpicture}
+%  \end{center}
+%  \caption{Processus de compilation d'une transformation de modèles {\tomemf}}
+%\label{fig:tomEMF}
+%\end{figure}

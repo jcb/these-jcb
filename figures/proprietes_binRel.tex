@@ -1,0 +1,74 @@
+\begin{tikzpicture}[node distance=1cm,>=stealth',scale=1,transform shape, on grid, auto]
+
+  \tikzstyle{node}=[text centered]
+
+  %confluence
+  \node (t) {$t$};
+  \node (ghost) [below of=t] {};
+  \node (u) [left of=ghost] {$u$};
+  \node (v) [right of=ghost] {$v$};
+  \node (w) [below of=ghost] {$w$};
+  \node (a) [below of=w] {\scriptsize{(a) Confluence}};
+
+  \path[->,draw] (t) -- node [above,xshift=-0.1cm, yshift=-0.1cm] {$^*$} (u);
+  \path[->,draw] (t) -- node [above,xshift=0.1cm, yshift=-0.1cm] {$^*$} (v);
+  \path[dashed,->,draw] (u) -- node [below,xshift=-0.1cm, yshift=0.1cm] {$^*$} (w);
+  \path[dashed,->,draw] (v) -- node [below,xshift=0.1cm, yshift=0.1cm] {$^*$} (w);
+
+  %Church-Rosser
+  \node (t2) [right of=t,xshift=3.0cm] {};
+  \node (ghost2) [below of=t2] {};
+  \node (u2) [left of=ghost2] {$u$};
+  \node (v2) [right of=ghost2] {$v$};
+  \node (w2) [below of=ghost2] {$w$};
+  \node (b) [below of=w2] {\scriptsize{(b) Church-Rosser}};
+
+  \path[<->,draw] (u2) -- node [above] {$^*$} (v2);
+  \path[dashed,->,draw] (u2) -- node [below,xshift=-0.1cm, yshift=0.1cm] {$^*$}
+  (w2);
+  \path[dashed,->,draw] (v2) -- node [below,xshift=0.1cm, yshift=0.1cm] {$^*$}
+  (w2);
+
+
+  %Confluence locale
+  \node (t3) [right of=t2,xshift=3.0cm] {$t$};
+  \node (ghost3) [below of=t3] {};
+  \node (u3) [left of=ghost3] {$u$};
+  \node (v3) [right of=ghost3] {$v$};
+  \node (w3) [below of=ghost3] {$w$};
+  \node (c) [below of=w3] {\scriptsize{(c) Confluence locale}};
+
+  \path[->,draw] (t3) -- node [above,xshift=-0.1cm, yshift=-0.1cm] {} (u3);
+  \path[->,draw] (t3) -- node [above,xshift=0.1cm, yshift=-0.1cm] {} (v3);
+  \path[dashed,->,draw] (u3) -- node [below,xshift=-0.1cm, yshift=0.1cm] {$^*$}
+  (w3);
+  \path[dashed,->,draw] (v3) -- node [below,xshift=0.1cm, yshift=0.1cm] {$^*$}
+  (w3);
+
+  %\begin{scope}
+  %  %confluence
+  %  \node [node] (t) {$t$};
+  %  \path (t)+(-1.3,-1.3) node (u)	[node]{$u$};
+  %  \path (t)+(1.3,-1.3) node (v) [node]	{$v$};
+  %  \path (u)+(1.3,-1.3) node (w)	[node] {$w$};
+
+  %  %Church-Rosser
+  %  \path (v)+(4.0,0.0) node (u2) 			[node]	{$u$};
+  %  \path (u2)+(2.6,0.0) node (v2)			[node]	{$v$};
+  %  \path (u2)+(1.3,-1.3) node (tt)			[node]	{$w$};
+  %\end{scope}
+
+  % Draw arrows between elements
+  %confluence
+	%\path [draw, ->] (t.south)+(-0.2,0.0) -- node [above] {$^*$} (u);
+	%\path [draw, ->] (t.south)+(0.2,0.0)-- node [above] {$^*$} (v);
+	%\path [draw, dashed, ->] (u.south)+(0.2,0.0)-- node [above] {$^*$}
+  %(w);
+	%\path [draw, dashed, ->] (v.south)+(-0.2,0.0)-- node [above] {$^*$}
+  %(w);
+
+  %Church-Rosser
+	%\path [draw, <->] (u2.east)+(0.0,0.0) -- node 		[above] {$^*$} (v2);
+	%\path [draw, dashed, ->] (u2.south)+(0.2,0.0)-- node 	[above] {$^*$} (tt);
+	%\path [draw, dashed, ->] (v2.south)+(-0.2,0.0)-- node 	[above] {$^*$} (tt);
+\end{tikzpicture}

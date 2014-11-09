@@ -1,0 +1,8 @@
+\begin{tomcode3}[label=code:matchAltPeanoPlus,caption=Écriture alternative de la construction de filtrage \lex{\%match} appliquée à l'exemple de l'addition des entiers de Peano]
+Nat peanoPlus(Nat t1, Nat t2) {
+  #\tomgray{\%match \{}#
+    #\tomgray{x << t1, zero() << t2 -> \{}# return #\tomgray{`x}#; #\tomgray{\}}#
+    #\tomgray{x << t1, suc(y) << t2 -> \{}# return #\tomgray{`suc(}#peanoPlus(#\tomgray{x}#,#\tomgray{y}#)#\tomgray{)}#; #\tomgray{\}}#
+  #\tomgray{\}}#
+}
+\end{tomcode3}

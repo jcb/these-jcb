@@ -1,0 +1,1438 @@
+% vim:spell spelllang=fr
+\chapter{Outils pour exprimer une transformation de modèles en Tom}
+\label{ch:outils}
+%15p
+
+Dans ce chapitre, nous traitons de notre contribution au langage {\tom} et de
+la manière dont notre approche de transformation de modèles par réécriture est
+implémentée. Dans un premier temps, nous donnons le mode opératoire concret
+pour utiliser nos outils en nous appuyant sur l'exemple de transformation vu
+précédemment. Nous présentons ensuite l'extension du langage {\tom} dédiée aux
+transformations de modèles, puis nous expliquons son implémentation technique
+au sein du compilateur, ainsi que l'implémentation du générateur d'ancrages
+formels.
+
+%%Réorganisation du chapitre :
+% 1. Exemple pratique super concret (ex 3)
+% 2. Extension du langage mais en présentant resolve+tracelink ensemble (ex1)
+% 3. Implémentation (ex2)
+% 4. Synthèse 
+
+\section{Exemple d'utilisation des outils}
+
+%\todo{ici : j'écris une version pour l'exemple en couleurs ? Je me suis appuyé
+%dessus avant, cette section a-t-elle du sens ? ou alors c'est avant que je
+%n'aurais pas dû parler des constructions ?\\
+%Non, en fait ici on parle d'utilisation concrète, le déroulé d'une
+%implémentation vient dans le chapitre suivant sur le cas d'étude SimplePDL, etc.}
+
+Cette section présente l'utilisation de nos outils d'un point de vue concret.
+Nous expliquons le processus d'écriture d'une transformation de modèles avec
+eux. Pour cela, nous proposons de nous appuyer sur la transformation de texte
+en formes géométriques colorées présentée dans un chapitre précédent et que
+nous rappelons dans la section~\ref{ch:outils:subsec:ex} ci-après. L'objectif
+de cette transformation est purement pédagogique et sert uniquement à illustrer
+l'utilisation de nos outils pour ensuite introduire notre extension du langage.
+Nous ne nous intéressons donc pas à sa pertinence ni à son utilité dans le
+cadre d'un développement en contexte industriel.
+
+\subsection{Exemple support}
+\label{ch:outils:subsec:ex}
+
+Le principe général de cette transformation de modèle est de transformer un
+modèle sous forme de texte en une représentation graphique, comme l'illustre la
+figure~\ref{fig:rappelSimpleTransfo}.
+
+\begin{figure}[h]
+  \begin{center}
+   \input{figures/simpleApproachExample}
+   \caption{Exemple de transformation de texte en formes géométriques colorées.}
+    \label{fig:rappelSimpleTransfo}
+  \end{center}
+\end{figure}
+
+Les figures~\ref{fig:textmmodel} et~\ref{fig:picturemmodel} sont deux
+métamodèles que nous proposons et auxquels les modèles source et cible de la
+figure~\ref{fig:rappelSimpleTransfo} se conforment respectivement.
+
+\begin{figure}[h]
+  \begin{center}
+    \input{figures/textmmodel}
+    \caption{Un métamodèle pouvant décrire le formalisme textuel (source)
+    utilisé dans l'exemple support.}
+    \label{fig:textmmodel}
+  \end{center}
+\end{figure}
+
+Un texte (\emph{Text}) est composé de lettres (\emph{Letter}) et de symboles
+(\emph{Symbol}). Dans notre exemple, les lettres peuvent être soit des A
+(\emph{AText}), soit des B (\emph{BText}) ; tandis que les symboles sont des
+points-virgules (\emph{SemiColon}).
+
+\begin{figure}[h]
+  \begin{center}
+    \input{figures/picturemmodel}
+    \caption{Un métamodèle pouvant décrire le formalisme graphique (cible)
+    utilisé dans l'exemple support.}
+    \label{fig:picturemmodel}
+  \end{center}
+\end{figure}
+
+Une image \emph{GeoPicture} est composée de formes (\emph{Shape}) caractérisées
+par une couleur (\emph{Color}, pouvant prendre les valeurs \emph{red},
+\emph{green} et \emph{blue}). \emph{Shape} est abstraite, et plusieurs formes
+concrètes en héritent (\emph{Triangle}, \emph{Pentagon}, \emph{Hexagon},
+\emph{Square}, \emph{Circle}). Les formes géométriques sont reliées entre elles
+par des segments (\emph{Segmen}).
+
+
+\FloatBarrier
+
+\subsection{Mode opératoire}
+
+Concrètement, un utilisateur souhaitant implémenter une transformation de
+modèle devra opérer par étapes, obtenues en fonction de l'outil principal à
+utiliser :
+\begin{enumerate}
+
+  \item {\eclipse} : modélisation et génération des structures de données
+    {\java-\emf} ;
+
+  \item {\tomemf} : génération des ancrages formels pour représenter les
+    modèles comme des termes (passerelle opérant le changement d'espace
+    technologique) ;
+
+  \item {\tomjava} : écriture effective de la transformation.
+
+\end{enumerate}
+
+\paragraph{Étape 1 :} La première étape consiste à modéliser le problème,
+c'est-à-dire à définir les métamodèles source et cible, en utilisant {\eclipse}
+ou tout autre outil capable de générer un métamodèle au format \texttt{.ecore}.
+Supposons que ces métamodèles source et cible s'appellent respectivement
+\texttt{text.ecore} et \texttt{picture.ecore}.
+
+Depuis ces métamodèles, le générateur de code de {\emf} (\emph{GenModel})
+permet de générer les structures de données {\java} correspondantes qui
+permettent d'instancier et de manipuler les modèles. L'utilisateur souhaitant
+implémenter la transformation n'a pas forcément besoin de se plonger dans ce
+code, étant donné que par la suite il ne manipulera pas directement les
+modèles en {\java+\emf}, mais plutôt des termes algébriques. Une fois le
+code des métamodèles source et cible généré, il suffit de l'exporter sous la
+forme d'archives \texttt{.jar} (par exemple \texttt{text.jar} et
+\texttt{picture.jar} dans notre cas). Une fois cette opération accomplie,
+{\eclipse} n'est plus nécessaire.
+
+\paragraph{Étape 2 :} La seconde étape de la mise en œuvre d'une transformation
+consiste à générer les ancrages algébriques à partir de la représentation
+{\emf} des métamodèles. Cette étape est réalisée en utilisant un outil nommé
+{\tomemf}.  L'utilisateur applique {\tomemf} sur l'archive (ou les archives) en
+spécifiant le nom complet de l'\emph{EPackage} (ou des \emph{EPackages})
+concerné(s). 
+
+Concrètement, la commande suivante permet d'effectuer l'opération (nous
+supposons que les archives \texttt{.jar} sont dans le répertoire courant noté
+\texttt{.} et nous ne les nommons donc pas explicitement :
+
+\begin{verbatim}
+$> emf-generate-mappings -cp . text.TextEPackage picture.PictureEPackage
+\end{verbatim}
+
+Un mécanisme de préfixe a aussi été prévu pour résoudre les conflits de noms.
+Nous supposons dans notre exemple qu'il n'y en a pas et que l'utilisateur n'a
+pas à spécifier des préfixes. 
+%
+%Pour éviter les conflits de noms, l'utilisateur peut définir un préfixe à
+%utiliser lors d'une application de {\tomemf}. Concrètement, avec les noms de
+%fichiers de notre exemple, les commandes suivantes conviendraient :
+%
+%\begin{verbatim}
+%$> emf-generate-mappings -cp ./text.jar -prefix Text_ text.TextPackage
+%
+%$> emf-generate-mappings -cp ./picture.jar -prefix Pic_ picture.PicturePackage
+%\end{verbatim}
+%
+%Dans les deux cas, les commandes précédentes entraînent la génération de deux
+La commande précédente entraîne la génération de deux fichiers d'ancrages
+---~un par \emph{EPackage} spécifié~--- nommés respectivement
+\texttt{text.TextEPackage.tom} et \texttt{picture.PictureEPackage.tom}. %Dans le
+%premier cas, les types et opérateurs ne sont pas préfixés, dans le second,
+%chaque \emph{mapping} a un préfixe (les types primitifs et {\ecore} sont
+%exclus).
+Dans notre exemple, les types et opérateurs ne sont pas préfixés. Si
+l'utilisateur avait choisi de spécifier un préfixe, chaque \emph{mapping}
+aurait eu un préfixe (les types primitifs et {\ecore} sont exclus).
+
+%Il est aussi possible d'intégrer le sous-typage au moment de la génération des
+%ancrages algébriques
+
+La passerelle permettant d'opérer le changement d'espace technologique étant
+générée, l'outil {\tomemf} n'est plus utile pour le reste du développement.
+
+
+\paragraph{Étape 3 :} Il s'agit de l'écriture en {\tomjava} de la
+transformation à proprement parler. Cette étape consiste en un développement
+{\java} classique intégrant des constructions {\tom} en son sein, notamment
+\lex{\%transformation} pour spécifier la transformation. Pour pouvoir manipuler
+les modèles comme des termes algébriques, il est nécessaire d'inclure les
+fichiers d'ancrages que nous venons de générer avec {\tomemf}. Dans notre
+exemple, les inclusions (îlot formel \texttt{\%include}) et la transformation
+(îlot formel \texttt{\%transformation}) apparaissent comme illustré dans le
+listing~\ref{code:exInclude}.
+
+\begin{figure}[H]
+  \centering
+  \input{code/exInclude}
+%  \caption{<+caption text+>}
+%  \label{fig:<+label+>}
+\end{figure}
+
+Dans ce programme, un modèle peut être soit chargé en utilisant les services
+{\emf} (chargement d'un modèle sérialisé dans un fichier \texttt{.xmi}), soit
+créé avec la construction \emph{backquote} de {\tom} (\lex{`}), comme tout
+autre terme. Quelle que soit la méthode choisie, le modèle peut ensuite être
+manipulé en tant que terme. À ce titre, il est possible de filtrer des motifs
+et d'appliquer des stratégies de réécriture (donc des transformations {\tom}).
+
+Une fois le développement terminé, le programme doit être compilé en deux
+temps. Il faut procéder à une compilation {\tom} pour \emph{dissoudre} les
+îlots formels {\tom} dans le langage hôte, puis compiler normalement le code
+{\java} généré en intégrant les bibliothèques générées par {\emf}. L'exécution
+du programme est identique à toute exécution de programme {\java}.
+
+\begin{verbatim}
+$> tom TestText2Picture.t
+$> javac -cp ./text.jar:./picture.jar:${CLASSPATH} TestText2Picture.java
+$> java -cp ./text.jar:./picture.jar:${CLASSPATH} TestText2Picture
+\end{verbatim}
+
+
+%%%%%%%
+
+\section{Extension du langage}
+
+Nous avons vu le mode opératoire pour écrire une transformation de modèles avec
+nos outils dans la section précédente, sans détailler le langage lui-même. Nous
+décrivons nos constructions dans cette section. Nous avons vu dans le
+chapitre~\ref{ch:approach} que nous décomposons les transformations de modèles
+en transformations élémentaires (\emph{Letter2Shape} par exemple), encodées par
+des stratégies de réécriture.  Nous formons ensuite une stratégie en les
+composant avec d'autres combinateurs élémentaires tels que \texttt{Sequence} ou
+\texttt{TopDown}. Nous avons aussi vu que cela constitue la première phase
+d'une transformation suivant notre approche et qu'il faut procéder à une
+seconde phase ---~\emph{résolution}~---, elle aussi encodée par une stratégie
+de réécriture.
+
+Pour mettre en œuvre la méthode générale de transformation que nous
+proposons~\cite{Bach2012}, nous avons ajouté trois constructions principales au
+langage {\tom} :
+
+%\begin{itemize}
+%  \item exprimer une transformation ;
+%  \item intégrer et créer les éléments \emph{resolve} ;
+%  \item assurer la traçabilité de la transformation.
+%\end{itemize}
+%
+\begin{itemize}
+
+  \item \lex{\%transformation} pour exprimer une transformation
+    (listing~\ref{transformationConstructSyntax}) ;
+
+  \item \lex{\%resolve} pour intégrer et créer les éléments \emph{resolve}
+    (listing~\ref{resolveConstructSyntax}) ;
+
+  \item \lex{\%tracelink} pour assurer la résolution des liens ainsi que la
+    traçabilité de la transformation (listing~\ref{tracelinkConstructSyntax}).
+
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \input{code/transformationSyntax}
+%  \caption{Syntaxe concrète de la construction \%transformation}
+%  \label{transformationConstructSyntax}
+\end{figure}
+
+\begin{figure}[H]
+  \begin{center}
+    \input{code/resolveSyntax}
+  \end{center}
+  %\caption{Syntaxe concrète de la construction \%resolve}
+  %\label{resolveConstructSyntax}
+\end{figure}
+
+\begin{figure}[H]
+  \begin{center}
+    \input{code/tracelinkSyntax}
+  \end{center}
+  %\caption{Syntaxe concrète de la construction \%tracelink}
+  %\label{tracelinkConstructSyntax}
+\end{figure}
+
+
+Ces constructions nous permettent d'implémenter des transformations avec les
+caractéristiques suivantes, selon des critères proposés par
+Czarnecki~\cite{Czarnecki2003,ibm06} :
+%portée de la transformation
+%\ttodo{reprendre les critères de Czarnecki~\cite{Czarnecki2003,ibm06} et les
+%mettre en relation avec ce que je fais ? :
+\begin{itemize}
+
+  \item \textbf{règles de transformation :} une règle contient des
+    \emph{patterns} et des variables, et bénéficie de typage. L'application
+    des règles peut être contrôlée par le paramétrage des transformations
+    élémentaires que l'utilisateur averti peut faire varier ;
+
+  \item \textbf{ordonnancement des règles :} nos règles ne sont pas ordonnées
+    ni interactives. Par défaut, et si le flot d'exécution n'est pas interrompu
+    (par des instructions du type \texttt{break} ou \texttt{return}), les règles
+    sont appliquées sur tous les motifs filtrés du modèle source. Ce
+    comportement peut toutefois être modifié par le paramétrage de la
+    \emph{définition} en cours {\via} une stratégie {\adhoc}. L'ordre
+    d'écriture des \emph{définitions} et des règles n'a pas d'impact sur le
+    résultat final ;
+
+  \item \textbf{découpage en phases :} nos transformations sont constituées de
+    deux phases, l'une pour transformer, l'autre pour \emph{résoudre} les
+    liens ;
+
+  \item \textbf{sens des règles et des transformations :} nos règles sont
+    unidirectionnelles, nos transformations ne sont pas naturellement
+    bidirectionnelles ;
+
+  \item \textbf{modularité et mécanismes de réutilisation :} nos
+    transformations reposent sur le langage de stratégies de réécriture de
+    {\tom} dont l'une des caractéristiques est la modularité. Si une règle ne
+    peut être directement réutilisée ailleurs, une \emph{définition} (un
+    ensemble de règles) peut en revanche l'être ;
+
+  \item \textbf{relation entre l'entrée et la sortie :} le modèle cible est
+    différent du modèle source, même dans le cas d'une transformation endogène
+    (transformation \emph{out-place}) ;
+  
+  \item \textbf{portée de la transformation :} tout ou partie du modèle peut
+    être transformé, en fonction des \emph{patterns} dans les règles définies
+    par l'utilisateur ;
+
+  \item \textbf{traçabilité :} durant une transformation, nous maintenons des
+    liens entre les éléments sources et cibles.
+
+\end{itemize}%}
+
+La syntaxe des nouvelles constructions du langage ainsi que les
+caractéristiques des transformations de notre approche étant établies,
+détaillons précisément ces constructions. Pour illustrer notre propos, nous
+nous appuierons sur la transformation proposée en exemple précédemment. Cette
+transformation consiste à transformer le modèle texte \texttt{A;B} en une
+figure constituée de formes géométriques
+(figure~\ref{fig:rappelSimpleTransfo}). 
+
+Afin d'illustrer concrètement l'extension du langage, nous nous appuierons sur
+l'extrait de code donné par le listing~\ref{code:transformationText2Picture}.
+Les points de suspension dénotent le fait qu'il est parcellaire dans le but de
+mettre en avant les nouvelles constructions du langage et de rendre plus
+lisible l'extrait de code ainsi que son explication. Nous adoptons en outre le
+code visuel suivant : les nouvelles constructions du langage apparaissent en
+\colcode{blue}{bleu } tandis que le texte souligné et coloré marque les
+correspondances dans la transformation entre les éléments des constructions. Ce
+code visuel permet de comprendre clairement les relations entre les termes
+créés par les nouvelles constructions du langage.
+
+%et  \myul{magenta}{pour} \myul{black}{les} nouvelles constructions du langage.
+%Nous adoptons aussi le code visuel bleu pour les nouvelles constructions du langage.
+
+\begin{figure}[h]
+  \begin{center}
+    \input{code/transformationText2Picture}
+  \end{center}
+%  \caption{Extrait de code de la transformation \emph{Text2Picture} illustrant les nouvelles constructions {\tom} dédiées aux transformations de modèles}
+%  \label{code:transformationText2Picture}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{Expression d'une transformation}
+
+Une transformation prend un modèle source en paramètre et renvoie un modèle
+cible. L'encodant sous la forme d'une stratégie de réécriture composée, nous
+proposons une construction haut niveau gérant automatiquement sa combinaison.
+Elle est composée de transformations élémentaires ---~\emph{définitions}~---,
+représentées par des blocs \texttt{definition}. Une \emph{définition} opère une
+transformation sur des éléments d'un type unique : deux
+éléments ayant des types différents (et sans surtype commun) ne peuvent être
+transformés dans une même \emph{définition}. Une transformation comporte donc
+au moins autant de \emph{définitions} qu'il y a de types d'éléments que
+l'utilisateur souhaite transformer. Chaque \emph{définition} est constituée
+d'un ensemble de règles de réécriture composées d'un \emph{pattern} (membre
+gauche) ainsi que d'une action (membre droit). Une action est un bloc pouvant
+contenir du code hôte et du code {\tom}. De plus, chaque \emph{définition}
+---~encodée par une stratégie~--- est nommée et paramétrée par une stratégie de
+parcours que l'utilisateur averti peut faire varier.
+
+Chacune de ces \emph{définitions} est écrite sans notion d'ordre par rapport
+aux autres \emph{définitions} et elles n'entretiennent aucune dépendance dans
+le sens où l'entrée de l'une n'est pas la sortie d'une autre. La transformation
+est de type \emph{out-place} (la source n'est jamais modifiée) et la source de
+chaque \emph{définition} est le modèle source. Le résultat de la
+transformation ne dépend donc pas de l'ordre d'écriture des \emph{définitions}
+adopté par l'utilisateur. La transformation finale est encodée par une
+stratégie qui est une séquence de ces \emph{définitions}.
+
+%Le
+%listing~\ref{code:formeSyntaxeTransfo} illustre la forme générale d'une
+%transformation de modèle écrite selon notre approche.
+%
+%\begin{figure}[H]
+%  \begin{center}
+%    \input{code/formeSyntaxeTransfo}
+%  \end{center}
+%  %\caption{Schéma global d'une transformation de modèle avec {\tom}}
+%  %\label{code:formeSyntaxeTransfo}
+%\end{figure}
+%
+%Cette transformation \texttt{MyTransfo} donnera lieu à une stratégie $MyTransfo
+%= Sequence(TopDown(Nom1),TopDown(Nom2))$.
+
+
+Dans l'exemple, la transformation nommée \texttt{Text2Picture} est introduite
+par le lexème \lex{\%transformation} (ligne 1). Elle sert à transformer un
+modèle conforme au métamodèle \texttt{text.ecore} en un modèle conforme au
+métamodèle \texttt{picture.ecore}, ce qui est symbolisé par les noms de
+fichiers des deux métamodèles de part et d'autre du lexème \lex{\texttt{->}}
+(ligne 2). %On peut donner des chemins absolus ou relatifs,
+%mais en l'absence de tout élément de chemin, seul le répertoire courant est
+%considéré. 
+Cette transformation prend deux arguments : \texttt{link} qui est le
+modèle de lien qui sera peuplé durant la transformation, et \texttt{gp} qui est
+le modèle cible qui sera construit au fur et à mesure de l'avancée des pas
+d'exécution.
+
+Cette transformation est constituée d'au moins deux \emph{définitions} nommées
+\texttt{Letter2Shape} (ligne 4) et \texttt{Symbol2Shape} (ligne 20). Elles sont
+toutes deux paramétrées par une stratégie introduite par le mot-clef
+\texttt{traversal} pouvant être différente pour chaque définition (bien que
+cela n'ait pas d'impact dans cet exemple, nous avons utilisé deux stratégies
+différentes ---~\texttt{TopDown} et \texttt{BottomUp}~--- pour illustrer cette
+possibilité). C'est cette stratégie qui est utilisée pour appliquer les
+transformations élémentaires. Il est à noter que les paramètres de la
+transformation sont aussi les paramètres de ces stratégies. Les
+\emph{définitions} sont constituées de règles de réécriture à l'image des
+stratégies {\tom}. Le fait que la \emph{définition} qui traduit les lettres en
+formes géométriques soit écrite avant ou après celle qui transforme les
+symboles n'a aucune importance. La \emph{définition} \texttt{Letter2Shape}
+comprend deux règles : l'une pour transformer les éléments de type \emph{BText}
+(lignes 5 à 10) et l'autre pour transformer les éléments de type \emph{AText}
+(lignes 11 à 16). La \emph{définition} \texttt{Symbol2Shape} est quant à elle
+constituée d'une seule règle qui transforme les éléments de type
+\emph{SemiColon} (lignes 21 à 28). Une fois définie, une transformation peut
+être utilisée (appelée) comme toute autre stratégie {\tom} {\via} la fonction
+\texttt{visit()}.
+
+Seule, la construction \lex{\%transformation} permet d'exprimer la première
+phase de la transformation en générant une stratégie composée.
+
+
+\subsection{Résolution}
+
+La seconde phase de la transformation (résolution) est exprimée grâce à deux
+autres constructions. 
+
+Pour intégrer et créer des éléments intermédiaires \emph{resolve}, nous avons
+introduit une nouvelle construction : \lex{\%resolve} (syntaxe donnée dans le
+listing~\ref{resolveConstructSyntax}). Elle permet de créer les termes
+intermédiaires pour représenter les éléments censés être créés dans une autre
+\emph{définition}. Cette construction correspond à une spécialisation de la
+construction \emph{backquote} (\lex{`}), en ce sens qu'elle crée un terme tout
+en déclenchant un autre traitement, à savoir la génération d'un \emph{mapping}
+dédié.
+
+%\begin{figure}[h]
+%  \begin{center}
+%    \input{code/resolveSyntax}
+%  \end{center}
+%  %\caption{Syntaxe de la construction \%resolve}
+%  %\label{resolveConstructSyntax}
+%\end{figure}
+
+La construction \lex{\%resolve} prend deux paramètres : l'élément source en
+cours de transformation et le nom de l'élément de l'image d'un élément
+transformé dans une autre définition que ce terme est censé représenter.
+%\ttodo{$\leftarrow$ incompréhensible en français, faire un schéma / dessin pour
+%expliquer qqch du genre : $r_1 = Img(Source_1).x$ insert schéma.} C'est ce
+%mécanisme qu'illustre la figure\needcite.
+
+Cet élément transformé dans une autre \emph{définition} est quant à lui marqué
+comme pouvant être résolu {\via} la construction \lex{\%tracelink} (syntaxe
+donnée dans le listing~\ref{tracelinkConstructSyntax}). Elle est le pendant de
+\lex{\%resolve} et apparaît obligatoirement dans le code si l'utilisation
+d'éléments intermédiaires est nécessaire. Elle correspond elle aussi à une
+spécialisation de la construction \emph{backquote} : elle permet de créer un
+terme tout en mettant à jour la structure de données qui maintient les liens de
+traçabilité \emph{interne} (pour la résolution).
+
+%elle permet de créer un terme tout en mettant à jour une structure qui rend la
+%résolution possible.
+
+La construction \lex{\%tracelink} prend deux paramètres : le nom du terme
+marqué (accompagné de son type) ainsi que le terme lui-même (\emph{terme
+backquote}). 
+
+%Si l'on considère deux \emph{définitions} $d_1$ et $d_2$, et deux sources
+%$s_{i_1}$ et $s_{i_2}$
+%
+%Soient $s_i$ les $i$ éléments du modèle source à transformer. Soit $t_i =
+%Img(s_i)$ l'image de $s_i$ par la transformation. $t_i$ est un ensemble de $j$
+%éléments cibles : $t_i = Img(s_i) = \{ t_{i,j} \}$. Si une règle de cette
+%\emph{définition} nécessite un élément temporaire, un élément \emph{resolve}
+%$r_{i,j}$ doit être créé. Il représente un élément $t_{i',j'}$ obtenu lors de
+%la transformation d'un autre élément source $s_{i'}$. L'image d'une source
+%$s_i$ est donc un ensemble d'éléments cibles $t_{i,j}$ dont certains sont des
+%éléments intermédiaires $r_{i,j}$ jouant le rôle d'éléments $t_{i',j'} \in
+%Img(s_{i'})$.
+
+Dans notre exemple support, la transformation d'un élément \textsf{B} en la
+forme constituée d'un pentagone bleu et d'un connecteur nécessite
+l'introduction d'un élément \emph{resolve}. En effet, le connecteur carré est
+créé dans une autre \emph{définition} ---~\texttt{Symbol2Shape}~--- et nous
+devons utiliser le mécanisme de création d'éléments intermédiaires
+\emph{resolve}. À la ligne 6, nous instancions donc un terme \emph{resolve} qui
+remplacera temporairement l'élément \texttt{target\_right} de l'image de la
+transformation du symbole \emph{SemiColon} (\texttt{;}). Outre le fait de jouer
+le rôle de \emph{placeholder} et de pouvoir être manipulé comme s'il s'agissait
+d'un élément classique du modèle cible, l'élément \emph{resolve} maintient aussi
+un lien entre l'élément source (\texttt{b}, de type \texttt{BText}) qui a
+provoqué sa création et la cible représentée.
+
+Dans notre exemple, ce mécanisme est réitéré dans la \emph{définition}
+suivante (ligne 25) et peut être utilisé autant de fois que nécessaire dans la
+transformation.
+
+%%\ttodo{+ bloc de code pour expliquer ?, reprendre l'exemple graphique, par
+%%exemple resolveB2Forme -> nope, on réutilise le bloc de code d'avant où on met
+%%tout, sinon c'est incompréhensible}
+%%\input{code/resolveB2Forme}
+
+%\ttodo{déplacer DISCUSSION / Nous remarquons que la phase de résolution n'apparaît pas dans l'extrait de
+%code présenté, ce qui est tout à fait normal. En effet, elle est entièrement
+%générée, en fonction de l'utilisation des constructions \lex{\%resolve} au sein
+%de la transformation. Ainsi, une transformation ne nécessitant pas d'éléments
+%\emph{resolve} (donc sans utilisation du lexème \lex{\%resolve}) n'a pas de
+%phase de résolution.} 
+%
+%\ttodo{ déplacer UTILISATION / À l'inverse, l'utilisation de la construction provoque la
+%génération du bloc de résolution dédié au type traité. Dans la version
+%actuellement publiée de l'outil ({\tom-2.10}), cette phase est encodée par une
+%unique stratégie que l'utilisateur n'écrit qu'indirectement par l'usage
+%judicieux des constructions de résolution. L'application de la stratégie de
+%résolution est néanmoins à la charge de l'utilisateur au sein de son programme.
+%Il doit appeler la stratégie en l'appliquant sur le modèle intermédiaire créé
+%lors de la première phase.}
+%
+%\ttodo{déplacer EXPÉRIMENTATION / Nous avons aussi expérimenté une version modulaire de la phase de résolution.
+%Plutôt que de générer une stratégie monolithique effectuant toute la
+%résolution, nous avons écrit une solution alternative générant plusieurs
+%stratégies de résolution partielle, chacune de ces stratégies n'effectuant la
+%réconciliation que sur un type de termes donné. Dans notre exemple, cette
+%alternative générerait deux stratégies distinctes, ainsi qu'une stratégie
+%combinant les deux. L'inconvénient de cette solution est qu'elle est plus
+%complexe à prendre en main pour l'utilisateur. Cependant, elle a l'avantage
+%d'offrir un plus grande modularité en décomposant la seconde phase. Ainsi, le
+%code généré pour une \emph{définition} peut être réutilisé dans une autre
+%transformation, et l'utilisateur averti prendra soin d'accompagner la
+%définition de la (ou des) stratégie(s) de résolution correspondante(s).
+%Pour des raisons d'utilisabilité de nos outils , nous avons fait le choix de
+%diffuser la version du générateur de phase de résolution monolithique dans la
+%version stable de {\tom}.}
+
+\subsection{Traçabilité}
+\label{ch:outils:trace}
+%\ttodo{traçabilité on demand}
+
+Nous avons également étendu le langage afin d'ajouter la traçabilité aux
+transformations. Une possibilité eût été de tracer systématiquement les termes
+créés, puis de mettre en œuvre un mécanisme de requête pour retrouver les
+informations intéressantes. Cependant, cette approche aurait donnée des traces
+extrêmement verbeuses et donc peu exploitables. Pour éviter cet écueil, nous
+avons fait le choix d'une \emph{traçabilité à la demande}, implémentée par la
+construction \lex{\%tracelink} dont la syntaxe a été donnée en début de section
+dans le listing~\ref{tracelinkConstructSyntax}.
+
+%\begin{figure}[h]
+%  \begin{center}
+%    \input{code/tracelinkSyntax}
+%  \end{center}
+%  %\caption{Syntaxe concrète de la construction \%tracelink}
+%  %\label{tracelinkConstructSyntax}
+%\end{figure}
+
+Bien que techniquement implémentée par un unique lexème, la notion de
+traçabilité est double. Ce lexème a donc actuellement deux usages ---~pour deux
+types de traçabilité~--- à savoir :
+\begin{itemize}
+
+  \item assurer la traçabilité \emph{interne} (ou \emph{technique}) : pour
+    spécifier les éléments correspondant aux éléments \emph{resolve} créés lors
+    de la transformation, afin que la phase de résolution puisse effectuer le
+    traitement (nous pouvons parler de \emph{resolveLink}) ;
+
+  \item assurer la traçabilité au sens de la qualification logicielle :
+    construire d'une part le métamodèle de lien à la compilation de la
+    transformation, et d'autre part peupler la trace à l'exécution (nous
+    parlons dans ce cas de \emph{trace}).
+
+\end{itemize}
+
+Quelle que soit la traçabilité voulue, nous souhaitons spécifier à la demande
+quels sont les éléments que nous créons que nous souhaitons tracer.
+L'utilisateur doit donc explicitement désigner les termes {\tom} à tracer.
+Chaque terme traçable appartenant à une \emph{définition} de la transformation,
+l'élément du modèle source dont il est issu est implicite. Du point de vue de
+l'utilisateur, tracer un terme revient simplement à utiliser la construction
+dédiée en spécifiant son nom, son type et en écrivant le terme {\via} la
+construction \emph{backquote}.
+
+Dans le cadre d'une traçabilité \emph{interne}, la construction correspond au
+pendant des éléments \emph{resolve} (\emph{resolveLink}). La création
+d'éléments \emph{resolve} dans la transformation implique alors l'utilisation
+d'au moins un marquage de ce type. Cette utilisation est celle présentée dans
+la section précédente.
+
+Dans le cadre d'une traçabilité de transformation au sens de la qualification
+logicielle, la construction de trace peut être utilisée de manière indépendante
+de la construction pour la résolution. Une transformation peut donc comporter
+des constructions de trace sans qu'aucune construction de résolution ne soit
+utilisée. Dans notre approche, l'utilisateur ne fournit pas de métamodèle de
+lien \emph{a priori}. La construction de trace permet de générer le métamodèle
+de lien de la transformation lors de la compilation, c'est-à-dire de générer
+les structures liant sources et cibles en fonction des termes tracés. À
+l'exécution, ces structures sont peuplées pour maintenir les relations entre
+les sources et les cibles de la transformation. La construction de trace lie un
+élément cible créé à la source en cours de transformation, ce qui permet
+d'établir un ensemble de relations \texttt{1..N} (une source associée à
+plusieurs cibles).
+
+Dans notre exemple support, l'utilisateur a décidé d'opérer une trace minimale,
+c'est-à-dire que les éléments tracés sont ceux qui doivent impérativement être
+tracés pour que la résolution s'opère correctement. C'est donc la traçabilité
+technique qui est essentiellement utilisée ici. Les traces sont activées par
+les lexèmes \lex{\%tracelink} (lignes 12 et 23). Celui de la ligne 23
+correspond à l'élément \emph{resolve} de la ligne 6 (souligné en magenta),
+tandis que celui de la ligne 12 à celui de la ligne 25 (souligné en noir).
+L'utilisateur aurait bien évidemment pu tracer les autres éléments créés (par
+exemple \texttt{bluePentagon} à ligne 7). Même si l'usage de \lex{\%tracelink}
+dans cet exemple fait transparaître la volonté de l'utilisateur d'avoir
+uniquement une traçabilité \emph{technique}, un modèle de lien minimal de la
+transformation est néanmoins créé. La transformation spécifie un modèle de lien
+(\texttt{link} dans notre cas) dans lequel nous stockons les associations
+établies entre les éléments sources et les éléments cibles tracés tout au long
+de la transformation. En fin de transformation, cette trace peut être
+sérialisée pour un usage ultérieur.
+
+En expérimentant nos outils, nous nous sommes aperçus que l'utilisation d'une
+construction unique pour deux usages distincts pouvait perturber l'utilisateur.
+Nous projetons donc à terme de séparer cette construction en deux constructions
+distinctes, chacune adaptée à une des traçabilités.
+
+
+\section{Travaux d'implémentation}
+
+% rappel
+%\usepackage{float}
+%...
+%\begin{figure}[H]
+% ou
+%\begin{figure}[!htbp]
+% ou
+%\usepackage{placeins}
+%...
+%\FloatBarrier
+%\begin{figure}[H]
+
+%\todo{utile ? vient de la réorganisation du premier jet ; refaire, le projet a
+%un peu évolué\\}
+%D'un point de vue plus macroscopique, le projet {\tom} compte environ 60000
+%lignes de code, réparties dans les sous-projets suivants : le compilateur
+%{\tom} lui-même (\texttt{engine}), le générateur d'ancrages algébriques et de
+%structures de données {\java} à partir d'une signature (\texttt{gom}), les
+%bibliothèques (\texttt{library}), le générateur d'ancrages algébriques à partir
+%d'un métamodèle EMF Ecore (\texttt{emf}), ainsi que la plateforme
+%(\texttt{platform}) qui mutualise une partie du code de {\tom} et de {\gom}
+%(gestion des phases). La Table~\ref{table:stats} résume cela avec quelques
+%valeurs chiffrées \ttodo{Mettre à jour}.
+%
+%\begin{table}[H]
+%  \begin{center}
+%    \input{figures/tomstats}
+%    \caption{Nombre de lignes de code dans le compilateur Tom}
+%    \label{table:stats}
+%  \end{center}
+%\end{table}
+
+Les travaux d'implémentation pour étendre le langage ont concerné deux parties
+du projet {\tom} : d'une part le compilateur {\tom}, d'autre part l'outil
+{\tomemf}. 
+
+Avant de détailler la manière dont nous avons mis en œuvre notre extension du
+projet, nous décrivons l'architecture du projet {\tom} ainsi que le processus
+de compilation dans le contexte de {\java}.
+%le projet {\tom} d'un point de vue technique et nous
+%expliquons son architecture ainsi que le processus de compilation dans le
+%contexte de {\java}. 
+Cela nous permettra ensuite d'expliquer comment nous nous
+sommes intégrés dans l'existant.
+
+\subsection{Architecture du projet Tom et chaîne de compilation}
+%\subsection{\todo{Architecture actuelle} vs \todo{Chaîne de compilation et architecture du compilateur Tom}}
+%\section{Langages supportés : \emph{backends}}
+
+Le projet {\tom} s'articule autour de trois outils distincts utilisables
+indépendamment : le compilateur lui-même, {\gom} et l'outil de génération
+d'ancrages formels {\tomemf}.
+
+%Le projet {\tom} s'articule autour de trois outils distincts : le compilateur
+%lui-même, {\gom} que nous ne détaillerons pas ici et l'outil de génération
+%d'ancrages formels {\tomemf}. 
+Le projet {\tom} comprend aussi un ensemble de bibliothèques (notamment la
+bibliothèque de stratégies \texttt{sl}, des ancrages algébriques, un outil de
+conversion {DOM \xml} vers {\gom} et inverse, une bibliothèque de
+\emph{bytecode} {\java}, etc.) ainsi que de très nombreux exemples et tests
+unitaires. La gestion des phases de compilation est assurée par la plateforme
+sur laquelle s'appuient {\tom} et {\gom}.
+
+%D'un point de vue plus macroscopique, le projet {\tom} compte environ 60000
+%lignes de code, réparties dans les sous-projets suivants : le compilateur
+%{\tom} lui-même (\texttt{engine}), le générateur d'ancrages algébriques et de
+%structures de données {\java} à partir d'une signature (\texttt{gom}), les
+%bibliothèques (\texttt{library}), le générateur d'ancrages algébriques à partir
+%d'un métamodèle EMF Ecore (\texttt{emf}), ainsi que la plateforme
+%(\texttt{platform}) qui mutualise une partie du code de {\tom} et de {\gom}
+%(gestion des phases). La Table~\ref{table:stats} résume cela avec quelques
+%valeurs chiffrées \ttodo{Mettre à jour}.
+
+L'ensemble du projet compte environ \num{60000} lignes de code, réparties dans les
+sous-projets \texttt{engine} (compilateur {\tom} lui-même), \texttt{gom},
+\texttt{library}, \texttt{emf}, ainsi que \texttt{platform}. L'essentiel du
+code source est écrit en {\tom} (+{\java}) ainsi qu'en {\java} pur. La
+Table~\ref{table:stats} résume cette répartition par projet et par langage.
+
+\begin{table}[H]
+  \begin{center}
+    \input{figures/tomstats}
+    \caption{Nombre de lignes de code dans le projet {\tom}, par sous-projet et par langage}
+    \label{table:stats}
+  \end{center}
+\end{table}
+
+
+
+%\subsection{Backends}
+Le langage {\tom} a été conçu pour étendre des langages hôtes. La chaîne de
+compilation (figure~\ref{fig:tomArchi}) a été pensée de manière à minimiser le
+code spécifique à chaque langage hôte. Le compilateur ne traitant que la partie
+{\tom} et n'analysant pas le code hôte, seules les constructions {\tom} sont
+\emph{parsées} puis traitées par chaque phase du compilateur, jusqu'à la
+compilation à proprement parler. Durant cette phase, plutôt que de compiler
+directement vers le langage cible, {\tom} compile vers un langage intermédiaire
+(IL) qui sert de langage pivot. Les constructions de ce langage sont ensuite
+traduites dans le langage cible lors de la dernière phase de compilation.
+Ainsi, l'extension à un nouveau langage passe par l'écriture d'un nouveau
+\emph{backend} sans forcément avoir à réécrire ou adapter la chaîne complète du
+compilateur.
+
+Nos exemples sont centrés sur {\java} étant donné que son \emph{backend} est
+le plus avancé. Cependant {\tom} supporte d'autres langages : {\ada}, {\C},
+{\caml}, {\csharp}, {\python}. Le tableau ~\ref{table:backends} donne
+l'implémentation des fonctionnalités en fonction des \emph{backends}.
+
+\begin{table}[H]
+  \begin{center}
+    \input{figures/tomFeatures}
+  \end{center}
+    \caption{Implémentation de fonctionnalités de {\tom} par langage cible.}
+    \label{table:backends}
+\end{table}
+
+%\subsection{Vue d'ensemble du compilateur}
+
+Un programme est écrit en {\tom}+langage hôte, accompagné d'ancrages pour faire
+le lien avec les structures de données hôtes. Le compilateur analyse les
+constructions {\tom} et génère le code hôte correspondant qui, couplé aux
+structures de données hôtes, constitue un programme écrit dans le langage hôte
+que l'on compile avec le compilateur adéquat. La
+figure~\ref{fig:wholeTomProcess}
+%~\ref{fig:tomGomCompiler}
+explique ce fonctionnement global des outils du projet {\tom} dans
+l'environnement {\java}. La partie haute décrit le processus de compilation
+d'un programme {\tom} couplé à {\gom}, tandis que la partie basse se concentre
+sur le processus dans le cadre des transformations de modèles, c'est-à-dire en
+utilisant l'outil {\tomemf} pour générer les ancrages algébriques. Ces outils
+peuvent bien évidemment être utilisés indépendamment.
+
+%\todo{[ancienne version (manque EMF):]}
+%\input{figures/bckp.tomGomCompiler}
+%\input{figures/tomGomCompiler}
+%\todo{[version en cours de modification : ajout de EMF : wholeTomProcess]}
+%\todo{[test, première version]}
+
+\begin{figure}[H]
+  \begin{center}
+    \input{figures/wholeTomProcess}
+  \end{center}
+  \caption{Diagramme d'activité décrivant le processus de compilation d'un programme {\tom}.}
+  \label{fig:wholeTomProcess}
+\end{figure}
+
+%\todo{[test, ou autre version~\ref{fig:wholeTomProcess2} :]}
+%\input{figures/wholeTomProcess2}
+%\todo{[TEST schéma, en faire un plus simple pour expliquer Tom-EMF ; et un plus
+%complexe pour expliquer toute l'archi du projet (à la place de la figure
+%au-dessus]}
+%\input{figures/tomEMFCompiler} 
+%Figure~\ref{fig:tomEMFCompiler} 
+%\subsection{Architecture du compilateur Tom}
+
+Le compilateur {\tom} se décompose en phases -- écrites en {\tomjava} -- qui
+sont chaînées les unes après les autres. Chacune procède à une transformation
+bien définie sur l'entrée, et fournit une sortie à la phase suivante. Nous
+décrivons brièvement chacune de ces phases ci-après, et nous représentons
+l'architecture du compilateur {\tom} avec la figure~\ref{fig:tomArchi}. Les
+blocs marqués en traits pointillés indiquent les phases où nos travaux
+d'implémentation se sont essentiellement concentrés tandis que la phase colorée
+était inexistante avant ce travail de thèse. C'est le cœur de
+l'implémentation permettant de traiter l'extension du langage dédiée aux
+transformations de modèles.
+
+\begin{figure}[h]
+  \begin{center}
+    \input{figures/tomArchi}
+  \end{center}
+  \caption{Phases du compilateur {\tom}.}
+  \label{fig:tomArchi}
+\end{figure}
+
+\begin{description}
+
+  \item[Parser :] Le \emph{parser} produit un arbre de syntaxe abstraite (AST,
+    \emph{Abstract-Syntax Tree}) à partir du code d'entrée. Les constructions
+    {\tom} sont représentées par des nœuds particuliers tandis que les blocs de
+    code hôte sont stockés dans l'arbre comme des chaînes de caractères. Dans
+    le cas d'une construction \lex{\%gom} (ou de l'utilisation d'un fichier
+    \texttt{.gom}), l'outil {\gom} est appelé et son \emph{parser} prend le
+    relais pour l'analyse du bloc.
+
+  \item[Transformer :] Le \emph{transformer} est une phase qui a été ajoutée
+    durant cette thèse afin de traiter les constructions du langage dédiées aux
+    transformations de modèles. Il traite en particulier les constructions
+    \lex{\%transformation}, \lex{\%resolve} et \lex{\%tracelink}, les AST issus
+    de ces deux dernières étant des sous-arbres de l'AST issu de
+    \lex{\%transformation}. La mise en œuvre de cette phase est détaillée dans
+    la section~\ref{subsec:meoExt}.
+
+  \item[Syntax checker :] Le \emph{syntax checker} effectue des vérifications
+    syntaxiques sur l'{\AST}. Par exemple, il vérifie que chaque symbole de
+    fonction a été déclaré et qu'il n'y a pas de dépendance circulaire entre
+    les conditions de filtrage.
+
+  \item[Desugarer :] Le \emph{desugarer} simplifie l'{\AST} en transformant les
+    différents types de nœuds représentant des constructeurs de langage hôte en
+    nœuds génériques. De plus, les variables anonymes y sont nommées avec des
+    noms \emph{frais} (noms qui n'ont jamais été utilisés précédemment).
+
+  \item[Typer :] Le \emph{typer} effectue l'inférence de type et propage les
+    types inférés dans l'{\AST}.
+
+  \item[Typer checker :] Le \emph{type checker} vérifie les types et les rangs
+    des symboles. Il vérifie par exemple que les occurrences d'une même
+    variable sont du même type.
+
+  \item[Expander :] L'\emph{expander} transforme une dernière fois l'{\AST}
+    avant la compilation : il traite les nœuds issus des constructions
+    \lex{\%strategy} et génère les introspecteurs (structures pour parcourir un
+    terme).
+
+  \item[Compiler :] Le \emph{compiler} transforme les nœuds {\tom} en
+    instructions du langage intermédiaire (IL, pour \emph{Intermediate
+    Language}) qui sert de langage pivot.
+
+  \item[Optimizer :] L'\emph{optimizer} est responsable de l'optimisation du
+    code écrit dans le langage intermédiaire. Il limite par exemple le nombre
+    d'assignations de variables.
+
+  \item[Backend :] Le \emph{backend} est le générateur de code cible. Durant
+    cette phase, le langage intermédiaire est traduit en instructions du
+    langage cible.
+
+\end{description}
+
+
+
+\subsection{Générateur d'ancrages algébriques}
+\label{ch:outils:subsec:tomemf}
+%\ttodo{Tom-EMF ; traitement de gros MM : UML2, Ecore}
+
+Dans cette partie, nous décrivons techniquement le générateur d'ancrages
+formels {\tomemf}. Il a été écrit pour répondre au besoin de représentation des
+modèles {\emf} sous la forme de termes {\tom}. Il est lui-même écrit en
+{\tomjava} et fonctionne de manière complètement indépendante de l'extension du
+langage dédiée aux transformations de modèles. Il est utilisé de manière
+\emph{stand-alone}, c'est-à-dire comme un logiciel à part entière, exécuté sans
+être appelé par un programme {\tom} externe. La figure~\ref{fig:tomEMF} décrit
+le principe général de fonctionnement que nous expliquons ci-après :
+%\ttodo{supprimer ces interlignes pourris}
+\begin{enumerate}
+    %\compresslist
+  \item {\eclipse} : métamodélisation et génération des structures {java}
+    \begin{enumerate}
+    %\compresslist
+      \item L'utilisateur écrit un métamodèle {\ecore} manuellement, ou en
+        utilisant les \emph{modeling tools} de {\eclipse} ;
+      \item Il génère ensuite le générateur de code {\java} (\emph{GenModel}) 
+        à partir de ce métamodèle via {\eclipse} ;
+      \item Il génère ensuite les structures {\java} correspondantes et les exporte
+        sous la forme d'une archive (\texttt{.jar}) ;
+    \end{enumerate}
+  \item {\tomemf} : génération des ancrages algébriques
+    %\compresslist
+    \begin{enumerate}
+    %\compresslist
+  \item L'utilisateur charge les structures {\java} générées et spécifie à
+    {\tomemf} le(s) \emph{EPackage(s)} pour le(s)quel(s) il souhaite générer des
+    ancrages ;
+  \item Un fichier de \emph{mappings} (\texttt{<nom.complet.du.paquet>.tom})
+    est généré par paquet ;
+    \end{enumerate}
+  \item {\tom} et {\java} : transformation de modèles
+    %\compresslist
+    \begin{enumerate}
+    %\compresslist
+  \item L'utilisateur inclut les ancrages dans sa transformation via la
+    construction \lex{\%include} et importe les structures de données {\java}
+      (\texttt{import}) ;
+    \item L'utilisateur peut alors utiliser les types apparaissant dans le
+      métamodèle et écrire la transformation en {\tomjava}, en utilisant ou non
+      l'extension du langage, dédiée aux transformations de modèles ;
+    \item La suite du processus est identique à une utilisation classique de
+      {\tom} (compilation du code {\tom}, puis du code {\java}).
+    \end{enumerate}
+\end{enumerate}
+%\ttodo{insérer schéma de fonctionnement {\tomemf} (comme dans les
+%présentations)}
+
+\begin{figure}[h]
+  \begin{center}
+    \input{figures/tomEMF}
+  \end{center}
+  \caption{Processus de compilation d'une transformation de modèles {\tomemf}.}
+  \label{fig:tomEMF}
+\end{figure}
+
+%\todo{[tests schéma idée Marion v1]}
+%\input{figures/tests_marion/v1_myTomGomCompiler}
+%\todo{[tests schéma idée Marion v2]}
+%\input{figures/tests_marion/v2_tomGomCompiler}
+
+Ce générateur extrait une signature algébrique utilisable par {\tom} à partir
+du code {\java-\emf} représentant le métamodèle.
+%traduit le code du métamodèle sous la forme d'une signature
+%algébrique utilisable par {\tom}.
+
+%\ttodo{fonctionnalités : gestion des paquestmultiples, gestion des doublons,
+%des types builtin, des types venus de Ecore et de UML2, gestion des préfixes}
+
+%Le générateur d'ancrages {\tomemf} était au départ un \emph{proof of concept}
+
+Au départ en tant que \emph{proof of concept}, nous avons adapté et étendu le
+générateur d'ancrages {\tomemf} afin de construire un générateur pleinement
+opérationnel dédié aux modèles. Compte tenu de la forte utilisation de {\java}
+dans le développement logiciel ainsi que de celle de {\eclipse} et de {\emf}
+dans la communauté de l'ingénierie dirigée par les modèles, nous avons fait le
+choix de nous concentrer dans un premier temps sur ces technologies pour
+obtenir un outil fonctionnel. Cependant, nous ne nous limitons pas à ces choix
+et n'excluons pas une ouverture de {\tomemf} à d'autres technologies et
+langages. Notamment, certaines expériences ont été menées dans le but d'étendre
+l'outil au langage {\ada} et au \emph{framework} {\gms}. Une autre piste
+d'extension envisagée est l'utilisation de {\kmf}~\footnote{\emph{Kevoree
+Modeling Framework} : \url{http://www.kevoree.org/kmf}}. Le développement d'une
+transformation en {\java-\emf} nécessitant de toute manière de générer la
+structure de données du métamodèle pour l'utiliser au sein du programme, nous
+avons choisi de conserver dans un premier temps ce fonctionnement de génération
+de signature algébrique à partir du code. Cependant, si l'outil devait être
+étendu à d'autres langages et technologies, nous pourrions revoir nos choix
+afin de générer la signature directement à partir du métamodèle au format
+\texttt{.ecore}.
+%\todo{$^{[\text{à voir}]}$}.
+
+Dans sa forme actuelle, {\tomemf} est en mesure de traiter plusieurs paquetages
+{\ecore} (\emph{EPackages}) en entrée, et de générer un fichier d'ancrages pour
+chacun d'entre eux. Si des éléments du métamodèle sont utilisés alors qu'ils
+appartiennent à un autre \emph{EPackage} du métamodèle (ou d'un autre
+métamodèle chargé en mémoire), alors notre générateur génère les
+\emph{mappings} en cascade, tout en évitant la génération multiple d'un même
+paquetage. De la même manière, cet outil ne génère les ancrages formels que
+pour les types qui n'en ont pas déjà. Durant l'opération, nous maintenons donc
+un ensemble d'ancrages générés et à générer pour les types rencontrés.
+
+Pour chaque \emph{EPackage} spécifié par l'utilisateur, {\tomemf} récupère les
+\emph{EClassifiers} (surclasse commune de \emph{EClass} et \emph{EDataType}
+permettant de spécifier les types d'opérations, de \emph{structural features}
+et de paramètres) et génère les ancrages algébriques associés.
+%\emph{EClassifier} (surclasse commune de \emph{EClass} et
+%\emph{EDataType} permettant de spécifier les types d'opérations, de
+%\emph{structural features} et de paramètres) d'un métamodèle {\ecore}, un
+%ancrage algébrique est généré. 
+Si le métamodèle spécifie qu'un élément
+\emph{EClass} possède la propriété \emph{abstract}, l'opérateur (\lex{\%op})
+n'est naturellement pas généré. Lorsque la multiplicité d'un attribut est
+strictement supérieure à 1 (\emph{structural feature} \texttt{many}), le champ
+de l'opérateur est un type liste. Un ancrage supplémentaire est alors généré,
+accompagné de l'opérateur variadique correspondant. Les associations et
+compositions sont donc représentées de cette manière. Il est à noter que {\tom}
+disposant d'un moteur d'inférence de type équipé du
+sous-typage~\cite{tavares09}, nous avons intégré cette fonctionnalité dans
+{\tomemf}. Lorsque l'option adéquate (\texttt{-nt}) est activée, les ancrages
+générés prennent en compte le sous-typage proposé par {\ecore}. Si un type n'a
+pas de surtype explicitement donné, le surtype généré dans l'ancrage est
+\emph{EObject} (le type \emph{Object} de {\ecore}) afin de correspondre aux
+conventions de {\emf}.  Cette fonctionnalité de génération des sous-types est
+toutefois limitée au sous-typage simple : en effet {\ecore} supporte l'héritage
+multiple, mais pas {\java} (au niveau des classes). Nous verrons dans la
+section suivante que la fonctionnalité de sous-typage de {\tom} est utilisée en
+interne par le mécanisme de résolution (génération et remplacement des éléments
+\emph{resolve}).
+
+S'agissant des types issus des métamodèles {\ecore} ou {\uml} (ainsi que les
+types dits \emph{builtin}), ceux-ci sont traités à part (et non en cascade
+lorsqu'ils apparaissent) étant donné qu'il s'agit de métamodèles très utilisés
+et que leurs types sont souvent inclus dans les transformations. De ce fait,
+nous diffusons les ancrages pour ces métamodèles en tant que bibliothèques dans
+le projet {\tom}. L'outil {\tomemf} lui-même est écrit en {\tomjava} et utilise
+ces ancrages {\ecore}. La première utilisation de notre générateur a donc été
+pour terminer son \emph{bootstrap}, ce qui nous a permis de remplacer les
+ancrages écrits manuellement par des ancrages générés, comme l'illustre la
+figure~\ref{fig:bootstrapTomEMF}. Dans cette figure, les flèches en trait plein
+sont à comprendre comme des flux d'entrée et sortie, tandis que les flèches en
+pointillés signifient \emph{intégration à l'outil}.
+
+
+\begin{figure}[h]
+  \begin{center}
+    \input{figures/bootstrapTomEMF}
+  \end{center}
+  \caption{\emph{Bootstrap} de {\tomemf} : remplacement des ancrages algébriques \texttt{Ecore.tom} écrits manuellement par les ancrages générés.}
+  \label{fig:bootstrapTomEMF}
+\end{figure}
+
+
+{\tomemf} gère aussi le préfixage des noms de types et d'opérateurs générés. En
+effet, il n'est pas rare de nommer de la même manière des éléments de
+métamodèles différents, mais qui n'appartiennent pas aux mêmes paquetages.
+Cependant, {\tom} n'ayant pas de système d'espaces de noms (\emph{namespaces})
+pour ses types et opérateurs, nous offrons à l'utilisateur la possibilité de
+préfixer les ancrages générés.
+
+%\ttodo{Quoi d'autre à dire sur la partie technique de {\tomemf} ?
+%EcoreContainmentIntrospector}
+
+Enfin, pour rendre complètement opérationnel le pont entre les deux espaces
+technologiques, {\tomemf} comprend un outil additionnel :
+\texttt{EcoreContainmentIntrospector}. Il s'agit d'une bibliothèque permettant
+le parcours de modèles par des stratégies. Elle repose sur le fait que le
+modèle possède une structure arborescente par la relation de composition et
+définit le parcours de modèles suivant ces relations. Cette bibliothèque
+s'utilise en conjonction des stratégies (l'utilisateur passe cet
+\emph{introspecteur} dédié à {\ecore} en paramètre de la stratégie).
+Techniquement, cette bibliothèque spécialisée fournit des services nécessaires
+à {\tom} pour compter, récupérer et modifier les enfants d'un nœud d'un terme
+représentant un modèle.
+
+
+\subsection{Mise en œuvre de l'extension}
+\label{subsec:meoExt}
+%\todo{à traiter : comment est faite l'implémentation ? Quelle(s) phase(s)
+%concernée(s) ? comment c'est compilé ? etc.}
+
+Dans cette partie, nous décrivons la mise en œuvre de l'extension du langage au
+sein du compilateur {\tom}. %Il s'agissait d'intégrer les constructions
+%\lex{\%transformation}, \lex{\%resolve} et \lex{\%tracelink} au langage
+
+%\ttodo{ajout du transformer, modif du parser+backend forcément, modif de
+%l'expander pour ajouter des bouts de code aux stratégies si besoin (pour
+%resolve), adt}
+
+Lors de l'implémentation de constructions d'un langage, plusieurs modifications
+de la chaîne de compilation sont nécessaires, de l'analyseur syntaxique au
+générateur de code. Dans notre cas, s'agissant de nouvelles constructions avec
+de nouveaux lexèmes, il fallait étendre le \emph{parser} (début de chaîne) pour
+pouvoir les reconnaître. Ensuite, ces constructions entraînant la génération de
+code qui n'était pas encore traité par le compilateur, le \emph{backend} (fin
+de chaîne) a aussi été étendu. Cependant, ces deux tâches ne sont pas le cœur
+de la mise en œuvre de l'extension du langage dédiée aux transformations de
+modèles. En effet, l'essentiel de l'implémentation réside dans l'ajout d'une
+nouvelle phase ---~le \emph{transformer}~--- dont la charge est de transformer
+les nœuds de l'arbre spécialisé dans la transformation de modèles en des
+stratégies. À cela s'ajoute la génération automatique d'ancrages ainsi que
+celle de la trace dont les instructions sont ajoutées à l'arbre.
+
+%\todo{[Pas grand chose à dire côté parsing, c'est très classique, rien de bien
+%compliqué, l'intelligence n'est pas là]\\}
+
+\paragraph{Parser.} L'aspect inhabituel de l'analyseur syntaxique de {\tom}
+réside dans le fait qu'il n'analyse pas tout le code, mais uniquement les îlots
+formels. Le code hôte est quant à lui vu comme une chaîne de caractères qui est
+parcourue jusqu'à l'îlot suivant. Ce type d'analyse où la grammaire du langage
+n'est pas totalement définie est appelé \emph{fuzzy parsing} : seule la
+grammaire de {\tom} l'est, totalement (on parle de grammaire îlot ou
+\emph{island grammar}). L'analyseur syntaxique de {\tom} repose sur le très
+populaire générateur de \emph{parser} {\antlr}~\footnote{\emph{ANother Tool for
+Language Recognition} : \url{http://www.antlr.org}}, ainsi que sur
+{\gomantlradapter}, un outil du projet permettant de lier les arbres générés
+par {\antlr} aux structures {\gom}. Lorsque le \emph{parser} principal détecte
+une construction donnée, il donne la main à un \emph{parser} dédié ({\tom} ou
+{\gom}). Il s'agissait donc d'étendre ces analyseurs pour mettre en œuvre les
+nouvelles constructions, en ajoutant de nouvelles règles adéquates dans la
+grammaire. En parallèle, la signature de {\tom} a été étendue afin de prendre
+en compte ces nouvelles constructions.
+
+
+\paragraph{Transformer.} Le cœur de la mise en œuvre de l'extension de {\tom}
+dédiée aux transformations de modèles se situe au niveau du \emph{plugin}
+\emph{transformer}, juste après l'analyseur syntaxique, et avant la phase de
+typage. Ce choix de nous insérer tôt dans la chaîne de compilation est tout à
+fait logique : la seule contrainte forte que nous avions était d'apparaître
+avant l'\emph{expander} ---~\emph{plugin} dédié aux stratégies~--- et nous
+souhaitions aussi bénéficier au maximum des éléments de contrôle déjà
+implémentés dans le compilateur {\tom} (\emph{syntax checker}, \emph{typer},
+\emph{type checker}).
+
+Cette phase prend en entrée l'arbre issu de l'analyseur syntaxique et produit
+un arbre syntaxique ne contenant plus aucun sous-arbre de type
+\emph{Transformation} obtenu après \emph{parsing} de la construction
+\lex{\%transformation}. Elle est implémentée de manière classique ---~du point
+de vue d'un développeur {\tom}~---, à savoir qu'une stratégie {\tom} est
+appliquée sur l'arbre en entrée.
+
+Les nœuds de type \emph{Resolve} et \emph{Tracelink} obtenus à partir du
+\emph{parsing} des constructions \lex{\%resolve} et \lex{\%tracelink} sont
+forcément des sous-arbres des arbres dont la racine est un nœud
+\emph{Transformation} étant donné que ces constructions sont uniquement
+utilisables dans le cadre des transformations de modèles. En ne manipulant que
+ces derniers, nous sommes donc en mesure de collecter et traiter tous les nœuds
+\emph{Resolve} et \emph{Tracelink}.
+
+%\todo{
+%\begin{itemize}
+%\item run : process transfonode -> abstractdecl
+%\item gen resolve element nodes à partir des instructions Resolve
+%\item concElementaryTransfo (genElementaryStrategy + elemenStratSymbol
+%\item gen stratégie resolve
+%\item on empaquette tout dans une séquence
+%\end{itemize}
+%}
+
+Dans le sous-arbre représentant une transformation, nous filtrons les nœuds de
+type \emph{Resolve} correspondant aux utilisations de la construction
+\lex{\%resolve}. Si un tel motif est filtré, le mécanisme d'enrichissement du
+métamodèle cible présenté dans le chapitre~\ref{ch:approach} est déclenché. Il
+est alors nécessaire de créer d'une part les structures de données concrètes
+représentant les éléments \emph{resolve}, et d'autre part des ancrages
+algébriques correspondants. Pour illustrer concrètement ce mécanisme, reprenons
+l'instruction \verb+%resolve(l:AText,target_left:Circle);+ de l'exemple
+précédent transformant du texte en figure géométrique. Elle entraîne la
+génération de la structure {\java} par le \emph{backend}, donnée dans le
+listing~\ref{code:resolveClassA2Shape} (par souci de lisibilité, les noms ont
+été simplifiés et les attributs sont publics). 
+
+\begin{figure}[h]
+  \begin{center}
+    \input{code/resolveClassA2Shape}
+  \end{center}
+  %\caption{Exemple de classe {\java} générée implémentant les éléments \emph{resolve}.}
+  %\label{code:resolveClassA2Shape}
+\end{figure}
+
+La classe générée ---~ici \texttt{ResolveATextCircle}~--- étend naturellement
+la classe de l'élément cible ---~\texttt{Circle} dans notre cas~--- que
+l'élément \emph{resolve} est censé représenter. Cette classe est associée à un
+ancrage et la relation d'héritage de {\java} est exprimée par un sous-type dans
+le \emph{mapping} décrit dans le listing~\ref{code:resolveMappingA2Shape}.
+Étant donné que ce mécanisme a lieu durant le processus de compilation
+{\textsf{Tom}\texttt{->}\java}, cet ancrage n'apparaît pas en tant que tel, mais
+est directement généré en mémoire pour être traduit en {\java} par la suite.
+Le listing~\ref{code:resolveMappingA2Shape} est néanmoins une traduction fidèle
+du \emph{mapping} qui serait écrit en {\tom}.
+
+\begin{figure}[h]
+  \begin{center}
+    \input{code/resolveMappingA2Shape}
+  \end{center}
+  %\caption{Exemple d'ancrage algébrique pour un élément \emph{resolve}.}
+  %\label{code:resolveMappingA2Shape}
+\end{figure}
+
+C'est aussi dans le \emph{transformer} que nous filtrons tous les symboles de
+type \emph{Tracelink}. Pour chaque instruction de traçage, le
+\emph{transformer} crée (ou récupère si elle existe déjà) ce que nous appelons
+une \texttt{ReferenceClass}. Il s'agit d'une structure de données permettant de
+référencer les éléments cibles tracés. 
+
+En termes d'implémentation {\java}, nous fournissons une interface
+\texttt{ReferenceClass} extrêmement simple
+(listing~\ref{code:referenceClassInterface}) que les structures de données
+générées implémentent.
+
+\begin{figure}[h]
+  \begin{center}
+    \input{code/referenceClassInterface}
+  %\caption{Interface devant être implémentée par les structures de type \texttt{ReferenceClass}.}
+  %\label{code:referenceClassInterface}
+  \end{center}
+\end{figure}
+
+Ces classes sont essentiellement constituées d'attributs (les références vers
+les éléments cibles), de leurs méthodes d'accès (\texttt{get} et \texttt{set})
+ainsi que d'une méthode permettant d'associer un nom à un élément. Le
+listing~\ref{code:exreferenceClass} montre une classe qui serait générée
+dans le cas de notre exemple de transformation de texte en formes géométriques.
+
+\begin{figure}[h]
+  \begin{center}
+    \input{code/exreferenceClass}
+  %\caption{Exemple de classes générées implémentant l'interface \texttt{ReferenceClass} dans le cas de la transformation \emph{Text2Shape}.}
+  %\label{code:exreferenceClass}
+  \end{center}
+\end{figure}
+
+Une structure de type \texttt{ReferenceClass} est elle-même liée à l'élément
+source filtré par la règle qui lui a donné naissance. Techniquement, cela
+consiste à maintenir une table de hachage dont les clefs sont des sources de
+type \texttt{EObject} et dont les valeurs sont ces structures de données. Cette
+table de hachage fait partie intégrante du modèle de lien de la transformation,
+implémenté par la classe \texttt{LinkClass} (fournie en tant que bibliothèque
+avec son ancrage associé).
+
+Toute \emph{définition} d'un sous-arbre \emph{Transformation} est quant à elle
+transformée en une stratégie comprenant les règles de la \emph{définition},
+accompagnée de son symbole. Une stratégie plus complexe est ensuite composée à
+partir de ces stratégies. Finalement, tout nœud de type \emph{Transformation}
+est remplacé par sa stratégie nouvellement créée ainsi que par une éventuelle
+stratégie de résolution.
+
+%déclaration de ReferenceClass, générée par la suite une fois que toutes les
+%tracelink instructins sont données
+%HashMap, stockage, LinkClass : table:ConcurrentHashMap EObject-> ReferenceClass
+
+
+%\ttodo{\emph{backend} : il y a plus de choses à dire que pour le \emph{parsing}
+%(génération du métamodèle de lien/trace, resolve, adaptation de la génération
+%des stratégies pour le cas où on ajoute du code}
+
+\paragraph{Backend.} En fin de chaîne de compilation, au niveau du générateur
+de code (\emph{backend}), le travail a consisté à ajouter des fonctions de
+génération de la phase de résolution ainsi que celles pour le métamodèle de
+lien qui n'existaient pas auparavant. Ces dernières produisent du code
+similaire à celui que nous avons montré précédemment dans les
+listings~\ref{code:referenceClassInterface} et~\ref{code:exreferenceClass},
+dans la partie décrivant la mécanique du greffon \emph{transformer}.
+
+%du métamodèle de lien ainsi que celles pour la phase de résolution.
+%La génération du métamodèle 
+%
+%Un autre aspect important de l'extension du \emph{backend} est l'ajout des
+%fonctions de génération du modèle de trace qui n'existaient pas auparavant.
+%Elles produisent du code similaire à celui que nous avons montré précédemment
+%dans les listings~\ref{code:referenceClassInterface}
+%et~\ref{code:exreferenceClass}, dans la partie décrivant la mécanique du
+%greffon \emph{transformer}.
+
+
+%\todo{parler de l'évolution de l'encodage résolution (ici ?): 
+%\begin{itemize}
+%  \item[v1] : stratégie + procédure de résolution iresolveInverseLinks avec
+%  services EMF ;
+%  \item[v2] : stratégie + procédure de résolution resodveInverseLinks en
+%  enlevant les services EMF ;
+%  \item[v3] : procédure resolve() à la place de la stratégie + procédure
+%  customResolveInverseLinks.
+%\end{itemize}}
+
+La mise en œuvre de la génération de la phase de résolution a fait l'objet de
+nombreuses évolutions au cours de ce travail. Nous décrirons son état stable
+actuel (inclus dans la dernière version stable publiée : {\tom}-2.10) ainsi que
+celui de la prochaine version stable.
+
+La phase de résolution étant encodée sous la forme d'une stratégie de
+réécriture, sa génération est en partie identique à la génération de stratégies
+classiques. Cependant, elle se distingue d'elles par le fait qu'il faille aussi
+écrire une procédure supplémentaire permettant d'effectuer la \emph{résolution
+de liens inverses}. Cette procédure consiste à notifier tous les objets du
+modèle ayant un pointeur vers l'objet qui vient d'être modifié pour que ce
+pointeur pointe vers le nouvel objet et non plus vers l'élément \emph{resolve}.
+
+La figure~\ref{fig:resolutionInverse} illustre ce mécanisme. La
+figure~\ref{fig:resolutionInverse-a} est l'état du modèle en fin de première
+phase. Il est constitué d'éléments cibles ainsi que d'éléments \emph{resolve}
+(en pointillés). Les éléments à résoudre sont détectés et l'élément cible
+effectif est identifié (figure~\ref{fig:resolutionInverse-b}).  Tous les
+éléments faisant référence à cet élément \emph{resolve} doivent aussi être mis
+à jour.  Dans l'exemple, le connecteur entre le pentagone bleu et le carré vert
+référence le carré vert temporaire. Son extrémité (un pointeur vers l'élément
+\emph{resolve}) est mise à jour pour référencer l'élément cible final
+(figure~\ref{fig:resolutionInverse-c}). Une fois la \emph{résolution de liens
+inverses} effectuée, le modèle ne comprend plus d'élément \emph{resolve}
+(\ref{fig:resolutionInverse-d}).
+%En effet, il faut notifier tous les objets du modèle ayant
+%un pointeur vers l'objet qui vient d'être modifié pour que ce pointeur pointe
+%vers le nouvel objet et non plus vers l'élément \emph{resolve}.
+
+\begin{figure}[h]
+%  \centering
+%  \begin{tabular}{cccc}
+    \begin{subfigure}{0.21\textwidth}
+      %\centering
+      \input{figures/resolutionInverse-a}
+      \subcaption{}
+      \label{fig:resolutionInverse-a}
+    \end{subfigure} 
+%      &
+    \quad
+    \begin{subfigure}{0.21\textwidth}
+      %\centering
+      \input{figures/resolutionInverse-b}
+      \subcaption{}
+      \label{fig:resolutionInverse-b}
+    \end{subfigure}
+%    &
+    \quad
+    \begin{subfigure}{0.21\textwidth}
+      %\centering
+      \input{figures/resolutionInverse-c}
+      \subcaption{}
+      \label{fig:resolutionInverse-c}
+    \end{subfigure}
+%    &
+    \quad
+    \begin{subfigure}{0.21\textwidth}
+      %\centering
+      \input{figures/resolutionInverse-d}
+      \subcaption{}
+      \label{fig:resolutionInverse-d}
+    \end{subfigure}
+%    \\
+%  \end{tabular}
+  \caption{Processus de résolution de liens inverses.}%FIXME\ttodo{alignement ???} 
+  \label{fig:resolutionInverse}
+\end{figure}
+
+Dans le contexte de {\emf}, ce traitement peut être fait en utilisant les
+services fournis. Dans la stratégie de résolution, nous effectuons donc une
+résolution de liens inverses pour chaque élément \emph{resolve} trouvé et
+remplacé. La procédure de résolution de liens inverses peut être automatisée ;
+mais dépendant des types des éléments du modèle, elle ne peut être générique et
+doit donc être générée pour chaque transformation. Pour rendre possible la
+génération de ce code additionnel dans les stratégies, il a été nécessaire de
+modifier la signature des stratégies afin de pouvoir embarquer du code
+supplémentaire, ainsi que l'\emph{expander}. Le \emph{backend} des stratégies a
+ensuite été adapté afin de prendre en compte cette nouveauté.
+
+Signalons que la phase de résolution n'apparaît pas dans l'extrait de
+code présenté plus tôt dans le chapitre. Il ne s'agit pas d'une simplification
+du code pour les besoins de notre propos, mais bien du fonctionnement normal de
+nos outils. En effet, la phase de résolution est entièrement générée, en
+fonction de l'utilisation des constructions \lex{\%resolve} au sein de la
+transformation.  Ainsi, une transformation ne nécessitant pas d'élément
+\emph{resolve} (donc sans utilisation du lexème \lex{\%resolve}) n'a pas de
+phase de résolution.
+À l'inverse, l'utilisation de la construction provoque la génération du bloc de
+résolution dédié au type traité. Dans la version actuellement publiée de
+l'outil ({\tom-2.10}), cette phase est encodée par une unique stratégie que
+l'utilisateur n'écrit qu'indirectement par l'usage judicieux des constructions
+de résolution. L'application de la stratégie de résolution est néanmoins à la
+charge de l'utilisateur au sein de son programme.  Il doit appeler la stratégie
+en l'appliquant sur le modèle intermédiaire créé lors de la première phase.
+
+Par la suite, nous avons expérimenté notre langage et avons constaté que
+l'utilisation intensive des services {\emf} avait des conséquences importantes
+sur les performances de la transformation, tant du point de vue de la mémoire
+consommée que du temps. Nous avons donc fait évoluer la phase de résolution en
+nous passant des services {\emf} pour la résolution de liens. Dans un premier
+temps, plutôt que d'utiliser les méthodes {\emf}, nous avons écrit notre propre
+méthode de résolution en évitant de parcourir tous les objets du modèle comme
+le fait {\emf}. Dans un second temps, nous avons écrit une phase de résolution
+sans stratégie afin de ne plus du tout parcourir le modèle intermédiaire. Pour
+réaliser cette optimisation, nous conservons tout au long de la transformation
+un ensemble de références inverses pour chaque élément \emph{resolve} créé (les
+seuls éléments du modèle intermédiaire concernés par la résolution de liens
+inverses). Nous détaillerons l'aspect performances de nos outils dans le
+chapitre~\ref{ch:evaluation}.
+
+Nous avons aussi expérimenté une version modulaire de la phase de résolution.
+Plutôt que de générer une stratégie monolithique effectuant toute la
+résolution, nous avons écrit une solution alternative générant plusieurs
+stratégies de résolution partielle, chacune de ces stratégies n'effectuant la
+réconciliation que sur un type de terme donné. Dans notre exemple, cette
+alternative générerait deux stratégies distinctes, ainsi qu'une stratégie
+combinant les deux. L'inconvénient de cette solution est qu'elle est plus
+complexe à prendre en main pour l'utilisateur. Cependant, elle a l'avantage
+d'offrir une plus grande modularité en décomposant la seconde phase. Ainsi, le
+code généré pour une \emph{définition} peut être réutilisé dans une autre
+transformation, et l'utilisateur averti prendra soin d'accompagner la
+définition de la (ou des) stratégie(s) de résolution correspondante(s).
+Pour des raisons d'utilisabilité de nos outils, nous avons fait le choix de
+diffuser la version du générateur de phase de résolution monolithique dans la
+version stable de {\tom}.
+
+%\section{\todo{ici ? Travaux connexes}}
+%: approche classique en MDE, outils, différences
+
+\section{Synthèse}
+\label{ch:outils:synth}
+
+%\ttodo{
+%  \begin{itemize}
+%    \item Extension du langage + critères
+%      \begin{itemize}
+%        \item transfo
+%        \item resolution
+%        \item traçabilité
+%      \end{itemize}
+%    \item Implémentation
+%      \begin{itemize}
+%        \item archi, fonctionnalité, stats, tour des phases
+%        \item générateur d'ancrages algébriques
+%        \item mise en œuvre de l'extension : parser / transformer / backend
+%        \item exemple d'utilisation (ligne de commande, etc.)
+%      \end{itemize}
+%    \item 
+%  \end{itemize}
+%}
+
+Dans ce chapitre, nous avons d'abord montré une utilisation concrète de nos
+outils appliquée sur un exemple simple. Nous avons présenté l'extension du
+langage {\tom} permettant de mettre en œuvre notre approche de transformation.
+Les trois aspects principaux de cette extension sont : l'expression de la
+transformation elle-même, le mécanisme de résolution et d'extension du
+métamodèle cible par des éléments temporaires, ainsi que la traçabilité. Ces
+éléments sont respectivement mis en œuvre par les constructions
+\lex{\%transformation}, \lex{\%resolve} et \lex{\%tracelink}.
+
+Nous avons  par ailleurs présenté nos travaux d'implémentation ainsi que leur
+intégration au sein du projet {\tom}. Nous avons notamment décrit le générateur
+d'ancrages algébriques {\tomemf} permettant d'opérer le changement d'espace
+technologique $mod\grave eles\rightarrow termes$. Nous avons de plus expliqué
+comment nous analysions et transformions les sous-arbres issus des nouvelles
+constructions du langage {\tom} dans la phase \emph{transformer}, et quel était
+le code généré par le \emph{backend}.
+
+Nous avons expérimenté nos outils et les premiers retours nous donnent des
+pistes de travail intéressantes sur l'usage des technologies externes sur
+lesquelles le prototype repose, sur le concept de modularité d'une
+transformation (et donc aussi de la résolution), mais aussi sur la conception
+du langage lui-même (séparation explicite des traçabilités). Nous reparlerons
+de ces expériences et des perspectives offertes dans la suite de ce document.
+
+Tout au long de ce chapitre, nous nous sommes appuyés sur l'exemple simple
+d'une transformation de texte en formes géométriques colorées pour expliquer
+les mécanismes en jeu. Nous nous proposons d'étudier une transformation
+complète dans le chapitre suivant.%~\ref{ch:usecase}.
+
+% vim:spell spelllang=fr

@@ -1,0 +1,10 @@
+\begin{tomcode3}[label=code:nonlinearlistmatchingSupprimerDoublon,caption=Filtrage associatif non linéaire.]
+public NatList supprimerDoublon(NatList liste) {
+  %match(liste) {
+    concNat(X1*,x,X2*,x,X3*) -> { 
+      return `supprimerDoublon(concNat(X1*,x,X2*,X3*));
+    }
+  }
+  return liste;
+}
+\end{tomcode3}

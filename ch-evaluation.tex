@@ -1,0 +1,672 @@
+% vim:spell spelllang=fr
+\chapter{Résultats expérimentaux}
+\label{ch:evaluation}
+
+Dans ce chapitre, nous présentons des résultats expérimentaux obtenus avec nos
+outils, notamment leurs performances. Nous discutons notre approche et nos
+choix technologiques, leur intérêt, ainsi que les limitations et perspectives de
+notre implémentation technique.
+Nous avons tenté d'évaluer nos outils afin d'améliorer les points limitants et
+de parfaire nos points forts par rapport à d'autres outils tels qu'{\atl} ou
+d'autres outils de transformation utilisant des stratégies de réécriture.
+
+
+\section{Utilisabilité}
+
+%\ttodo{revoir, notamment faire des références à ATL ici}
+
+Compte tenu du fait qu'un de nos objectifs était de simplifier le processus de
+développement pour les utilisateurs, un premier aspect de notre évaluation
+concerne l'utilisabilité de nos outils. 
+Fortement dépendant du contexte et de l'utilisateur, ce critère est
+difficilement mesurable et quantifiable. Nous pouvons toutefois exposer des
+retours utilisateurs.
+%Ce critère ne peut être évalué de
+%manière complètement formelle et objective (avec des valeurs chiffrées), mais
+%nous pouvons exposer des retours utilisateurs.
+ 
+Nous avons pu tester en conditions réelles une partie de nos outils : il
+s'agissait de développer une transformation en {\tomjava} dans le cadre du
+projet {\quarteft} par une entreprise partenaire du projet. Le développeur
+était un ingénieur en informatique maîtrisant le langage {\java} ainsi que
+l'environnement {\eclipse}. Il ne connaissait pas {\tom}, ni les langages à
+base de règles de réécriture, ni le concept de stratégie avant de commencer.
+
+La prise en main du langage {\tom} sans les nouvelles constructions s'est faite
+sans aucune difficulté et sans réel besoin de support de notre part hormis la
+documentation officielle en ligne. Nous avons donné un support informel pour
+l'usage des stratégies {\tom} afin d'accélérer son développement. L'outil
+{\tomemf} a été utilisé pour générer les ancrages formels inclus dans la
+transformation. Si l'usage en lui-même n'a pas posé de problème à l'ingénieur
+(peu d'options différentes, documentation centralisée), nous lui avons fourni
+un support plus important. En effet, l'usage par un non développeur a permis de
+découvrir des \emph{bugs} et des manques de fonctionnalités (besoin de
+génération massive de \emph{mappings} en une seule fois qui a donné lieu à la
+fonctionnalité de génération multiple de \emph{EPackages}, conflits de noms
+qui a donné lieu à la fonctionnalité de préfixage, génération multiple des
+ancrages pour les bibliothèques UML2 et {\ecore}, {\etc}). Ces premiers retours
+utilisateur ont joué un rôle important dans l'amélioration de l'outil
+{\tomemf}.
+
+Lors de ce test en conditions réelles, l'utilisateur a suivi la méthodologie
+avec les stratégies, mais n'a cependant pas utilisé les constructions {\tom}
+haut-niveau dédiées aux transformations de modèles. En effet, elles n'étaient
+pas incluses dans la version stable du moment.
+
+L'aspect hybride de notre approche a permis à l'utilisateur d'être très
+rapidement opérationnel sans qu'il ait à apprendre un nouveau langage complet.
+De plus, du fait de son environnement de développement, sa transformation a pu
+être immédiatement intégrée dans les outils développés, ce qui n'aurait pas été
+aussi simple avec des langages tels que {\atl}, {\kermeta} ou même {\stratego}. Si
+notre approche utilisant {\tom} fournit moins de fonctionnalités pour la
+transformation de modèles que {\atl}, nous avons l'avantage de ne pas nous
+séparer des fonctionnalités (bibliothèques notamment) du langage généraliste
+considéré ({\java} dans notre cas), ce qui permet à l'utilisateur d'exprimer
+tout de même ce qu'une construction {\tom} ne pourrait pas fournir nativement.
+
+Le principe d'utiliser des stratégies de réécritures pour encoder les
+transformations de modèles semble aussi un choix judicieux du point de vue
+de l'utilisateur : la décomposition d'une transformation en transformations
+élémentaires est naturelle pour appréhender la complexité et le principe
+d'écriture de règles est aussi courant dans d'autres langages. Nous ne
+changeons donc pas fondamentalement les habitudes du développeur. Grâce aux
+mécanismes en jeu dans notre approche, nous avons une forte expressivité dans
+les motifs (membre gauche) et nous offrons une grande liberté à l'utilisateur
+dans les actions (membre droit) grâce à leur nature composite. 
+
+Le fait que notre approche se fonde sur un changement d'espace technologique
+pourrait paraître limitant en première approche (outil supplémentaire pour
+opérer le changement), cependant cet outil (générateur d'ancrages formels) est 
+extrêmement simple d'utilisation et ne nécessite qu'une seule intervention en
+début de développement.
+
+Le choix de l'usage d'un outil par rapport à un autre ne peut être définitif et
+universel : il doit être effectué de manière réfléchie en tenant compte de
+critère tels que l'environnement de développement, les fonctionnalités
+respectives des outils envisagés ainsi que les performances des outils. Dans un
+contexte {\java}+{\emf}, compte tenu des premiers retours, le choix de nos
+outils est pertinent. 
+
+\section{Performances}
+
+De manière générale, un outil peut être extrêmement intéressant
+scientifiquement, mais inutilisable du fait de ses performances (implémentation
+inefficace ou problème à résoudre trop complexe). Dans un cadre industriel,
+cette question se pose rapidement, étant donné que des modèles \og réels \fg
+(généralement de plus grandes tailles que ceux utilisés pour le prototypage
+initial) sont transformés. Il est donc naturel d'évaluer ses performances, même
+si n'est pas l'objectif premier de l'outil. Dans le domaine de la vérification
+du logiciel, les outils de \emph{model-checking} sont généralement des outils
+consommateurs de ressources (temps et mémoire), ce qui peut constituer un
+goulet d'étranglement dans une chaîne de développement imposant une
+vérification de ce type. Il ne faut donc pas que les autres traitements aient
+des performances moindres (et deviendraient de fait le nouveau goulet
+d'étranglement), ou que leurs temps d'exécution ajoutent trop de délais avant
+ce goulet. Un second aspect de l'évaluation des performances vient du fait que
+beaucoup d'outils de transformation existent, mais leur passage à l'échelle est
+souvent un facteur limitant. C'est donc dans ce contexte que nous avons
+effectué une première évaluation des performances de nos outils, d'une part
+{\tomemf}, d'autre part les constructions haut-niveau dédiées aux
+transformations de modèles.
+
+\subsection{{\tomemf}}
+
+Nous avons expérimenté {\tomemf} sur divers métamodèles afin de nous assurer de
+son passage à l'échelle. Très rapidement, nous avons constaté que peu de très
+gros métamodèles sont utilisés, les métamodèles {\ecore} et {\uml} étant
+souvent les plus gros métamodèles utilisés régulièrement. Nous avons donc
+appliqué notre outil sur ces métamodèles pour générer les \emph{mappings}
+correspondant, ainsi que sur les parties des deux métamodèles du cas
+d'utilisation présenté dans le chapitre~\ref{sec:simplepdl2pn}.
+
+\begin{table}[h]
+  \begin{center}
+    \input{tables/statsTomEMF}
+    \caption{Tailles de quelques métamodèles significatifs ainsi que des
+      \emph{mappings} {\tomemf} correspondant.}
+    \label{table:statsTomEMF}
+  \end{center}
+\end{table}
+
+%   nom    : typeterm / op / oplist / oparray / lignes
+%SimplePDL : 8 / 8 / 0 / 2 /185 
+%PetriNet  : 8 / 6 / 0 / 2 / 185
+
+Nous constatons que les temps de génération donnés dans la
+table~\ref{table:statsTomEMF} sont extrêmement bas, de l'ordre de la seconde.
+Notre outil de génération d'ancrages est tout à fait capable de gérer un \og
+gros \fg{} métamodèle, dans un temps négligeable par rapport à la durée de
+développement et d'exécution d'une transformation comme nous allons le voir.
+Considérant ces temps de génération pour de tels métamodèles, nous estimons que
+les performances de l'outil {\tomemf} sont largement suffisantes et qu'elles ne
+sont pas limitantes dans la chaîne de développement.
+
+Outre l'aspect performances que nous jugeons satisfaisant, cet outil s'est
+avéré simple à utiliser pour un utilisateur complètement extérieur au projet
+{\tom}. Cela nous donne un indice positif sur l'utilisabilité de notre outil.
+
+\subsection{Transformation}
+%%\ttodo{chiffres plus à jour ! attention, Benchmark pour SimplePDL, les temps sont exprimés en millisecondes (ms). }
+
+Afin de tester les performances du langage, nous avons utilisé la
+transformation \emph{SimplePDLToPetriNet} sur des modèles de tailles
+différentes. Nous avons fait ce choix, car ayant servi de support au
+développement de nos outils, nous en avions une bonne maîtrise tout en ayant
+une confiance élevée dans son implémentation. Nous l'avons aussi implémentée
+dans d'autres langages afin d'avoir des points de comparaison avec l'existant.
+S'agissant d'une transformation connue dans le domaine, nous avons pu corriger
+et améliorer ces implémentations grâce à celles existantes.
+
+Pour le modèle d'entrée, nous avons défini un processus paramétrable généré de
+manière déterministe en fonction de deux paramètres :
+\begin{itemize}
+  \item le nombre de \emph{WorkDefinitions} présentes (\texttt{N}) ;
+  \item le fait qu'il y ait ou non des \emph{WorkSequences}.
+\end{itemize}
+
+Le processus d'entrée n'est pas hiérarchique, mais cela n'a pas d'impact sur la
+complexité du modèle d'entrée étant donné que :
+\begin{itemize}
+  \item l'image d'un \emph{Process} est plus simple que l'image d'une
+    \emph{WorkDefinition}, nous pouvons nous limiter à jouer sur le nombre de
+    \emph{WorkDefinitions} plutôt que sur le nombre de \emph{Process} ;
+  \item un processus père existant, des éléments \emph{resolve} sont dans tous
+    les cas créés pour chaque \emph{WorkDefinition} ;
+  \item l'ajout de séquences entre les activités permet d'ajouter d'autres
+    éléments \emph{resolve} et donc augmenter la complexité du modèle d'entrée
+    et de la transformation. 
+\end{itemize}
+
+Il s'agissait surtout d'être en mesure de générer des modèles d'entrée définis
+simplement, mais parfaitement maîtrisés (dont les éléments sources sont
+dénombrables de manière fiable) et pouvant atteindre de très grosses tailles
+(plusieurs millions d'éléments). La figure~\ref{fig:inputModel} donne la forme
+générale d'un tel processus donné en entrée ainsi que le réseau de Petri
+résultant par l'application de la transformation \emph{SimplePDLToPetriNet}.
+
+\begin{figure}[h]
+  \begin{center}
+      \input{figures/inputModel}
+      \caption{Forme générale des modèles d'entrée générés.}
+      \label{fig:inputModel}
+  \end{center}
+\end{figure}
+
+En fonction des deux paramètres et de la définition du processus, nous pouvons
+parfaitement dénombrer les éléments constituant le modèle source, ainsi que
+ceux constituant le résultat. Il est aussi possible de dénombrer précisément
+les éléments intermédiaires \emph{resolve} créés.
+
+Ainsi, dans notre exemple, pour un processus avec $N$ \emph{WorkDefinitions}
+($N>1$) chaînées, il y a $N-1$ \emph{WorkSequences}. Les règles de
+transformation produisant des réseaux de Petri identiques à ceux vus dans le
+chapitre~\ref{sec:simplepdl2pn} que nous rappelons dans la
+figure~\ref{fig:rappel2PN}, nous établissons le
+tableau~\ref{table:productionRules} donnant les règles de production des
+éléments sources. Dans ce tableau, $n$ et $r$ signifient respectivement
+$normal$ et $resolve$, les abréviations Pl, Tr, A, P, WD, WS correspondent
+respectivement à \emph{Place}, \emph{Transition}, \emph{Arc}, \emph{Process},
+\emph{WorkDefinition} et \emph{WorkSequence}. Les trois dernières colonnes du
+tableau sont les totaux d'éléments \emph{resolve} créés (T$_{resolve}$),
+d'éléments créés (T$_{\text{\textit{intermédiaire}}}$), et d'éléments dans les
+versions finales des images des sources après résolution (T$_{final}$).
+
+\begin{figure}[!h]
+  \begin{center}
+    \begingroup
+\tikzset{every picture/.style={scale=0.7}}%
+    \begin{subfigure}[h]{0.25\linewidth}
+      \input{figures/PNProcess_notext}
+      %\caption{P P P}
+      \label{fig:rappelP2PN}
+    \end{subfigure}
+    \quad %\qquad
+    \begin{subfigure}[h]{0.30\linewidth}
+      \input{figures/PNWorkDefinition_notext}
+      %\caption{WD WD WD}
+      \label{fig:rappelWD2PN}
+    \end{subfigure}
+    \quad %\qquad
+    \begin{subfigure}[h]{0.35\linewidth}
+      \input{figures/PNWorkSequence_notext}
+      %\caption{WS WS WS}
+      \label{fig:rappelWD2PN}
+    \end{subfigure}
+    \caption{Réseaux de Petri images d'un \emph{Process}, d'une
+    \emph{WorkDefinition} et d'une \emph{WorkSequence}.}
+    \label{fig:rappel2PN}
+\endgroup
+  \end{center}
+\end{figure}
+
+Compte tenu du fait que nos modèles d'entrée générés n'ont pas de processus
+hiérarchiques, les arcs de synchronisation ainsi que les éléments
+\emph{resolve} associés n'existent pas dans l'image du \emph{Process}.
+
+\begin{table}[h]
+  \begin{center}
+    \input{tables/productionRules}
+    \caption{Dénombrement des éléments cibles créés à partir d'éléments
+    sources.}
+    \label{table:productionRules}
+  \end{center}
+\end{table}
+
+
+Ainsi, pour un processus composé de $N$ \emph{WorkDefinitions} (avec $N > 1$)
+on obtient $14N+8$ éléments cibles \emph{normaux} et $4N-2$ éléments
+\emph{resolve}, comme le résume la table~\ref{table:denombrementCibles}.
+
+\begin{table}[h]
+  \begin{center}
+    \input{tables/denombrementCibles}
+    \caption{Dénombrement des éléments cibles créés en fonction du nombre de
+      \emph{WorkDefinitions} donné en entrée ($N>1$).}
+    \label{table:denombrementCibles}
+  \end{center}
+\end{table}
+
+Les valeurs que nous donnons par la suite sont celles d'expériences menées sur
+un serveur ayant les caractéristiques suivantes :
+\begin{itemize}
+  \item système Unix 64 bits ;
+  \item RAM : 24 GB ;
+  \item processeurs : 2 $\times$ \num{2.93} GHz Quad-Core Intel Xeon.
+\end{itemize}
+Cependant, mis à part pour les transformations à plusieurs millions
+d'éléments qui demandent des ressources supérieures à celles fournies par un
+poste de bureau, ces expériences peuvent tout à fait être reproduites sur une
+machine bien plus modeste.
+
+La table~\ref{table:tempsTomFull} donne les temps moyens de la transformation
+appliquée sur des modèles de tailles différentes. La première colonne donne le
+nombre d'éléments sources du modèle d'entrée en fonction du paramètre d'entrée
+$N$. La deuxième colonne donne le nombre d'éléments constituant le modèle
+résultant. Les temps moyens sont donnés par les colonnes suivantes, en séparant
+les deux phases, la dernière colonne donnant les durées totales.  Pour donner
+une idée de la taille des données, la sérialisation \texttt{.xmi} d'un modèle à
+\num{2000000} d'éléments sources (dernière ligne) est un fichier d'environ
+\num{320} Mo.
+
+%La table~\ref{table:denombrement} donne les tailles des modèles sources et
+%cibles, ainsi que les nombres d'éléments de notre exemple. Le modèle source
+%était entièrement généré, et connaissant sa forme, nous sommes en mesure de
+%dénombrer ses éléments ainsi que ceux du modèle résultant. Pour donner une idée
+%de la taille des données, la sérialisation \texttt{.xmi} d'un modèle à 2000000
+%d'éléments est un fichier d'environ 320 Mo.
+
+%\begin{table}[h]
+%\begin{center}
+%\input{tables/denombrement}
+%\caption{Dénombrement des éléments IN et OUT pour l'exemple 1}
+%\label{table:denombrement}
+%\end{center}
+%\end{table}
+
+
+%OSEF, on fait du motu-one
+%Version \og filip \fg :
+%\begin{table}[h]
+%\begin{center}
+%\begin{tabular}{rr|r|rrrr|r}
+%  N (nbr WD) & src(2N) & tgt(14N+8)&
+%  \multicolumn{2}{c}{phase\#1} & \multicolumn{2}{c}{phase\#2}  & total \\
+%          & & & temps & \% & temps & \% & \\
+%%  Exemple & N (nbr WD) & tot. src(2N) & tot. tgt(14N+8)& phase\#1 &  & total \\
+%  \hline
+%  10 & 20 & 148 & 19 & 19.19 & 80 & 80.81 & 99 \\
+%  100 & 200 & 1408 & 76 & 7.79 & 891 & 92.21 & 976 \\
+%  500 & 1000 & 7008 & 249 & 0.54 & 45768 & 99.46 & 46017 \\
+%  1000 & 2000 & 14008 & 522 & 0.12 & 437047 & 99.88 & 437569 \\
+%       &      &       &     & & \multicolumn{2}{r|}{$\sim$7min 17s} & $\sim$7min 17s \\
+%  5000 & 10000 & 70008 & ?? & 0.?? & ?? & 99.?? & ?? \\
+%       &      &       &     & & \multicolumn{2}{r|}{$\sim$??min ??s} & $\sim$??min ??s \\
+%  10000 & 20000 & 140008 & ?? & 0.01 & ?? & 99.99 & ?? \\
+%        &       &        &    & & \multicolumn{2}{r|}{$\sim$??min ??s} & $\sim$??min ??s \\
+%\end{tabular}
+%\caption{Temps de transformation, exemple 1}
+%\label{table:stats}
+%\end{center}
+%\end{table}
+
+\begin{table}[h]
+  \begin{center}
+    \input{tables/tempsTomFull}
+    \caption{Mesures de durées de transformation en fonction des tailles des
+    modèles sources.}
+%    \label{table:temps}
+    \label{table:tempsTomFull}
+  \end{center}
+\end{table}
+
+% 1er décembre : 126 094 099 + 24 262 874 = 150 356 973 (model gen: 57 877 925)
+%               35h1min34s + 6h44min..s = 41h45min (16h4min37s)
+%benchWOemfresolve/MY
+
+%? 53644826 -> 14h 54min
+
+La figure~\ref{fig:courbeTemps} donne une représentation graphique des temps
+d'exécution en fonction de la taille du modèle d'entrée. Plus le modèle
+source est gros, plus la durée de la transformation est élevée. Nous notons que
+plus le modèle source est important, plus la part de la première phase de la
+transformation est importante par rapport à la phase de résolution. Cela
+s'explique par deux facteurs : d'une part par la transformation elle-même qui
+crée bien plus d'éléments cibles (\emph{normaux} et \emph{resolve}) qu'elle ne
+doit en résoudre, d'autre part par les améliorations et optimisations que nous
+avons apportées au code généré et aux mécanismes développés.
+
+\begin{figure}[h]
+  \begin{center}
+    \input{figures/courbeTemps}
+  \caption{Temps moyen de transformation (en ms) en fonction du nombre d'éléments
+  dans le modèle source (phase 1, phase 2, total).}
+  \label{fig:courbeTemps}
+  \end{center}
+\end{figure}
+
+En effet, ces résultats ne sont pas les résultats que nous pourrions obtenir
+avec la version stable actuelle de nos outils : initialement, la phase de
+résolution était largement plus consommatrice de ressources et la durée d'une
+transformation était quasiment celle de la seconde phase (environ $99\%$ du
+temps d'exécution pour des modèles de taille $>$100). De plus, dans leur
+première version stable publiée, outre une certaine lenteur, nos outils
+consomment une grande quantité de mémoire. Lors des premières expériences, nos
+transformations étaient beaucoup plus longues à s'exécuter que la même
+transformation développée en {\atl} (donnée en~\ref{annexe:atlpdl2pn}). Nous ne
+pouvions exécuter une transformation d'un modèle source de \num{20000} éléments
+ou plus, par manque de mémoire (20GB alloués par défaut). De son côté, {\atl}
+franchissait ce seuil est bloquait aux alentours de \num{50000} éléments
+sources par manque de mémoire. C'est ce qu'illustre le
+tableau~\ref{table:tempsTomEvolution} qui donne les temps d'exécution de deux
+versions de nos outils, que nous comparons à ceux avec {\atl}. Nous avons donc
+travaillé en priorité sur l'amélioration du code généré pour la phase de
+résolution afin de corriger ces lacunes. 
+
+\begin{table}[h]
+  \begin{center}
+    \input{tables/comparatifTemps}
+    \caption{Comparaison des performances entre Tom (première et dernière
+    versions) et ATL.}
+    \label{table:tempsTomEvolution}
+  \end{center}
+\end{table}
+
+Dans un premier temps, constatant que l'essentiel du temps était passé dans
+l'appel de fonctions du \emph{framework} {\emf}, nous avons modifié la
+résolution de liens. Nous nous reposions exclusivement sur les méthodes
+\emph{emf} gérant la résolution de liens, qui étaient appelées au sein de la
+stratégie de résolution. Cependant, l'implémentation de cette méthode dans le
+\emph{framework} {\emf} n'est pas assez efficace. Nous avons donc implémenté
+notre propre résolution de liens. Dans un second temps, nous avons continué à
+optimiser en modifiant notre approche lors de la trace technique des objets
+créés. Ces améliorations successives ont drastiquement diminué la durée
+d'exécution de la seconde phase par rapport à la première qui concentre
+maintenant l'essentiel du temps processeur d'une transformation.
+
+Finalement, nous avons abouti à la version actuelle qui sera intégrée dans la
+prochaine version stable de {\tom}. Tout au long de la transformation, nous
+stockons les éléments tracés servant à la résolution (traçabilité technique)
+ainsi que les éléments référençant les éléments intermédiaires \emph{resolve}
+(c'est-à-dire ayant un pointeur vers un élément \emph{resolve}, par exemple un
+arc image d'une \emph{WorkSequence} dans l'exemple
+\emph{SimplePDLToPetriNet}). 
+
+En début de phase de résolution, nous récupérons l'ensemble des éléments
+intermédiaires temporaires. Nous le parcourons et pour chaque élément de cet
+ensemble, nous parcourons l'ensemble des objets le référençant pour leur
+appliquer la résolution de lien. Avec notre implémentation, nous parcourons le
+minimum d'objets possible, ce qui réduit considérablement les parcours
+(notamment par rapport à {\emf}). Ces optimisations nous ont apporté un gain
+conséquent nous permettant de passer d'outils transformant difficilement des
+petits modèles de \num{10000} éléments en des outils capables de transformer
+des modèles de plusieurs millions d'éléments.
+
+Finalement, ces premiers résultats expérimentaux nous permettent d'exprimer un
+avis sur nos choix technologiques initiaux, en particulier sur l'utilisation de
+{\emf}. Si ce choix paraissait naturel pour pouvoir avoir une couverture
+initiale maximale de chaînes de développement, d'outils et d'utilisateurs, il
+paraît beaucoup moins naturel lorsque l'on commence à s'intéresser aux
+performances. En effet, notre travail de \emph{profiling} et d'optimisation
+nous a montré que le facteur limitant essentiel résidait dans les appels
+{\emf}. Leur limitation puis leur suppression a drastiquement amélioré les
+performances de nos outils. Dans notre contexte, et pour les tâches demandées,
+nous n'avions finalement pas un besoin fondamental de toutes les
+fonctionnalités fournies par {\emf}. Une version simplifiée et optimisée de la
+gestion des références inverses suffisait amplement pour notre phase de
+résolution. Il est donc plus intéressant en termes de performances pures et de
+mémoire de nous passer de la technologie de support ({\emf} dans notre
+implémentation actuelle) pour tout ce qui relève de la mécanique interne de la
+transformation. De plus, nous affranchir totalement d'une technologie nous
+permet d'obtenir des outils plus génériques, et donc plus facilement
+intégrables dans d'autres contextes et chaînes de développement.
+
+Cependant, si le choix initial d'utilisation des services {\emf} pour le moteur
+des transformations s'est avéré peu judicieux et a été remis en cause en cours
+de thèse, il a été fondamental pour avoir une implémentation concrète et un
+support de travail. De plus, notre travail a mis en avant ce choix peu
+judicieux pour la mise en œuvre de mécanismes internes de nos transformations,
+ce qui ne remet pas en cause l'usage d'{\emf} dans d'autres contextes avec
+d'autres outils, ni même son usage avec {\tom}. En effet, au-delà des
+constructions haut-niveau qui s'appuyaient partiellement sur {\emf}, subsiste
+notre outil de génération automatique d'ancrages formels qui permet d'opérer le
+changement d'espace technologique. 
+%Il est totalement décorrélé du langage de transformation et de
+%l'implémentation concrète de la phase de résolution. 
+Cet outil reste extrêmement intéressant pour faciliter l'écriture des
+transformations ---~de manière totalement indépendante du langage de
+transformation ainsi que de sa mise en œuvre technique~--- dans un contexte
+{\java}-{\emf}.
+
+
+\section{Perspectives}
+\label{ch:evaluation:perspectives}
+
+%De notre travail de thèse ainsi que de ces premiers résultats expérimentaux,
+%plusieurs pistes de recherche et de développement se profilent. 
+L'ensemble de nos outils peut être actuellement considéré comme un prototype
+opérationnel. Cependant, dans le cadre d'une utilisation plus large et dans un
+contexte industriel réel, on pourrait s'orienter vers différents aspects qui
+ont émergé de ce travail de thèse et des premiers résultats expérimentaux.
+
+Nous avons pu éprouver l'intérêt de notre approche hybride pour développer des
+transformations de modèles. Cette approche facilite de développement grâce aux
+outils de génération de code et aux constructions haut-niveau avec une forte
+expressivité, tout en conservant l'environnement global existant. Il reste donc
+possible d'utiliser les spécificités du langage généraliste au sein duquel nous
+nous intégrons pour certaines tâches tout en manipulant des termes dans une
+autre partie de l'application. Le travail d'adaptation que l'utilisateur doit
+fournir est de fait plus faible, d'où une plus grande efficacité.
+
+Notre approche a aussi l'avantage de perturber au minimum la chaîne de
+développement et le choix de l'adopter n'est pas irréversible ou coûteux dans
+le sens où chaque transformation développée peut être remplacée par sa version
+dans le langage hôte (ou écrite avec un autre outil) sans changer le reste du
+logiciel. Dans cette optique d'intégration non-intrusive dans des
+environnements existants, une voie serait de travailler à la généralisation de
+nos outils afin d'étendre l'approche à d'autres langages et technologies. Par
+exemple, un premier pas dans cette direction pourrait être de se pencher sur
+l'utilisation de {\kevoree} ainsi que sur l'extension au langage {\ada} (des
+travaux sur le sujet ont déjà été entamés).
+
+L'utilisation de constructions haut-niveau et d'outils de génération permet à
+l'utilisateur de se concentrer sur le cœur de l'application et de déléguer à un
+outil automatique les tâches répétitives sujettes à erreurs pour un humain.
+Cela contribue à augmenter la confiance dans le logiciel développé.
+
+Un autre axe de travail consisterait à réfléchir sur les stratégies que nous
+utilisons pour transformer des modèles.  Nous nous sommes aperçus que certaines
+relations étaient souvent vues comme intéressantes (composition), mais que dans
+certaines situations, d'autres relations pouvaient être le centre de la
+transformation. Travailler sur la paramétrisation des stratégies de réécriture
+par des types de relation à suivre pourrait être une voie à explorer.
+
+Un autre aspect intéressant que d'autres outils couvrent est la transformation
+de modèles multiples : actuellement notre approche considère un seul modèle
+source et un seul modèle cible. Cependant, on pourrait gagner en expressivité
+en permettant d'écrire des transformations à plusieurs sources et cibles. %Une
+%première approche dans ce sens serait dans un premier temps de créer un modèle
+%englobant ces différents modèles d'entrées
+
+Bien que les outils soient complètement opérationnels, une optimisation serait
+probablement nécessaire pour un usage plus large dans un cadre industriel, tant
+du point de vue de leurs performances que de leur utilisabilité. Nos travaux
+d'amélioration des performances par réingénierie de la phase de résolution
+constituent une première étape qui sera concrétisée dans une prochaine
+\emph{release} du projet {\tom}.
+
+Du point de vue de la modularité et de la réutilisation du code, les stratégies
+de réécriture nous fournissent un socle intéressant de par leur modularité
+intrinsèque. Nos expérimentations sur le sujet ont abouti à un prototype de nos
+outils avec phase de résolution modulaire. Cependant, pour des raisons de
+confort d'utilisation pour le développeur, nous avons choisi de ne pas intégrer
+cette fonctionnalité par défaut dans la version stable actuelle. Nous avons
+cependant une base de travail pour réfléchir à cet aspect. Il faut toutefois
+noter que les évolutions de nos outils dues à l'amélioration de leurs
+performances risquent d'entrer en concurrence avec l'approche adoptée dans
+notre prototype modulaire. De fait, l'aspect performance est actuellement
+privilégié.
+
+Nous avons aussi pu apporter une traçabilité au sein d'un langage généraliste
+tel que {\java}. Il s'agissait d'apporter une aide substantielle au processus
+de qualification d'un logiciel. L'aspect traçabilité des transformations semble
+être un thème particulièrement prometteur. En effet, les industries développant
+du logiciel critique ont un besoin accru de traçabilité pour qualifier et
+certifier leurs outils. L'adoption de l'ingénierie dirigée par les modèles a
+entraîné l'usage de nouvelles méthodes et de nouveaux outils tandis que les
+contraintes légales subsistent. Partant de ce constat, les travaux sur la
+traçabilité à des fins de validation du logiciel offrent des perspectives
+intéressantes. Dans l'implémentation actuelle de nos travaux, les constructions
+pour la traçabilité ne sont pas distinctes. Une première étape serait de
+distinguer clairement (par deux constructions distinctes du langage) la
+traçabilité utilisée à des fins purement techniques (usage pour la phase de
+résolution) et la traçabilité métier. Notre approche de trace à la demande
+permet déjà de limiter la taille des traces et donc de les rendre plus
+exploitables \emph{a posteriori}. Se pose aussi la question de l'exploitation
+du modèle de lien, de manière automatique ou non dans le processus de
+qualification.
+
+
+
+%virer ça
+
+%\noindent \textbf{\textit{Approche hybride.}} Notre choix d'utiliser Tom est
+%intéressant car nous nous plaçons à la frontière de deux espaces
+%technologiques qui sont souvent peu connus ensembles par le développeur
+%moyen. Cette approche nous permet d'utiliser des concepts et outils formels
+%tout en restant accessible à des utilisateurs non-académiques. Il s'agit
+%d'aider l'utilisateur à améliorer la qualité de son logiciel sans pour
+%autant le pousser à changer radicalement d'environnement, d'outil, de langage
+%et d'habitudes. Le cela permet de limiter le coût du développement par
+%rapport à l'adoption d'outils complètement spécifiques et dédiés.
+%
+%\noindent \textbf{\textit{Langage de transformation.}} Concernant l'expression de la transformation elle-même ainsi que
+%l'implémentation de l'approche en deux temps avec résolution, nous ne
+%devrions pas apporter de changements fondamentaux. Il s'agit d'une approche
+%relativement classique dans le monde des transformations de modèles qui a
+%montré son efficacité. Les évolutions à venir viseront essentiellement
+%l'amélioration de l'expérience utilisateur et la simplification de la prise
+%en main des outils :
+%\begin{itemize}
+%\compresslist
+%
+%  \item L'introduction de raccourcis syntaxiques permettra de 
+%%  L'écriture des définitions pourra être amélioré par l'introduction
+%%  de raccourcis syntaxiques permettant de 
+%  spécifier plus simplement la stratégie après le mot-clef
+%  \lex{traversal}. Dans le cas le plus courant, l'utilisateur suit nos
+%  recommandations et ne souhaite véritablement spécifier que le type de
+%  parcours et non toute la stratégie (avec les paramètres la plupart du
+%  temps identiques à ceux de la transformation) ;
+%
+%  \item Une simplification de l'utilisation du modèle de lien est aussi à
+%  l'étude afin que l'utilisateur n'ait plus à le spécifier explicitement
+%  ;
+%
+%  \item Nous souhaitons alléger la syntaxe de la construction \lex{\%resolve}
+%  pour ne plus avoir à donner explicitement les types en les inférant.
+%
+%\end{itemize}
+%
+%\noindent \textbf{\textit{\'Evaluation et limitations.}} Nous avons essayé
+%de trouver des usages pour lesquels nos outils étaient particulièrement
+%intéressants ou au contraires pour lesquels ils apportaient peu. Nous les
+%avons notamment utilisés pour implémenter l'exemple de l'applatissement
+%d'une hiérarchie de classes (les feuilles de l'arbre d'héritage
+%récupèrent tous les attributs de leurs surclasses).  Cet exemple nous
+%semblait intéressant du fait que la relation de composition n'est pas
+%centrale et que notre outil est calibré pour la relation de composition. \\
+%Nous avons constaté que pour un tel exemple dont l'implémentation
+%récursive en Java, Java+Tom classique (sans la partie modèle) ou ATL est
+%triviale, les constructions dédiées aux modèles n'apportent aucun
+%véritable gain. Elles complexifient même la transformation, sans
+%véritablement tirer parti des outils développés. Nous constatons aussi
+%que \lex{\%transformation} prend beaucoup d'intérêt lors de l'utilisation
+%d'éléments \emph{resolve}, car les structures de données ainsi que la
+%phase de résolution sont générées automatiquement. En revanche, cet
+%exemple n'en nécessitant pas, le code est plus concis et lisible avec du Tom
+%classique sans construction \lex{\%transformation}. Cet exemple nous a aussi
+%amené à réfléchir à l'extension de l'\emph{introspecteur} à
+%d'autres liens que les liens de composition (paramétrisation par les liens).
+%
+%\noindent \textbf{\textit{Traçabilité.}} Ce faible intérêt apparent
+%pour les transformations les moins complexes peut être compensé par un
+%autre axe de travail actuel : la traçabilité des transformations. Elle
+%est actuellement assurée par le modèle de lien et la construction
+%\lex{\%tracelink}, cependant cela comprend deux aspects de la traçabilité que
+%nous souhaitons distinguer : la traçabilité
+%\emph{technique} et de \emph{spécification}.\\
+%La traçabilité \emph{technique} est la traçabilité utilisée en
+%interne pour la transformation elle-même (pour la phase de résolution).
+%Bien qu'extrêment utile à des fins de debug, Cette traçabilité
+%proche de l'implémentation peut être très éloignée d'une
+%spécification. La certification d'un logiciel peut par conséquent être
+%particulièrement ardue avec cette unique traçabilité, qui est
+%d'ailleurs implémentée dans ATL ~\cite{Jouault2005} et
+%Kermeta~\cite{Falleri2006}.\\
+%La traçabilité de \emph{spécification} peut quant à elle être
+%décorrélée de l'implémentation technique. Elle décrit des relations
+%entre des sources et des cibles comme une spécification peut le faire, sans
+%forcément adopter le découpage des règles de l'implémentation. Nous
+%souhaitons séparer clairement ces deux traçabilités et donc découper
+%la construction \lex{\%tracelink} en deux constructions distinctes qui joueront
+%chacune un r\^ole spécifique. Techniquement, il nous faudra lever la
+%limitation actuelle de ne pouvoir lier qu'une seule source à plusieurs
+%cibles. Cela nous permettra de travailler à la généralisation de la
+%traçabilité d'une transformation pour les approches hybrides, et à
+%l'ajout de la traçabilité dans les transformations écrites avec des
+%langages généralistes grand public.
+%
+%\noindent \textbf{\textit{Enrichissement de l'expressivité du langage.}}
+%Notre solution est proche de celle apportée par ATL. Cependant, nous nous
+%distonguons par notre volonté de nous intégrer totalement à des langages
+%généralistes (et particulièrement Java). Nous souhaitons aussi étendre
+%et généraliser le mécanisme \emph{resolve} à des sources multiples, ce
+%que ne permet pas ATL.  Actuellement, un élément \emph{resolve} (ou le
+%\emph{resolveTemp} d'ATL) ne lie qu'un élément source à un élément
+%cible. Nous souhaitons améliorer l'expressivité de notre langage en offrant
+%la possibilité du \emph{resolve} multi-sources ainsi que des règles
+%multi-\emph{patterns}. Cela passe par l'élaboration de nouveaux mécanismes
+%tels que des \emph{patterns} paramétrés ou des stratégies multi-sujets
+%sur lesquelles nous travaillons actuellement.
+%
+%\noindent \textbf{\textit{Modularité.}} Ensuite, dans l'optique d'accroître
+%la modularité de notre approche -- et donc la réutilisabilité des
+%transformations --, un nouvel axe de travail est de décomposer la phase de
+%résolution jusqu'alors monolithique en \emph{résolutions élémentaires}.
+%Si une définition pouvait être réutilisée dans une autre
+%transformation, il était nécessaire de générer (ou éventuellement
+%développer) une nouvelle phase de résolution adaptée à la nouvelle
+%transformation. En décomposant cette phase en briques élémentaires, nous
+%rendons la phase de résolution modulaire et réutilisable. Une définition
+%-- accompagnée des résolutions élémentaires associées -- pourra donc
+%être complètement portable dans d'autres transformations.
+%
+%\noindent \textbf{\textit{Usage industriel.}} Bien que les versions courantes
+%du langage et des outils puissent être encore améliorées, l'ensemble est
+%déjà utilisable dans un contexte non-académique. Nos outils ont été
+%utilisés par nos partenaires industriels durant le projet
+%Quarteft~\footnote{\url{http://www.quarteft.loria.fr}} financé par la
+%FRAE~\footnote{Fondation de Recherche pour l'Aéronautique et l'Espace :
+%\url{http://www.fnrae.org}}. 
+
+% vim:spell spelllang=fr

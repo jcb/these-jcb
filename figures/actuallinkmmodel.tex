@@ -1,0 +1,51 @@
+%\begin{tikzpicture}[scale=0.7,transform shape]
+\begin{tikzpicture}[scale=1,transform shape]
+
+  \begin{class}{Trace}{-5.5,0}
+    \attribute{transfoName : String}
+  \end{class}
+  
+  \begin{class}{ReferenceClass}{0,0}
+    \attribute{definitionName : String}
+  \end{class}
+ 
+  \begin{class}{SourceElement}{5.0,1}
+    \attribute{}
+  \end{class}
+ 
+  \begin{class}{TargetElement}{5.0,-1}
+    \attribute{}
+  \end{class}
+  
+%  \begin{class}{Element}{4.5,0}
+%    \attribute{}
+%  \end{class}
+%  
+%  \composition{Trace}{links}{*}{TraceLink}
+%  \draw [umlcd style, ->] ([yshift=40pt]TraceLink) -- (Element)
+%  node[near end, above,xshift=-7pt]{source 1};
+%  %node[near end, above]{sources}
+%  %node[near end, below]{*};
+%
+%\draw [umlcd style, ->] ([yshift=-40pt]TraceLink) -- (Element)
+%  node[near end, below,xshift=-7pt]{targets *};
+%%  node[near end, below]{targets}
+%%  node[near end, above]{*};
+%%controls +(-160:5em) and +(140:5em) ..
+%
+%%  \unidirectionalAssociation{TraceLink}{sources}{*}{Element}
+%%  \unidirectionalAssociation{TraceLink}{targets}{*}{Element}
+
+  %test
+  \composition{Trace}{links}{*}{ReferenceClass}
+  \draw [umlcd style, ->] ([yshift=40pt]ReferenceClass) -- (SourceElement)
+  node[near end, above,xshift=-14pt]{sources 1..*};
+  %node[near end, above]{sources}
+  %node[near end, below]{*};
+
+\draw [umlcd style, ->] ([yshift=-40pt]ReferenceClass) -- (TargetElement)
+  node[near end, below,xshift=-14pt]{targets 1..*};
+
+
+
+\end{tikzpicture}

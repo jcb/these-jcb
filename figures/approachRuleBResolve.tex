@@ -1,0 +1,14 @@
+\definecolor{myblue}{HTML}{0000FF}
+\definecolor{mygreen}{HTML}{129d1c}
+\begin{tikzpicture}[>=latex, node distance=1cm, on grid, auto]%, scale=0.6, transform shape]
+
+\node (S2) [draw, rectangle, minimum size=0.5mm, color=mygreen, dashed] {};
+\path (S2.east)+(0.25,-1) node (B1) [draw, regular polygon, regular polygon
+sides=5, minimum size=1cm, color=myblue] {}; %{B};
+
+\path[-,color=myblue] (S2) edge (B1);
+
+\path (S2.west)+(-1,-0.5) node (arrow) [minimum size=0.5cm] {$\longrightarrow$};
+\path (arrow.west)+(-0.5,0) node (B) {B};
+
+\end{tikzpicture}

@@ -1,0 +1,55 @@
+\begin{tikzpicture}[node distance=1.3cm,>=stealth',bend
+  angle=45,auto,scale=1.0,transform shape]
+
+  \tikzstyle{place}=[circle,thick,draw=red!75,fill=red!20,minimum size=5mm]
+  \tikzstyle{transition}=[rectangle,thick,draw=blue!75,
+  			  fill=blue!20,minimum size=4mm]
+
+  \tikzstyle{every label}=[black]
+
+  \begin{scope}
+    % Petri net A
+    \node [place] (p1) [tokens=1] [xshift=-5cm]{}
+    ;
+    \node at (p1.west) [left] {};
+
+    \node [transition] (tp1) [right of=p1,dash pattern=on 2pt off 2pt]  {}
+      edge [post,bend right,dash pattern=on 2pt off 2pt] (p1)
+    ;
+    \node at (tp1.south) [below] {};
+
+    \node [transition] (t1) [below of=p1] {}
+      edge [pre]  (p1)
+    ;
+    \node at (t1.west) [left] {};
+
+    %%in order to center tstart transition
+    \node [place] (p) [below of=t1,circle,draw=white,fill=white] {};
+
+    \node [place] (p2) [left of=p] {}
+      edge [pre] (t1)
+    ;
+    \node at (p2.west) [left] {};
+    \node [place] (p3)  [right of=p] {}
+      edge [pre] (t1)
+    ;
+    \node at (p3.west) [left] {};
+
+    \node [transition] (t2) [below of=p2] {}
+      edge [pre]  (p2)
+    ;
+    \node at (t2.west) [left] {};
+
+    \node [place] (p4) [below of=t2] {}
+      edge [pre] (t2)
+    ;
+    \node at (p4.west) [left] {};
+    
+    \node [transition] (tp2) [right of=p4,dash pattern=on 2pt off 2pt] [xshift=0.5cm] {}
+      edge [pre,bend left,dash pattern=on 2pt off 2pt] (p4)
+    ;
+    \node at (tp2.north) [above] {};
+
+  \end{scope}
+
+\end{tikzpicture}

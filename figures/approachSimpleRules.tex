@@ -1,0 +1,52 @@
+\definecolor{myred}{HTML}{d01e1e}
+\definecolor{mygreen}{HTML}{129d1c}
+\definecolor{myblue}{HTML}{0000FF}
+\makeatletter
+\begin{tikzpicture}[>=latex, node distance=1cm, on grid, auto]
+
+%A
+\node (A2) [draw, circle, minimum size=0.5mm, color=myred] {};
+\path (A2.west)+(-0.25,-1) node (A1) [draw, regular polygon, regular
+polygon sides=6, minimum size=1cm, color=myred] {}; %{A};
+\path[-,color=myred] (A1) edge (A2);
+\path (A2.west)+(-1.5,-0.5) node (arrow) [minimum size=0.5cm] {$\longrightarrow$};
+\path (arrow.west)+(-1,0) node (A) {A};
+
+%ligne1
+\node (sepAS) [right of=A2] {} ;
+\path[draw,-] (sepAS)+(0,1) edge (sepAS)+(0,-1);
+
+%;
+\node (seq) [right of=sepAS] {;} ;
+\path (seq.east)+(1,0) node (arrow) [minimum size=0.5cm] {$\longrightarrow$};
+\path (arrow.east)+(1.5,0.5) node (S1) [draw, regular polygon, regular polygon sides=3, minimum size=1cm, shape border rotate=180, color=mygreen] {}; %{;};
+\path (S1.west)+(-0.5,-1) node (SA2) [circle, minimum size=0.5mm] {};
+\path (S1.east)+(0.5,-1) node (S2) [draw, rectangle, minimum size=0.5mm, color=mygreen] {};
+\path[-,color=mygreen] (SA2) edge (S1);
+\path[-,color=mygreen] (S1) edge (S2);
+
+%\node (S1) [draw, regular polygon, regular polygon sides=3, minimum
+%size=1cm, shape border rotate=180, color=mygreen] {}; %{;};
+%\path (S1.west)+(-0.5,-1) node (SA2) [circle, minimum size=0.5mm] {};
+%\path (S1.east)+(0.5,-1) node (S2) [draw, rectangle, minimum size=0.5mm, color=mygreen] {};
+%\path[-,color=mygreen] (SA2) edge (S1);
+%\path[-,color=mygreen] (S1) edge (S2);
+%\path (S1.west)+(-1.5,-0.5) node (arrow) [minimum size=0.5cm] {$\longrightarrow$};
+%\path (arrow.west)+(-1,0) node (seq) {;};
+
+
+%ligne2
+\node (SBH) [right of=S2] {} ;
+\node (SBB) [below of=SBH, ] {} ;
+\path[draw,-] (SBH) edge (SBB);
+
+
+%B
+\node (BS2) [rectangle, minimum size=0.5mm] {};
+\path (BS2.east)+(0.25,-1) node (B1) [draw, regular polygon, regular polygon
+sides=5, minimum size=1cm, color=myblue] {}; %{B};
+\path[-,color=myblue] (BS2) edge (B1);
+\path (BS2.west)+(-1.5,-0.5) node (arrow) [minimum size=0.5cm] {$\longrightarrow$};
+\path (arrow.west)+(-1,0) node (B) {B};
+
+\end{tikzpicture}

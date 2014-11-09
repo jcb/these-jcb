@@ -1,0 +1,76 @@
+%\begin{tikzpicture}[scale=0.7,transform shape]
+\begin{tikzpicture}[scale=1,transform shape]
+
+  \begin{class}{GeoPicture}{-1,4}
+    \attribute{name : String}
+  \end{class}
+  
+  \begin{class}[text width=2.5cm]{Segment}{4.5,-0.5}
+  \end{class}
+  
+  \begin{abstractclass}{Shape}{-2,0}
+    \attribute{color : Color}
+  \end{abstractclass}
+  
+  \begin{class}{Pentagon}{-3,-3}
+    \inherit{Shape}
+  \end{class}
+  
+  \begin{class}{Triangle}{-6,-3}
+    \inherit{Shape}
+  \end{class}
+  
+  \begin{class}{Hexagon}{0,-3}
+    \inherit{Shape}
+  \end{class}
+  
+  \begin{class}{Square}{3,-3}
+    \inherit{Shape}
+  \end{class}
+  
+  \begin{class}{Circle}{6,-3}
+    \inherit{Shape}
+  \end{class}
+  
+  \begin{enum}[text width=2cm]{Color}{5,3}
+    \attribute{red}
+    \attribute{green}
+    \attribute{blue}
+  \end{enum}
+  
+  \composition{GeoPicture}{shapes}{0..*}{Shape}
+  \unidirectionalAssociation{Shape}{picture}{1}{GeoPicture}
+  
+  \composition{GeoPicture}{segments}{0..*}{Segment}
+  \unidirectionalAssociation{Segment}{picture}{1}{GeoPicture}
+
+  %\association{Segment}{source}{1}{Shape}{0..*}{outgoings}
+%  \myassociation{Shape}{outgoings}{0..*}{Segment}{1}{source}{0.5,0}{0}
+
+  \draw [umlcd style, fill=white] (Segment) -- 
+node[near start, above, anchor=210, xshift=-0.3cm, yshift=-0.15cm]{outgoings}
+node[near start, below, anchor=150, xshift=-0.1cm, yshift=-0.05cm]{0..*}
+(1.0,0) -- (Shape)
+node[near end, below, xshift=-0.35cm, yshift=0.3cm]{1}
+node[near end, above, xshift=0.2cm, yshift=0.15cm]{source};
+
+
+\draw [umlcd style, fill=white] (Segment) -- 
+node[near start, above, anchor=210, xshift=-0.15cm, yshift=-0.35cm] {0..*}
+node[near start, above, anchor=150, xshift=-0.7cm, yshift=-0.1cm]{incomings}
+(1,-1.2) -- (Shape)
+node[near end, below, xshift=-0.35cm, yshift=0.45cm]{1}
+node[near end, above, xshift=0.3cm, yshift=-0.1cm]{target};
+
+%  \association{Segment}{0..*}{incomings}{Shape}{1}{target}
+
+  %\myassociation{Shape}{incomings}{0..*}{Segment}{1}{target}{0.5,-1}{1}
+  %\draw [umlcd style, fill=white] (Segment) -- 
+%node[near start, below, anchor=150, xshift=-0.5cm]{target}
+%node[near start, above, anchor=210, yshift=0.1cm]{1}
+%(0.5,-1) -- (Shape)
+%node[near end, above, yshift=0.1cm]{0..*}
+%node[near end, below, xshift=0.5cm, yshift=0.1cm]{incomings};
+
+
+\end{tikzpicture}

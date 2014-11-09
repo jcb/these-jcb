@@ -1,0 +1,47 @@
+    \begin{tikzpicture}[node distance=1.1cm,>=stealth',bend
+  angle=45,auto,scale=1.0,transform shape]
+
+  \tikzstyle{place}=[circle,thick,draw=red!75,fill=red!20,minimum size=5mm]
+  \tikzstyle{transition}=[rectangle,thick,draw=blue!75,
+  			  fill=blue!20,minimum size=4mm]
+
+  \tikzstyle{every label}=[black]
+
+  \begin{scope}
+    % Petri net  Process
+    \node [place] (ppc1) [tokens=1] [xshift=0cm]{}
+    ;
+    \node at (ppc1.west) [left] {{$P_{p_{ready}}$}};
+    
+    \node [transition] (tp1) [right of=ppc1,dash pattern=on 2pt off 2pt]  {}
+      edge [post,bend right,dash pattern=on 2pt off 2pt] (ppc1)
+    ;
+    \node at (tp1.south) [below] {{$source$}};
+
+    \node [transition] (tpc1) [below of=ppc1] {}
+      edge [pre]  (ppc1)
+    ;
+    \node at (tpc1.west) [left] {{$P_{t_{start}}$}};
+
+    \node [place] (ppc2) [below of=tpc1] {}
+      edge [pre] (tpc1)
+    ;
+    \node at (ppc2.west) [left] {{$P_{p_{running}}$}};
+
+    \node [transition] (tpc2) [below of=ppc2] {}
+      edge [pre]  (ppc2)
+    ;
+    \node at (tpc2.west) [left] {{$P_{t_{finish}}$}};
+
+    \node [place] (ppc3) [below of=tpc2] {}
+      edge [pre] (tpc2)
+    ;
+    \node at (ppc3.west) [left] {{$P_{p_{finished}}$}};
+    
+    \node [transition] (tp2) [right of=ppc3,dash pattern=on 2pt off 2pt] {}
+      edge [pre,bend left,dash pattern=on 2pt off 2pt] (ppc3)
+    ;
+    \node at (tp2.north) [above] {{$target$}};
+  \end{scope}
+
+\end{tikzpicture} 

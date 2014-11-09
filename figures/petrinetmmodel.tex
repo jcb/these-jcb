@@ -1,0 +1,45 @@
+%\begin{tikzpicture}[scale=0.7,transform shape]
+\begin{tikzpicture}[scale=1.0,transform shape]
+
+  \begin{class}{PetriNet}{2,-0.5}
+    \attribute{name : String}
+  \end{class}
+  
+  \begin{class}[text width=2.5cm]{Arc}{1,3}
+    \attribute{kind : ArcKind}
+    \attribute{weight : Int}
+  \end{class}
+  
+  \begin{abstractclass}{Node}{-5,0.7}
+    \attribute{name : String}
+  \end{abstractclass}
+  
+  \begin{class}{Place}{-2,-1}
+    \inherit{Node}
+    \attribute{marking : Int}
+  \end{class}
+  
+  \begin{class}{Transition}{-8,-1}
+    \inherit{Node}
+    %\attribute{min\_time : Int}
+    %\attribute{max\_time : Int}
+  \end{class}
+  
+  \begin{enum}{ArcKind}{-7,3}
+    \attribute{normal}
+    \attribute{read\_arc}
+  \end{enum}
+  
+  \composition{PetriNet}{nodes}{*}{Node}
+  \unidirectionalAssociation{Node}{net}{1}{PetriNet}
+  
+  \composition{PetriNet}{arcs}{*}{Arc}
+  \unidirectionalAssociation{Arc}{net}{1}{PetriNet}
+
+  %\association{Arc}{source}{1}{Node}{0..*}{outgoings}
+  \myassociation{Node}{source}{1}{Arc}{*}{outgoings}{-3,2.1}{0}
+
+  %\association{Arc}{target}{1}{Node}{0..*}{incomings}
+  \myassociation{Node}{target}{1}{Arc}{*}{incomings}{-2,0.8}{1}
+
+\end{tikzpicture}

@@ -1,0 +1,27 @@
+%\begin{tikzpicture}[scale=0.7,transform shape]
+\begin{tikzpicture}[scale=1,transform shape]
+
+  \begin{class}{Graph}{0,0}
+  \end{class}
+  
+  \begin{class}{Arc}{3,-3}
+    \attribute{weight : Int}
+  \end{class}
+  
+  \begin{class}{Node}{-3,-3}
+    \attribute{name : String}
+  \end{class}
+  
+  \composition{Graph}{nodes}{*}{Node}
+  \unidirectionalAssociation{Node}{graph}{1}{Graph}
+  
+  \composition{Graph}{arcs}{*}{Arc}
+  \unidirectionalAssociation{Arc}{graph}{1}{Graph}
+
+  %\association{Arc}{source}{1}{Node}{0..*}{outgoings}
+  \myassociation{Node}{source}{1}{Arc}{*}{outgoings}{0,-3.0}{0}
+
+  %\association{Arc}{target}{1}{Node}{0..*}{incomings}
+  \myassociation{Node}{target}{1}{Arc}{*}{incomings}{0,-4.5}{1}
+
+\end{tikzpicture}

@@ -1,0 +1,7 @@
+\begin{tomcode3}[label=code:typetermNat,caption=Ancrage du type Nat avec l'implémentation Java JNat]
+%typeterm Nat {
+  implement { JNat }
+  is_sort(s) { (s instanceof JNat) }
+  equals(t1,t2) { (t1.equals(t2)) }
+}
+\end{tomcode3}

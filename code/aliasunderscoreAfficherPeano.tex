@@ -1,0 +1,9 @@
+\begin{tomcode3}[label=code:aliasunderscoreAfficherPeano,caption=Notations : alias et variable anonyme.]
+public void chercher(NatList liste) {
+  %match(liste) {
+    concNat(X1*,x@suc(suc(_)),_*) -> { 
+      System.out.println(`x + " trouv#\texttt{é}#, en position " + `X1.length());
+    }
+  }
+}
+\end{tomcode3}

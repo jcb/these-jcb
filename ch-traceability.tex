@@ -1,0 +1,583 @@
+% vim:spell spelllang=fr
+\chapter{Spécification et traçabilité des transformations}
+\label{ch:traceability}
+%10p
+
+Dans ce chapitre, nous abordons la notion de spécification et de traçabilité
+d'une transformation de modèles.
+%Dans ce chapitre, nous expliquons ce qu'est la traçabilité et comment spécifier
+%celle d'une transformation de modèle.
+
+Les systèmes se complexifiant, l'{\idm} a apporté des solutions pour faciliter
+et accélérer le développement logiciel. Cependant, si la manière de développer
+un logiciel ainsi que les technologies utilisées ont changé depuis les débuts
+de l'informatique, les contraintes liées à la maintenance (évolution du
+logiciel, déboguage) et à la fiabilité (qualification, certification)
+restent identiques. 
+%Ainsi, dans le cadre de la qualification, il est nécessaire
+%d'adopter la traçabilité. Lorsque l'on écrit et utilise une transformation, il
+%est nécessaire de connaître et de conserver les relations entre les sources et
+%les cibles. Ces relations sont données par la trace.
+Ainsi, dans le cadre des transformations qualifiables, nous souhaitons avoir
+confiance dans les transformations développées, du point de vue formel (pour la
+vérification) ainsi que de celui de l'autorité de certification. La norme
+DO-178/ED-12 exige la traçabilité entre le code source et le code objet, c'est
+donc une problématique essentielle des compilateurs dans le contexte de la
+qualification. Cette problématique est généralisable à toute transformation,
+notamment aux transformations de modèles. En effet, l'ingénierie dirigée par
+les modèles étant de plus en plus présente dans les chaînes de développement de
+systèmes critiques, du code généré à partir d'un modèle peut faire partie du
+logiciel final.
+
+
+
+\section{Spécification}
+
+Dans le chapitre~\ref{ch:verification}, nous avons vu qu'il fallait qualifier
+les transformations dans le cadre du développement de systèmes critiques. Il
+est important de spécifier les transformations pour vérifier leur conformité,
+afin de disposer de la traçabilité code source--code objet. Pour cela, nous
+nous appuyons sur les transformations de modèles. %\todo{La traçabilité s'effectue au
+%niveau de la spécification, or les langages tels que {\qvtr} ou {\atl}
+%proposent une traçabilité mécanique dans l'implémentation. De manière générale,
+%cette traçabilité technique n'est pas substituable à celle de spécification. }
+
+Reprenons le cas d'utilisation \emph{SimplePDLToPetriNet} brièvement illustré
+dans le chapitre précédent et spécifions les modèles source et destination
+ci-après.
+
+\begin{figure}[h]%[fig:simplepdlmmodel]{Métamodèle SimplePDL.}%[H] %[!h]
+  \begin{center}
+    \input{figures/simplesimplepdlmmodel}
+    \caption{Métamodèle SimplePDL possible.}
+    \label{fig:simplesimplepdlmmodel}
+  \end{center}
+\end{figure}
+
+Le langage SimplePDL dont le métamodèle est donné
+figure~\ref{fig:simplepdlmmodel} permet d'exprimer simplement des processus
+génériques. Un processus (\emph{Process}) est composé d'éléments
+(\emph{ProcessElement}). Chaque \emph{ProcessElement} référence son processus
+\emph{parent} et peut être soit une \emph{WorkDefinition}, soit une
+\emph{WorkSequence}. Une \emph{WorkDefinition} définit une activité qui doit
+être effectuée durant le processus (un calcul, une action, {\etc}). Une
+\emph{WorkSequence} définit quant à elle une relation de dépendance entre deux
+activités. La deuxième (\emph{successor}) peut être démarrée ---~ou
+terminée~--- uniquement lorsque la première (\emph{predecessor}) est déjà
+démarrée ---~ou terminée~--- selon la valeur de l'attribut \emph{linkType} qui
+peut donc prendre quatre valeurs : \emph{startToStart}, \emph{finishToStart},
+\emph{startToFinish} ou \emph{finishToFinish}. Afin de pouvoir représenter des
+processus hiérarchiques, une \emph{WorkDefinition} peut elle-même être définie
+par un processus imbriqué (référence \emph{process}), qui conserve un lien vers
+l'activité qu'il décrit (référence \emph{from}).
+
+Le métamodèle donné par la figure~\ref{fig:petrinetmmodel2} permet d'exprimer
+les réseaux de Petri. Un tel réseau se définit par un ensemble de nœuds
+(\emph{Node}) qui sont soit des places de type \emph{Place}, soit des
+transitions de type \emph{Transition}, ainsi que par des arcs (\emph{Arc}). Un
+arc (orienté) relie deux nœuds de types différents (le réseau de Petri est un
+graphe biparti) et peut être de type \emph{normal} ou \emph{read-arc}. Il
+spécifie le nombre de jetons (\emph{weight} ---~poids~---) consommés dans la
+place source ou produits dans la place cible lorsqu'une transition est tirée.
+Un \emph{read-arc} vérifie uniquement la disponibilité des jetons sans pour
+autant les consommer (test de franchissement). Le marquage d'un réseau de Petri
+est défini par le nombre de jetons dans chaque place (\emph{marking}).
+
+\begin{figure}[h]%[fig:petrinetmmodel]{Métamodèle PetriNet.}%[H] %[!h]
+  \begin{center}
+    \input{figures/petrinetmmodel}
+    \caption{Métamodèle des réseaux de Petri.}
+    \label{fig:petrinetmmodel2}
+  \end{center}
+\end{figure}
+
+\FloatBarrier
+
+\section{Traçabilité}
+
+La traçabilité est très importante dans le cadre de la maintenance pour pouvoir
+suivre l'évolution d'un logiciel et détecter des \emph{bugs} introduits durant
+le cycle de vie de l'application. C'est un précieux outil pour l'analyse et
+la vérification de transformations, ce qui explique que ce soit une exigence de
+qualification. La traçabilité peut prendre plusieurs formes. Nous distinguons
+notamment la traçabilité \emph{interne} (autrement appelée \emph{technique}) de
+la traçabilité de spécification.
+
+\subsection{Traçabilité interne}
+
+La traçabilité \emph{interne} ou \emph{technique}~\cite{Jouault2005} a un usage
+purement technique au sein de la transformation. C'est-à-dire qu'elle est
+utilisée pour opérer la transformation, mais n'est pas nécessairement utile dans
+le cadre d'un processus de qualification. Dans les approches compositionnelles
+des transformations comme la nôtre, il faut mettre en œuvre un mécanisme
+permettant d'assembler les résultats partiels. Dans notre cas, si des éléments
+intermédiaires \emph{resolve} sont créés, il est nécessaire de pouvoir les
+faire correspondre à des éléments cibles réels. Il faut donc pouvoir marquer
+les éléments susceptibles de correspondre à un \emph{resolve} donné afin
+d'assurer la réalisation de la phase de résolution. Nous avons mis en œuvre
+cette traçabilité dans le cadre de notre approche décrite dans le
+chapitre~\ref{ch:approach} et nous la décrivons plus précisément dans le
+chapitre~\ref{ch:outils}. Nous ne nous attardons donc pas sur cette notion dans
+ce chapitre.
+
+Du fait de son usage, la traçabilité technique est étroitement liée à
+l'implémentation de la transformation. Elle est difficilement générique, ce qui
+peut nécessiter de la réingénierie lors d'une évolution de la transformation.
+
+%\todo{Deux types de traçabilité pouvant être distingués, nous nous concentrons
+%essentiellement sur la
+%traçabilité de spécification dans ce chapitre. En effet, la traçabilité
+%\emph{interne} (ou \emph{technique}) ---~purement mécanique~--- est liée
+%%permet de réaliser le 
+%mécanisme de résolution exposé dans le chapitre précédemment.}
+
+%\todo{types de traçabiilité : implicite/explicite ; interne/spec ; choix ;
+%approche}
+
+
+\subsection{Traçabilité de spécification}
+
+La traçabilité de spécification est quant à elle une exigence de qualification.
+C'est-à-dire qu'il faut pouvoir lier une source à une cible selon une
+spécification donnée. Ce type de traçabilité n'a pas d'usage technique pour le
+bon déroulement de la transformation elle-même et n'est pas nécessairement liée
+à l'implémentation.
+
+La traçabilité des transformations de modèles étant un élément essentiel dans
+un cadre industriel, beaucoup de langages l'ont implémenté. Cependant, les
+langages tels que {\qvtr} et {\atl} proposent une traçabilité mécanique, mais
+qui n'est pas substituable à la traçabilité de spécification.
+
+
+%\ttodo{==============================
+%  \begin{itemize}
+%    \item traçabilité vs spec
+%    \item intérêt
+%    \item que tracer ? quel format ? usage
+%    \item spec MM + explication
+%    \item spec textuelle
+%    \item OCL contrainte sur la spec textuelle
+%    \item approche implicite
+%  \end{itemize}
+%       ==============================}
+
+
+En {\idm}, l'usage de {\uml} est courant et comme nous avons pu le voir dans le
+chapitre~\ref{ch:notions}, un métamodèle permet de spécifier un langage. Pour
+exprimer la traçabilité dans ce contexte, il est donc naturel d'utiliser des
+métaclasses pour avoir un formalisme cohérent. On peut alors exprimer
+simplement la traçabilité par le métamodèle~\ref{fig:linkmmodel}.
+
+\begin{figure}[h]
+  \begin{center}
+    \input{figures/linkmmodel}
+    \caption{Métamodèle générique de trace.}
+    \label{fig:linkmmodel}
+  \end{center}
+\end{figure}
+
+Une \emph{Trace} concerne une transformation donnée nommée. Elle est composée
+d'un ensemble de relations (ou de liens de trace \emph{TraceLink}) entre des
+éléments sources et cibles. Un lien de trace établit une relation entre un ou
+plusieurs éléments sources (\emph{SourceElement}) et un ou plusieurs éléments
+cibles (\emph{TargetElement}). Une relation de trace est nommée et peut être
+considérée comme une règle ayant un membre gauche (source) et en membre droit
+(cible). Ce métamodèle est générique afin de donner une intuition. Il doit
+cependant être spécifique pour chaque transformation donnée. Dans le cas de
+\emph{SimplePDLToPetrinet}, \emph{SourceElement} de la
+figure~\ref{fig:linkmmodel} est remplacé par les métaclasses \emph{Process},
+\emph{WorkDefinition} et \emph{WorkSequence} ou alors est leur surtype. Dans le
+cas d'un \emph{framework} comme {\emf}, on peut utiliser \emph{EObject}.
+
+Lors de la certification et de la qualification, les spécifications sont
+cependant très souvent écrites en langue naturelle (français ou anglais). Le
+tâche de l'expert qualifieur consiste alors à comparer la spécification
+textuelle au code du logiciel et aux sorties produites pour des entrées
+données. Cette tâche est complexe et fortement sujette à erreurs du fait du
+rôle central que joue l'humain dans ce processus. Tout doit donc être mis en
+œuvre pour assister l'expert qualifieur en lui fournissant des éléments de
+confiance supplémentaires. C'est le rôle des outils et de leurs implémentations
+de la traçabilité.
+
+Cette trace peut revêtir différents aspects et n'est pas forcément utilisable
+avec des outils automatiques. Par exemple, l'implémentation de la traçabilité
+peut consister en la génération de commentaires lisibles par un humain.  C'est
+d'ailleurs l'approche adoptée par l'outil {\btollvm} ---~hors du contexte de
+l'{\idm}~--- qui opère une transformation du langage {\B} vers le langage
+intermédiaire de {\llvm}\footnote{Le projet {\llvm} est une infrastructure de
+compilateur modulaire et réutilisable, voir \url{http://www.llvm.org}.}. Ces
+commentaires facilitent la lecture et la compréhension du code par l'expert,
+mais ne sont cependant pas réutilisables en tant que tels comme entrées d'un
+outil automatique de vérification. Un point particulièrement intéressant est
+d'assurer la traçabilité d'une transformation en générant une trace formelle
+exploitable \emph{a posteriori} par d'autres outils. L'intérêt est alors de
+permettre de se passer de l'écriture d'une preuve formelle ---~coûteuse à
+obtenir~--- tout en conservant une confiance forte dans la transformation. Une
+telle trace générée lors d'une transformation peut-être utilisée de deux
+manières :
+\begin{itemize}
+  \item elle peut être comparée à une trace de référence donnée en spécification ;
+  \item des propriétés données en spécification peuvent être vérifiées.
+\end{itemize}
+
+Dans le premier cas d'utilisation, le format de la trace doit être parfaitement
+spécifié afin que, pour une entrée et une transformation données, la trace
+puisse être comparée à une trace de référence. Cette dernière fait alors office
+de spécification de la transformation. 
+
+Dans le second cas d'utilisation de la trace, il faut pouvoir exprimer des
+propriétés à vérifier. Dans le contexte de la modélisation, {\ocl} est utilisé
+pour décrire des règles s'appliquant sur des modèles {\uml}. Lors d'une
+transformation de modèle, des pre-conditions peuvent donc être écrites pour les
+éléments sources, des post-conditions pour les éléments cibles et des
+invariants pour les liens de traçabilité.
+
+Dans notre approche, nous avons proposé une traçabilité de spécification. La
+transformation par réécriture présentée étant une transformation par parties,
+nous agrégeons un ensemble de règles (\emph{définitions}) pour obtenir la
+transformation finale. Chacune de ces \emph{définitions} est nommée et nous
+utilisons son nom pour construire le lien de trace lors de la génération du
+métamodèle de lien (au temps de compilation). Le membre gauche de nos règles
+constitue la source de chaque lien de trace, tandis que les éléments du membre
+droit sont les cibles de la relation de trace. Sur action explicite de
+l'utilisateur, nous établissons une relation un élément source et élément
+cible. Dans sa forme actuelle, notre implémentation permet de lier plusieurs
+cibles à une seule source (relations \texttt{1..N}), l'objectif étant à terme
+d'établir des liens entre plusieurs sources et plusieurs cibles (relations
+\texttt{N..N}).
+
+Reprenons le cas de la transformation \emph{SimplePDLToPetriNet} et choisissons
+une règle comme exemple : \emph{Process2PetriNet}. Cette règle transforme les
+éléments \emph{Process} du modèle source en un réseau de Petri composé de trois
+places ($p\_ready$, $p\_running$ et $p\_finished$), deux transitions
+($t\_start$ et $t\_finish$) et de quatre arcs ($ready2start$, $start2running$,
+$running2finish$ et $finish2finished$). De cette description textuelle, nous
+pouvons spécifier la relation liant la source \emph{src} aux éléments cibles
+comme suit :
+\begin{verbatim}
+Process2PetriNet = {
+  src : Process ;
+  p_ready, p_running, p_finished : Place ;
+  t_start, t_finish : Transition ;
+  ready2start, start2running, running2finish, finish2finished : Arc
+}
+\end{verbatim}
+
+On peut faire de même avec les relations \emph{WorkDefinition2PetriNet} et
+\emph{WorkSequence2PetriNet} pour compléter la spécification.
+
+Il est ensuite possible d'exprimer des contraintes sur cette relation,
+notamment des contraintes de nommage des éléments cibles. Dans notre cas,
+supposons que l'on impose que le nom d'un élément cible soit composé de deux
+parties, sur le principe suivant :
+\begin{itemize}
+  \item le nom de l'élément source lui ayant donné naissance en préfixe ;
+  \item un suffixe pertinent pour décrire l'élément (par exemple \emph{ready}
+    pour la place \emph{p\_ready}).
+\end{itemize}
+
+Avec ces conventions, nous pouvons par exemple écrire la contrainte de nommage
+pour la place \emph{p\_ready} peut être écrite comme suit (\verb+concat()+ est
+l'opération de concaténation des chaînes de caractères dans {\ocl}) :
+\begin{verbatim}
+p_ready.Name = src.Name.concat('_').concat(p_ready.Name);
+\end{verbatim}
+
+La trace est donc exploitable à des fins de qualification.
+
+%L'un des intérêts de
+%l'{\idm} est d'avoir la capacité de fournir des 
+
+%Compte tenu du processus de qualification actuel et de l'importance de cette 
+
+%Cette problématique étant fondamentale pour tout développement de système
+%critique, dans un autre domaine que l'{\idm}, 
+
+%C'est d'ailleurs l'approche adoptée par l'outil {\btollvm} qui implémente la
+%traçabilité de la transformation du langage {\B} vers le langage intermédiaire
+%de {\llvm} sous la forme de commentaires lisibles par un humain. Ces
+%commentaires sont générés pour un code {\B} donné et évoluent donc avec
+%l'outil. Ils facilitent la lecture et la compréhension du code par l'expert
+%mais ne sont pas réutilisables en tant que tel comme entrée d'un outil
+%automatique de vérification.
+
+
+%(\emph{SourceElement}) ---~association \emph{sources}~--- et un ou plusieurs
+%éléments cibles (\emph{TargetElement}) --~association \emph{targets}~---.
+%\ttodo{là il y a un problème : où est le liant ? d'où est-ce que ça sort ? etc.}
+
+%Ensuite, on se propose d'assurer la correction en exprimant les
+%propriétés avec {\ocl}. 
+%On écrit des pre-conditions pour les sources, des
+%post-conditions pour les cibles et des invariants pour les liens de
+%traçabilité. Ainsi, dans notre exemple, la traçabilité peut être spécifiée sous
+%la forme de contraintes {\ocl} telles que \todo{Nom du \emph{Process}
+%SimplePDL = Préfixe des éléments du réseau de Petri image ; Nom d'une
+%\emph{WorkDefinition} = Préfixe des éléments du réseau de Petri image de
+%l'activité}. (\ttodo{en OCL ?}).
+
+
+%Un modèle = nœuds + arcs (seront attribués)
+%
+%capturer 1 certain nombre de nœuds et d'arcs $\Rightarrow nouvel ensemble$
+%
+%nœuds bidons (resolve)
+%
+%Transfo de Modèles : {nœuds, arcs} -> autre {n,a} + nœuds à trous (resolve)
+%
+%Transfo pour réécriture de graphe
+%
+%Comment construire cette fonction ? par parties (bouts de graphes, avec des
+%trous)
+%
+%réécriture de termes $\Rightarrow$ graphe + arbre de recouvrement (par la
+%composition) + liens (associations)
+%%
+%%mécanique de termes, RW arbres
+%
+%+ enrichissement asso + recoller les morceaux de graphes
+%%
+%%description compositionnelle du problème : règles, assemblage via resolve.
+
+%\ttodo{ }
+
+%\ttodo{tout ce qui suit doit disparaitre d'une manière ou d'une autre ============}
+
+%\ttodo{réorganisation complète :
+%  \begin{itemize}
+%%    \item Comment spécifier ? illustrer la traçabilité (sans technique)
+%%    \item spéc sous forme de contraintes OCL : Nom petri = Nom process, etc.
+%%    \item propriétés OCL pre src / post tgt / inv lines de traçabilité
+%    \item cas d'utilisation SimplePDL2PetriNet à remonter du ch7 (MM) (modèles
+%      simples dans le ch4)
+%    \item modèle = ensemble de nœuds et arcs
+%    \item transfo de graphe, autre ensemble avec en intermédiaire la possibilité d'introduire des nœuds resolve
+%    \item transfo pour réécrire le graphe
+%    \item comment construire cette fonction ? par parties (bouts de graphe,
+%      éventuellement des bouts avec des trous)
+%    \item réécriture de termes, graphe -> arbre de recouvrement (composition) +
+%      liens (association)
+%  \end{itemize}
+%}
+
+%1e point : cf ch3, système critiques, qualification de transfo\\
+%important de spécifier la transformation pour vérifier la conformité
+%disposer de la traçabilité CS-CO\\
+
+%$\Rightarrow$ s'appuyer pour transfo les modèles\\
+%niveau spéc, donc différent de QVTR\\
+%ex comment spécifier
+%
+%ch5, comment spécifier $\Rightarrow$ illustrer traçabilité (sans tech)
+%
+%spéc sous forme de contraintes OCL : nom Petri = nom Process (par exemple), nom
+%activité
+
+%si on génère les liens de traçabilité, contraintes OCL applicables $\Rightarrow$
+%confiance$+$ $\Rightarrow$ pas besoin de preuve
+
+%2e point : langage QVTR, ATL, etc. proposent une traçabilité mécanique de
+%l'implémentation, pas substituable à celle de spécification
+
+%ex : aplatissement machines à états
+
+%\ttodo{tout ce qui précède doit disparaître d'une manière ou d'une autre\\============}
+%\ttodo{=========================================}
+
+
+%Metamodèle dans la vraie vie : 
+%\begin{figure}[h]
+%  \begin{center}
+%    \input{figures/actuallinkmmodel}
+%    \caption{Métamodèle de trace généré}
+%    \label{fig:actuallinkmmodel}
+%  \end{center}
+%\end{figure}
+
+
+%\todo{todo: 
+%\begin{itemize}
+%  \item Intérêt
+%  \item types
+%  \begin{itemize}
+%    \item interne
+%    \begin{itemize}
+%      \item explication
+%      \item implémentation technique NON
+%    \end{itemize}
+%    \item spécification
+%    \begin{itemize}
+%      \item explication
+%      \item implémentation technique / projet d'implémentation NON
+%    \end{itemize}
+%  \end{itemize}
+%\end{itemize}}
+
+%\ttodo{??? \begin{itemize}
+%\item DO-330 <- exigences dans l'industrie, pour la qualification du logiciel
+%\item que tracer ? comment ? quel format
+%\item intérêt
+%\item une idée de modèle de lien
+%\item comment utiliser les traces ? avec quels outils ?
+%\end{itemize}}
+
+%Les systèmes se complexifiant, l'{\idm} a apporté des solutions pour faciliter
+%et accélérer le développement logiciel. Cependant, si la manière de développer
+%un logiciel ainsi que les technologies utilisées ont changé depuis les débuts
+%de l'informatique, les contraintes liées à la maintenance (évolution du
+%logiciel, déboguage) ainsi qu'à la fiabilité (qualification, certification)
+%restent identiques. Ainsi, dans le cadre de la qualification, il est nécessaire
+%d'adopter la traçabilité. Lorsque l'on écrit et utilise une transformation, il
+%est nécessaire de connaître et de conserver les relations entre les sources et
+%les cibles. Ces relations sont données par la trace.
+
+%Nous abordons la notion de traçabilité
+
+%La notion de traçabilité est fondamentale en {\idm} pour différentes raisons
+%: %logiciel construit à partir de modèles, puis génération de code =>
+%%maintenance difficile
+%\begin{itemize}
+%\item qualification de logiciels obtenus via IDM
+%\item maintenance logicielle : changement d'archi, détection etcorrection de
+%bugs, etc.
+%\item analyse de transformations/compilations
+%\end{itemize}
+
+%définition de la \emph{trace navigation}~\cite{Vanhooff}
+
+
+%\section{Traçabilité interne}
+%%\subsection{\todo{Explication}}
+%usage pour les transfos elles-mêmes ; fortement liée à l'implémentation ;
+%problèmes en cas de réingénierie.
+
+
+%\subsection{Implémentation technique}
+%la partie « resolvelink » de \lex{\%tracelink} ; faut vraiment découper la
+%  construction en deux pour que les deux traçabilités soient bien
+%  distinctes 
+
+
+%\section{Traçabilité des spécifications}
+%%\subsection{\todo{Explication}}
+%intérêt ; découpler la trace des règles implémentées. La traçabilité de
+%spécification n'est pas un debug ; 
+%
+%%\subsection{Mise en {\oe}uvre / projet d'implémentation}
+%sur le mode « tout est modèle », je veux « tout est terme ». Le \emph{modèle de
+%lien} devient un \emph{terme de lien}.\\
+%TRACE, qui est l'ouverture vers un « contexte/environnement de termes ». 
+
+\section{Synthèse}%Approche}
+%\ttodo{en vrac :  environnement hybride / 1..N / marquage /}
+
+Nous avons vu qu'on pouvait distinguer deux types de traçabilité :
+\emph{interne} et \emph{de spécification}. Nous avons mis en œuvre les deux, la
+première étant absolument nécessaire à la bonne réalisation de notre approche,
+la seconde étant utile pour le développement de transformations qualifiables.
+
+Nous avons vu dans le chapitre~\ref{ch:verification:trace} que la traçabilité
+est généralement classée en deux catégories : \emph{implicite} et
+\emph{explicite}. Un aspect important de notre approche réside dans notre choix
+d'une traçabilité \emph{explicite}, ce qui implique l'introduction d'une
+syntaxe concrète dans le langage pour capturer explicitement les liens de
+trace. Dans le cas d'un choix implicite, tout doit être tracé et il faut
+prévoir un mécanisme pour trier et sélectionner les informations pertinentes
+\emph{a posteriori} (un système de requête sur la trace générée par exemple).
+Notre choix présente l'intérêt de produire des traces ciblées d'une taille plus
+raisonnable. Elles sont donc exploitables plus facilement \emph{a posteriori}.
+
+Enfin, un autre point intéressant qui ne peut transparaître sans aborder la
+question technique tient au fait de notre environnement technologique  hybride.
+En effet, nous apportons une traçabilité au sein d'un langage généraliste par
+l'ajout d'une construction dédiée. Dans un environnement homogène et parfaitement maîtrisé, la
+difficulté est levée rapidement, la traçabilité pouvant être assurée
+relativement simplement. En revanche, dans notre contexte, nous sommes à la
+frontière de deux mondes que l'utilisateur peut franchir selon ses convenances.
+Si l'utilisation du langage {\tom} et la manipulation de termes ne lui
+conviennent pas, l'utilisateur peut revenir à un mode de programmation en pur
+{\java}, auquel cas nous perdons le contrôle de cette partie du code. Ajouter
+la traçabilité dans cet environnement devient plus complexe. Nous détaillons la
+mise en œuvre de notre approche dans le chapitre~\ref{ch:outils}.
+
+Finalement, notre approche permet un usage \emph{a posteriori} de la trace
+générée à des fins de vérification dans le cadre de la qualification.
+
+%\todo{tout ce qui suit doit disparaitre ============================== }
+%
+%Notre approche sur la traçabilité d'une transformation consiste à exprimer
+%explicitement les relations liant une source à une cible. Nous sommes
+%actuellement en mesure d'associer une source à plusieurs cibles (relations
+%\texttt{1..N}). Nous disposons des deux types de traçabilité : d'une part la
+%traçabilité \emph{interne} (ou \emph{technique}) qui nous permet d'assurer la
+%phase de résolution, d'autre part la traçabilité des spécifications. Notre
+%approche est intéressante dans le sens où la granularité de la trace n'est pas
+%imposée à l'utilisateur (trop haut niveau ---~modèle source lié au modèle
+%cible~--- ou trop bas niveau ---~tous les éléments cibles sont forcément liés à
+%des éléments sources~---). Un autre intérêt certain de notre approche est son
+%environnement technologique : nous nous plaçons à la frontière des langages
+%généralistes et des langages dédiés en intégrant des constructions spécialisées
+%dans des outils généralistes. Cela nous permet d'ajouter une traçabilité dans
+%une transformation écrite en {\java} notamment. Nous décrivons l'aspect cet
+%aspect technique dans le chapitre~\ref{ch:outils:trace}, avec l'explication de
+%l'implémentation des outils.
+
+%\todo{en vrac}
+%
+%La traçabilité \emph{interne} est la traçabilité qui permet de réaliser la
+%phase de résolution. Elle consiste à marquer les éléments cibles d'une
+%\emph{définition} comme étant des éléments pouvant correspondre à des éléments
+%\emph{resolve}. Cette traçabilité a un intérêt technique.
+%
+%\todo{en vrac}
+%
+%Dans un environnement parfaitement maîtrisé, il est relativement simple
+%d'assurer la traçabilité d'une transformation : en effet, l'utilisateur a moins
+%de possibilités de s'écarter de l'environnement. Dans notre approche hybride,
+%nous sommes constamment à la frontière de deux mondes que l'utilisateur peut
+%franchir selon ses convenances. Si l'utilisation du langage {\tom} et la
+%manipulation de termes ne lui conviennent pas, l'utilisateur peut revenir à un
+%mode de programmation en pur {\java}, auquel cas nous perdons le contrôle de
+%cette partie du code. Ajouter la traçabilité dans cet environnement devient
+%plus complexe. Nous avons pris le parti de fournir une traçabilité qui puisse
+%être utilisée simplement au sein de {\java}.
+
+%\todo{en vrac}
+%
+%Nous avons vu dans le chapitre~\ref{ch:verification:trace} que la traçabilité
+%est généralement classée en deux catégories : \emph{implicite} et
+%\emph{explicite}. Dans notre approche, nous avons fait le choix d'une
+%traçabilité \emph{explicite}, ce qui implique l'introduction d'une syntaxe
+%concrète dans le langage pour capturer explicitement les liens de trace.
+
+%\todo{en vrac}
+%
+%Dans notre approche, afin d'obtenir des traces exploitables, nous avons choisi
+%d'aborder le problème de la traçabilité sur une action explicite de
+%l'utilisateur. Dans l'extension du langage {\tom}, nous proposons une
+%construction dédiée à la traçabilité.
+
+%\todo{en vrac}
+%
+%Nous distinguons deux types de traçabilité : la traçabilité dite \emph{interne}
+%ou \emph{technique}~\cite{Jouault2005} ainsi que la traçabilité de
+%spécification.
+
+%\todo{en vrac}
+%
+%La traçabilité \emph{interne} a un usage purement technique au sein de la
+%transformation, c'est-à-dire qu'elle est utilisée pour opérer la transformation
+%mais n'est pas nécessairement utile dans le cadre d'un processus de
+%qualification. Cette traçabilité est nécessaire à la réalisation de la phase de
+%résolution. En effet, si l'on crée des éléments \emph{resolve}, il faut aussi
+%marquer les éléments susceptibles de correspondre à un \emph{resolve} donné.
+%Les éléments tracés de la sorte sont donc les pendants des \emph{resolve}.
+
+
+%\section{Travail connexe (\todo{section à part entière ou au début plutôt ?})}
+
+%\section{\todo{Synthèse}}
+%\ttodo{}
+
+
+% vim:spell spelllang=fr

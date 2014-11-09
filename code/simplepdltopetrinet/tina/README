@@ -1,0 +1,41 @@
+Version: TINA toolbox 3.1.0
+
+Visualizer:
+~/tina-3.1.0/bin/nd tocheck.net
+
+Reachability Graph:
+~/tina-3.1.0/bin/tina -C tocheck.ndr tocheck.ktz
+
+Checking properties:
+~/tina-3.1.0/bin/selt  tockeck.ktz tocheck.ltl >> tocheck.selt
+
+
+
+properties:
+  op finished = T /\ A_finished /\ B_finished /\ C_finished /\ D_finished;
+  
+  [] (finished => dead);
+  [] (dead => finished);
+  [] <> dead ;
+  - <> finished;
+  
+The first line corresponds to the formula. The operator finished is defined as
+"true and A_finished and B_finished and C_finished and D_finished".
+
+The four others lines correspond to four properties to check:
+  [] (finished => dead);
+  can be translated by "always (finished implies deadlock)" which means that in
+  any cases, the finished state implies the deadlock property.
+
+  [] (dead => finished);
+  can be translated by "always (deadlock implies finished)", which means that
+  in any cases, the deadlock property implies the finished state.
+
+  [] <> dead ;
+  can be translated by "always eventually deadlock", which means that a
+  deadlock can be happen.
+
+  - <> finished;
+  can be translated by "non eventually finished", which means that it never
+  reach finished.
+

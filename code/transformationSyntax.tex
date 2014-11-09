@@ -1,0 +1,9 @@
+\begin{ebnf}[caption=Syntaxe concrète de la construction \lex{\%transformation}.,label=transformationConstructSyntax]
+TransformationConstruct  ::= '%transformation' TransformationName '('[TransformationArguments]')'
+                               ':' FileName '->' FileName '{' (Definition)+ '}'
+TransformationArguments  ::= SubjectName ':' AlgebraicType ( ',' SubjectName ':' AlgebraicType )*
+Definition                 ::= 'definition' DefinitionName 'traversal' Strategy '{' (DefinitionRule)+ '}'
+DefinitionRule             ::= Pattern '->' '{' BlockList '}'
+\end{ebnf}
+%Strategy AlgebraicType BlockList Pattern
+                             %| AlgebraicType SubjectName ( ',' AlgebraicType SubjectName )* 

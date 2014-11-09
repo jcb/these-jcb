@@ -1,0 +1,51 @@
+\begin{tomcode3}[caption=Forme générale du code de la transformation \emph{SimplePDLToPetriNet},label=code:transfoLightSimplePDL2PN]
+...
+public class SimplePDLToPetriNet {
+  %include{ sl.tom }
+  %include{ LinkClass.tom }
+  %include{ emf/ecore.tom }
+
+  %include{ mappings/DDMMPetriNetPackage.tom }
+  %include{ mappings/DDMMSimplePDLPackage.tom }
+
+  private static PetriNet pn = null;
+  private static LinkClass tom__linkClass;
+
+  %typeterm SimplePDLToPetriNet { implement { SimplePDLToPetriNet }}
+  public SimplePDLToPetriNet() {
+    this.tom__linkClass = new LinkClass();
+  }
+ ...
+  %transformation SimplePDLToPetriNet(tom__linkClass:LinkClass,pn:PetriNet) : 
+             "metamodels/SimplePDL.ecore" -> "metamodels/PetriNet.ecore" {
+    definition P2PN traversal `TopDown(P2PN(tom__linkClass,pn)) {
+      /* code du listing #\colcode{black}{~\ref{code:p2pn}}# */
+    }
+    definition WD2PN traversal `TopDown(WD2PN(tom__linkClass,pn)) {
+      /* code du listing #\colcode{black}{~\ref{code:wd2pn}}# */
+    }
+    definition WS2PN traversal `TopDown(WS2PN(tom__linkClass,pn)) {
+      /* code du listing #\colcode{black}{~\ref{code:ws2pn}}# */
+    }
+  }
+
+  public static void main(String[] args) {
+    ...
+    SimplePDLToPetriNet translator = new SimplePDLToPetriNet();
+    Introspector introspector = new EcoreContainmentIntrospector();
+    // processus #\colcode{black}{\texttt{à}}# transformer
+    simplepdl.Process p_root = `Process("root", ...);
+
+    Strategy transformer = 
+             `SimplePDLToPetriNet(translator.tom__linkClass,translator.pn);
+    transformer.visit(p_root, introspector);
+    //Appel de la strat#\colcode{black}{\texttt{é}}#gie de r#\colcode{black}{\texttt{é}}#solution g#\colcode{black}{\texttt{é}}#n#\colcode{black}{\texttt{é}}#r#\colcode{black}{\texttt{é}}#e
+    `TopDown(tom__StratResolve_SimplePDLToPetriNet(translator.tom__linkClass,
+                             translator.pn)).visit(translator.pn, introspector);
+    `TopDown(Sequence(PrintTransition()),PrintPlace()).visit(translator.pn,
+                                                                    introspector);
+    ...
+  }
+  ...
+}
+\end{tomcode3}

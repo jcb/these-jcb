@@ -1,0 +1,552 @@
+% vim:spell spelllang=fr
+\chapter{Vérification du logiciel}
+\label{ch:verification}
+%10p
+
+%exemple heartbleed : 
+%http://xkcd.com/1354/
+%http://imgs.xkcd.com/comics/heartbleed_explanation.png
+
+Il est extrêmement difficile de garantir l'absence totale d'erreurs
+dans un logiciel. Et cette tâche est d'autant plus ardue que le logiciel est
+complexe. Les bogues pouvant avoir des conséquences désastreuses et
+coûteuses, il est nécessaire de valider, vérifier et tester le logiciel avant
+leur mise en production. Dans ce chapitre, nous présentons le contexte de la
+vérification du logiciel dans lequel ce travail s'inscrit.  Nous expliquons
+différentes approches pour vérifier le
+logiciel~\ref{ch:verification:sec:approches}. Nous présentons aussi la
+qualification et la certification~\ref{ch:verification:sec:certifqualif} qui
+exigent une traçabilité.
+
+
+%Therac-25 (juillet 1985 -> avril 1986) / Ariane 5 (4 juin 1996) / crash AT&T (15 janvier 1990) / Pentium (juin 1994) / banque de New-York (21 novembre 1985)
+
+%\todo{VVT : Validation, Vérification, Test}
+
+%ch3 : validation et vérification des transformations -> biblio
+%
+%approches pour le logiciels -> relecture, testes
+%approches formelles, s'appuient sur spécification -> preuves, MC
+%certification, qualification
+%=> exigences ; préserver la traçabilité exigences/spécification
+%Notre cadre : qu'est-ce qui existe, biblio dessus
+%
+%approche «  validation par la traduction »
+
+\section{Approches pour la vérification du logiciel}
+\label{ch:verification:sec:approches}
+%intro, définitions, contraintes, outils
+
+%\ttodo{augmenter la qualité du soft, la confiance dans le logiciel :
+%vérification. Comment ? tests et simulation ; preuve mathématique ; MC
+%(exploration d'espaces d'états, tests exhaustifs, recherche de contre-exemple)}
+
+Dans cette section, nous abordons différentes manières de vérifier le logiciel
+afin d'en améliorer sa qualité, et donc la confiance que l'utilisateur peut
+avoir dans les logiciels qu'il utilise. Nous présentons d'abord des approches
+logicielles pratiques comme la relecture, les tests et la simulation, puis la
+preuve et le \emph{model-checking} qui sont des approches formelles.
+%~\ref{ch:verification:subsec:relecture},
+%les tests~\ref{ch:verification:subsec:test} et la
+%simulation~\ref{ch:verification:subsec:simu}, puis la
+%preuve~\ref{ch:verification:subsec:preuve} et le
+%\emph{model-checking}~\ref{ch:verification:subsec:mc} qui sont des approches
+%formelles.% Nous évoquons aussi une approche qui peut être vue comme un
+%%compromis : la simulation~\ref{ch:verification:subsec:simu}.
+Ces méthodes pour vérifier le logiciel et améliorer sa qualité sont
+généralement utilisées de manière conjointe, selon le niveau d'exigence visé
+(les contraintes pour une application sur ordiphone ne sont pas les mêmes que
+pour celles d'un calculateur de vol).
+
+\subsection{Relecture}
+\label{ch:verification:subsec:relecture}
+
+Une première approche évidente pour tout développeur est la relecture de code.
+Informelle, elle consiste à parcourir du code développé précédemment et à
+s'assurer qu'il est conforme aux exigences. Pour améliorer la fiabilité d'une
+relecture, la tendance est de faire relire du code d'un développeur à un autre
+développeur n'ayant pas participé au développement, et de croiser les
+relectures. Cependant, si cette méthode est largement répandue et encouragée,
+elle est loin d'être fiable. En effet, la relecture dépend totalement d'un
+relecteur humain dont l'état au moment de la relecture (compétences, fatigue,
+concentration, etc.) conditionne le résultat. Si la relecture permet de repérer
+les bogues les plus évidents, elle permet difficilement de repérer les plus
+subtils. De plus, dépendant des compétences et de l'expérience du relecteur,
+cette méthode est fortement soumise à son intuition. Une vérification d'un
+logiciel par relecture pourra ainsi être très différente selon le développeur.
+Si la relecture est indispensable dans tout développement, elle n'est pas
+suffisante pour du logiciel exigeant une forte fiabilité. Elle présente
+toutefois l'avantage d'être naturelle à tout développeur ayant suivi une
+formation adéquate\footnote{La relecture fait partie intégrante de la
+méthodologie du développement généralement enseignée dans les formations en
+informatique.} et d'être peu coûteuse : en effet, elle ne nécessite pas de
+compétences et d'outils supplémentaires qu'il a été nécessaire pour écrire le
+logiciel à relire. Cette approche de vérification peut éventuellement être
+suffisante pour des applications peu complexes, non critiques et peu diffusées
+(par exemple : un script pour renommer des fichiers dans un répertoire
+personnel). Elle reste efficace pour trouver des erreurs et constitue un
+élément fondamental de certaines approches agiles.
+
+
+\subsection{Tests}
+\label{ch:verification:subsec:test}
+
+Une seconde approche est de tester tout programme informatique avant sa mise en
+production, l'intensité des tests permettant d'obtenir plus d'assurance. Il
+existe diverses méthodologies et techniques pour tester du code. On citera par
+exemple la mise en place de tests unitaires censés tester des \emph{unités} de
+code (fonctions, classes). Des \emph{frameworks} dédiés aux tests unitaires ont
+ainsi été développés, comme par exemple
+{\junit}\footnote{\url{http://www.junit.org}}. Cela a été popularisé par les
+méthodes agiles, notamment \emph{eXtreme Programming}~\cite{Beck2004} qui
+repose en partie sur l'approche dirigée par les tests (\emph{Tests Driven
+Development}~\cite{Beck2003}). Remarquons que les scénarios de tests peuvent
+être considérés comme une forme de spécification. Bien que l'utilisation de
+tests permette d'améliorer grandement la qualité du logiciel durant sa phase de
+développement en réduisant les défauts~\cite{Williams2003}, la solution des
+tests unitaires commence à montrer ses limites lors de développements de
+logiciels complexes où les bogues peuvent avoir des origines plus nombreuses.
+Du fait des coûts et des délais de développement, il n'est pas rare de ne pas
+écrire de tests pour se concentrer sur le logiciel lui-même. Par conséquent,
+certaines parties de code ne sont pas testées et sont donc susceptibles de
+contenir des bogues. Des techniques de génération automatique de tests ont vu
+le jour pour augmenter la couverture de tests et tester au maximum les cas
+limites. Nous noterons par exemple 
+%l'outil DART~\cite{Godefroid2005}
+{\quickcheck}~\cite{Claessen2000,Hughes2010} pour tester les programmes
+{\haskell}, ainsi que ses implémentations et variantes pour d'autres langages
+%telles que {\scalacheck}\footnote{\url{http://code.google.com/p/scalacheck/}}
+%pour {\scala}, {\propcheck}\footnote{\url{https://github.com/polux/propcheck}}
+%pour le langage {\dart}, {\quickcheck} pour
+%{\java}\footnote{\url{https://bitbucket.org/blob79/quickcheck}}~\cite{Earle2013},
+%{\rushcheck}\footnote{http://rushcheck.rubyforge.org/} pour {\ruby}, {\etc}
+%\ttodo{autres réf et outils ?
+%{\junitquickcheck}\footnote{\url{https://github.com/pholser/junit-quickcheck}},
+%{\jcheck}\footnote{\url{http://www.jcheck.org/}}, qc = quickcheck pour Python
+%\footnote{http://github.com/dbravender/qc}}.
+% 
+  tels que {\scala}\footnote{{\scalacheck} :
+  \url{http://code.google.com/p/scalacheck/}}, {\dart}\footnote{{\propcheck} :
+  \url{https://github.com/polux/propcheck}}, {\java}\footnote{{\quickcheck}
+  pour {\java}~\cite{Earle2013} :
+  \url{https://bitbucket.org/blob79/quickcheck}}, {\ruby}\footnote{{\rushcheck}
+  : \url{http://rushcheck.rubyforge.org/}}, {\python}\footnote{qc :
+    \url{http://github.com/dbravender/qc}}, {\etc}
+
+
+
+Ces méthodes ont été transposées dans le cadre de l'{\idm}. L'approche dirigée
+par les tests~\cite{Giner2009} s'est développée, et des travaux de vérification
+par le test ont été menés pour les transformations de
+modèles~\cite{Fleurey2004}. Des \emph{frameworks} de test~\cite{Lin2005}, ainsi
+que des outils de génération de tests~\cite{Brottier2006,Lamari2007,Sen2009} et
+de génération de code tests~\cite{Rutherford2003} ont donc aussi vu le jour,
+accompagnés d'outils et de techniques de qualification des données de tests
+pour les transformations de modèles~\cite{Fleurey2009}.
+
+Les tests permettent de détecter des comportements anormaux, mais d'autres
+comportements anormaux peuvent aussi naître d'une combinaison de comportements
+normaux de modules fonctionnels indépendamment. Le problème pouvant alors
+provenir d'une incompréhension entre les équipes de développeurs ou entre le
+client et le fournisseur (spécification ambiguë). Si l'intégration de tests est
+absolument nécessaire dans le processus de développement d'un logiciel, elle se
+révèle insuffisante dans le cas du logiciel critique. En effet, tester
+intensément un logiciel permet de tester son comportement dans la plupart des
+cas, mais rien ne garantit que toutes les situations ont été testées.
+
+%\ttodo{théorie des graphes pour valider les transformations de modèles~\cite{Kuester2006}} 
+
+\subsection{Simulation}
+\label{ch:verification:subsec:simu}
+
+Il peut aussi être extrêmement difficile de tester correctement un système du
+fait de sa complexité, des fortes ressources demandées ou de la particularité
+de sa plateforme d'exécution. Les tests écrits et menés durant le développement
+peuvent se révéler peu réalistes ou fort éloignés des conditions réelles
+d'utilisation. Pour répondre à ce problème de réalisme du comportement d'un
+système sous conditions d'utilisation réelles, une approche liée aux tests
+revient à simuler le système pour étudier son comportement et
+détecter les anomalies. L'intérêt de ce type d'approche est que l'on peut
+travailler sur un système qui serait coûteux à déployer pour tester en
+conditions réelles. Notons par exemple les domaines du nucléaire ou de
+l'avionique qui ne permettent pas aisément (et à faible coût) des tests
+logiciels en conditions réelles, en particulier lors des premières étapes de
+développement. L'inconvénient de ce type de méthode de vérification est qu'il
+faut reproduire fidèlement un environnement et que les tests sont fortement
+conditionnés par la plateforme d'exécution sur lesquels ils sont exécutés et
+par les technologies employées. Dans le cas d'une informatique simple, la
+simulation est une option intéressante, mais sa difficulté de mise en œuvre
+croît avec la complexité du système (nombreuses dépendances, systèmes
+exotiques, matériel non disponible hors chaîne de production dédiée, modèles
+physiques complexes, {\etc}). Ainsi, en aéronautique, il est extrêmement
+complexe et coûteux de modéliser intégralement l'environnement afin de simuler
+tous les systèmes de l'avion. L'approche adoptée revient alors à procéder à une
+succession de phases simulant des modèles de l'environnement mécanique,
+physique, des calculateurs, du réseau, du logiciel, {\etc} La dernière étape
+avant le vol réel est l'\emph{Aircraft Zero --- Iron Bird} qui intègre toute
+l'informatique réelle sur un banc d'essai.
+
+%Par rapport à une preuve formelle, les méthodes de tests ont aussi
+%l'inconvénient d'être fortement conditionnées par la plateforme sur lesquels
+%ils sont exécutés et par les technologies employées.
+
+
+\subsection{Preuve}
+\label{ch:verification:subsec:preuve}
+
+À l'opposé de ces approches vues comme très pragmatiques et largement utilisées
+dans l'industrie, une autre approche pour améliorer la confiance dans un
+logiciel consiste à prouver formellement les algorithmes. Le problème est alors
+formalisé sous la forme d'axiomes et de buts qu'il faut atteindre en démontrant
+des théorèmes. Une preuve mathématique peut être écrite à la main, mais pour
+faciliter le processus et pour diminuer les risques d'introduction d'erreurs
+liées au facteur humain, des outils assistants à la preuve tels que
+{\coq}~\cite{Coq,Bertot2004} et {\isabelle}~\cite{Nipkow2002} ont été
+développés. Une preuve {\coq} est censée donner une forte confiance dans le
+logiciel développé et prouvé. Cependant, si la preuve de la correction d'un
+algorithme donne une garantie irréfutable du bon comportement de cet
+algorithme, elle ne donne pas obligatoirement la garantie du bon comportement
+du logiciel. En effet, ce sont les algorithmes et les spécifications qui sont
+généralement formellement prouvés et non les implémentations
+elles-mêmes\footnote{\og Beware of bugs in the above code; I have only proved
+  it correct, not tried it \fg{} -- D.E.  Knuth, 1977 ; citation et explication
+  accessibles sur sa page personnelle :
+  \url{http://www-cs-faculty.stanford.edu/~uno/faq.html}}. Or, le facteur
+  humain n'est pas à négliger, l'implémentation concrète du logiciel dépendant
+  fortement du développeur et des outils utilisés durant le processus. En
+  outre, lors d'une preuve, le contexte réel n'est pas forcément pris en compte
+  et certaines conditions d'utilisation réelles peuvent fortement influencer le
+  comportement et la fiabilité de l'application. %On peut aussi effectuer un
+%  raffinement pour finalement extraire le programme depuis la preuve {\coq}.
+
+%\ttodo{réf sur du réel qui ne colle pas avec la preuve : réseau ? gap pratique
+%vs théorie car phénomènes physiques (bruit), ou alors physique, bio\\ Preuve de
+%transformation de modèles ?}
+
+
+\subsection{Model-checking}
+\label{ch:verification:subsec:mc}
+
+%?\cite{Jhala2009} survey sur le MC
+
+Le \emph{model-checking} est une autre approche formelle que l'on peut
+considérer comme étant entre preuve et test. Elle consiste à abstraire
+(modéliser) un problème ou un système selon un formalisme (langage) donné, puis
+à explorer l'espace d'états possibles de ce système pour vérifier qu'aucun
+état ne viole une propriété donnée (un invariant par exemple). On peut
+considérer que cela revient à du test exhaustif, ce qui a donc valeur de
+preuve. L'intérêt du \emph{model-checking} est que --- contrairement aux tests
+--- il est généralement indépendant de la plateforme d'exécution et qu'il
+apporte une vérification formelle du système. Par exemple, les outils
+{\cadp}\footnote{\url{http://cadp.inria.fr}}~\cite{Garavel2011} et
+{\tina}\footnote{\url{http://projects.laas.fr/tina}}~\cite{Berthomieu2004} sont
+deux \emph{model-checkers} dont les formalismes d'expression des modèles sont
+respectivement LOTOS et les réseaux de Petri. On peut toutefois reprocher au \emph{model-checking} de ne pas
+toujours être suffisamment proche de la réalité et d'avoir un coût en
+ressources élevé dans le cas de systèmes complexes. Cela a conduit certains à
+compléter le \emph{model-checking} par l'analyse à l'exécution sur des
+applications réelles simulées~\cite{Bayazit2005}. L'{\idm} reposant sur les
+modèles qui sont des abstractions de problèmes, il est naturel d'adopter le
+\emph{model-checking} pour vérifier le logiciel produit par ces méthodes. On
+peut adjoindre des contraintes aux modèles avec des langages tels qu'{\ocl}
+dans le cas de {\uml}, mais un modèle n'est pas nécessairement immédiatement
+vérifiable. Il nécessite souvent une ou plusieurs transformations afin de
+pouvoir être vérifié au moyen d'un \emph{model-checker}. C'est une approche
+courante que d'opérer une suite de transformations permettant de passer du
+modèle servant de spécification au modèle vérifiable, ainsi que de la
+spécification vers l'application réelle.  Cependant, comme précédemment, il
+s'agit à nouveau de vérifier un modèle et non pas le code généré réel. Chaque
+transformation se doit donc d'être simple afin que l'on puisse garantir la
+préservation du comportement d'un pas à l'autre. Ce type d'approche est très
+utilisé en {\idm}. Nous notons immédiatement qu'une telle approche pour
+s'assurer du bon fonctionnement du logiciel nécessite non seulement une
+vérification du modèle, mais aussi une garantie que la transformation elle-même
+est correcte.
+
+\section{Certification et qualification}
+\label{ch:verification:sec:certifqualif}
+%\todo{transfos de modèles, deux formes de vérification : 
+%\begin{itemize}
+%  \item avant la transfo une fois pour toutes
+%  \item après chaque utilisation de la transformation
+%\end{itemize}
+%Le niveau de certification demandé ainsi que l'utilisation des outils impliqués
+%dans le processus de développement de logiciel embarqué impose de vérifier les
+%outils.
+%}
+
+Le processus de certification n'est pas nécessaire pour tous les logiciels et
+tous les secteurs d'activité. Il fait en revanche partie intégrante du
+processus de développement logiciel dans le cadre de développement de systèmes
+critiques, par exemple dans les domaines de l'aéronautique, de l'automobile (du
+transport en général) et de la santé. La loi impose le respect d'exigences en
+fonction de crédits de certification demandés. 
+
+\begin{definition}[Crédit de certification]
+  Acceptation par l'autorité de certification qu'un processus, un produit ou
+  une démonstration satisfait les exigences de certification.
+\end{definition}
+
+\begin{definition}[Certification]
+  Processus d'approbation par une autorité de certification d'un produit.
+\end{definition}
+
+%\begin{definition}[Autorité de certification]
+%  Entité en charge de l'approbation des données de qualification d'outil.
+%\end{definition}
+
+Ces exigences sont fixées par des standards de certification : en aéronautique,
+le standard actuel est la norme DO-178C/ED-12C\footnote{La notation DO-
+correspond au nom donné à ce standard aux États-Unis d'Amérique, tandis que la
+notation ED- est celle en vigueur en Europe.}~\cite{DO-178C}. Elle donne des
+objectifs (et non des moyens) dont le nombre et le niveau augmentent avec le
+niveau de criticité. Ces niveaux de criticité (ou niveaux DAL, pour
+\emph{Development Assurance Level}) sont notés de A à E, A étant le plus
+critique, E le moins critique : 
+
+\begin{enumerate}[\text{Niveau} A :]
+
+  \item (Erreur catastrophique) un défaut du système ou sous-système étudié
+    peut provoquer un problème catastrophique (sécurité du vol ou atterrissage
+    compromis, crash de l'avion) ;
+
+  \item (Erreur dangereuse) un défaut du système ou sous-système étudié peut
+    provoquer un problème majeur entraînant des dégâts sérieux voire la mort de
+    quelques occupants ;
+
+  \item (Erreur majeure) un défaut du système ou sous-système étudié peut
+    provoquer un problème sérieux entraînant un dysfonctionnement des
+    équipements vitaux de l'appareil (pas de mort) ;
+
+  \item (Erreur mineure) un défaut du système ou sous-système étudié peut
+    provoquer un problème pouvant perturber la sûreté du vol (pas de mort) ;
+
+  \item (Erreur sans effet) un défaut du système ou sous-système étudié peut
+    provoquer un problème sans effet sur la sûreté du vol.
+
+\end{enumerate}
+
+Dans le cadre du processus de certification de systèmes critiques, les outils
+utilisés pour le développement doivent être vérifiés afin de s'assurer de leur
+bon fonctionnement et qu'ils n'introduisent pas d'erreurs dans le logiciel.
+
+Les pratiques de développement logiciel évoluant, notamment par l'adoption
+croissante de l'approche dirigée par les modèles qui plaide pour
+l'automatisation maximale des tâches, de nouveaux outils sont intégrés aux
+processus de développement. L'introduction d'outils automatiques dans une
+chaîne de développement de système soumis à certification impose l'une des deux
+approches suivantes :
+\begin{itemize}
+  \item vérifier les données produites par l'outil \emph{a posteriori} ;
+  \item qualifier l'outil.
+\end{itemize}
+
+%\todo{Crédit de certification = confiance dans l'outil\\
+%Crédit de certification implicite : pas de vérification des sorties de l'outil. 
+%Si vérification des sorties, qualification pas requise}
+
+La qualification d'un logiciel participe à atteindre un objectif exigé par le
+processus de certification et permet d'obtenir de la confiance dans les
+fonctionnalités d'un outil. Ce processus de qualification peut être appliqué à
+une ou plusieurs fonctions dans un outil, à un outil unique ou à un ensemble
+d'outils.
+
+\begin{definition}[Qualification]
+La qualification d'outils est le processus nécessaire pour obtenir des crédits
+de certification d'un outil. Ces crédits peuvent uniquement être garantis pour
+un usage donné dans un contexte donné.
+\end{definition}
+
+L'intérêt de la qualification d'un outil est d'obtenir suffisamment de
+confiance en cet outil pour pouvoir l'intégrer dans une chaîne de développement
+sans avoir à vérifier ses données de sortie ensuite. Le choix entre l'approche
+de qualification et de vérification \emph{a posteriori} revêt un aspect
+stratégique : si la qualification d'un outil peut avoir un coût élevé fixe,
+elle n'en génère pas plus par la suite, tandis que la vérification \emph{a
+posteriori} aura un coût récurrent.
+
+%\todo{Qualification pas directement utilisée : focus sur les générateurs de code
+%  critères :
+%\begin{enumerate}
+%  \item outils dont la sortie appartient au logiciel embarqué / compilo
+%  \item outils qui automatisent un processus : détection d'erreur, (outils de
+%    vérif formelle) / vérification
+%  \item outils de vérification / pas d'impact
+%\end{enumerate}}
+
+La DO-178/ED-12 définit des catégories d'outils (\emph{sans impact},
+\emph{vérification} et \emph{compilateur, générateur de code}) ainsi que des
+critères de qualification. Elle précise les exigences de qualification adaptées
+aux différents types d'outils et à leur utilisation. La norme
+DO-330/ED-251~\cite{DO-330} donne des instructions pour la qualification
+d'outils. Elle définit aussi cinq niveaux de qualification d'outils (TQL ---
+\emph{Tool Qualification Levels}) qui sont fonction de ces trois critères ainsi
+que de la criticité du logiciel développé :
+\begin{enumerate}
+
+  \item[TQL-1 à 3 : ] ces niveaux concernent les générateurs de code et outils
+    dont la sortie fait partie du logiciel embarqué et qui peuvent donc
+    introduire des erreurs ;
+  
+  \item[TQL-4 à 5 : ] ces niveaux concernent les outils de vérification, qui ne
+    peuvent pas introduire d'erreurs, mais qui peuvent échouer à en détecter
+    (outils de tests, analyseurs de code statique)
+
+\end{enumerate}
+
+Selon son utilisation et selon le type de production de l'outil, le niveau de
+qualification sera différent. Un outil ne peut donc être qualifié une fois pour
+toutes. En revanche, il peut être \emph{qualifiable} pour chaque projet,
+c'est-à-dire \emph{pre qualifié} pour chaque projet.
+
+%%%%%
+
+L'{\idm} plaidant pour l'automatisation des tâches et l'usage d'outils
+automatisant les tâches, il faut vérifier ces outils. Dans ce contexte, l'un
+des problèmes majeurs de l'{\idm} est le grand nombre d'outils  non qualifiés
+et non certifiés impliqués dans les chaînes de développement, notamment des
+générateurs de code, des outils de traduction, et de manière plus générale des
+outils automatisant au maximum les tâches de transformation. 
+%Il faut donc certifier ou aider à certifier les nouveaux logiciels produits par
+%ces nouvelles chaînes, et donc qualifier les outils.
+
+
+%De plus, le processus de qualification étant mené manuellement par un humain,
+%il est extrêmement coûteux et est sujet à erreurs. C'est dans ce contexte que
+%notre travail s'intègre et que nous nous proposons d'aider le processus de
+%qualification.
+
+
+%validation = respect des besoins\\
+%vérification = respect des specs
+
+%\begin{definition}[Validation logicielle]
+%Selon le standard~\cite{IEEEstd610}, il s'agit du processus d'évaluation d'un
+%logiciel pendant ou à la fin du processus de développement pour déterminer s'il
+%satisfait les exigences spécifiées.
+%\end{definition}
+%selon~\cite{DO-330} : Le processus qui détermine que les exigences sont les exigences
+%corrects et qu'elles sont complètes.
+
+%\begin{definition}[Vérification logicielle]
+%Selon le~\cite{IEEEstd610}, il s'agit du processus d'évaluation d'un logiciel
+%pour déterminer si le produit d'une phase de développement donnée satisfait les
+%conditions imposées au début de cette phase. 
+%\end{definition}
+%selon~\cite{DO-330} : L'évaluation des sorties d'un processus pour s'assurer de la
+%correction et de la cohérence en fonction des entrée fournies à ce processus.
+
+
+%La validation logicielle garantit que le produit remplit effectivement les
+%besoins client, et que les spécifications étaient correctes initialement, alors
+%que la vérification garantit que le produit a été construit en conformité avec
+%les exigences et les spécifications de conception. La validation garantit « que
+%l'on a construit le bon produit ». La vérification garantit « que l'on a bien
+%construit le produit ». La validation confirme que le produit fourni remplira
+%l'usage attendu.
+
+%translation validation =  validation après chaque exécution du compilateur
+%que sa traduction est correcte (code cible correspond à une traduction correcte
+%du code source)
+%\todo{problèmes : 
+%  \begin{itemize}
+%    \item outils de modélisation non qualifiés et non certifiés => certifier
+%      des outils ou aider à certifier
+%    \item pb {\mde} : beaucoup d'outils dans les chaînes de développement =>
+%      introduction des outils "certifieurs" automatiques, problématique
+%\end{itemize}}
+
+%Problématiques : traçabilité, séparer spécification/implémentation/vérification
+
+\section{Traçabilité}
+\label{ch:verification:trace}
+
+%\todo{ici ? traçabilité interne vs traçabilité de spécification ; intérêt
+%(contrainte des précédentes sous-sous-sections). Souvent traçabilité interne ou
+%fortement liée à l'implémentation de la transformation. Se fait bien
+%techniquement.}
+
+%La qualification exige de séparer spécification, implémentation et
+%vérification. Elle exige aussi d'assurer la traçabilité entre elles.
+
+Une problématique fondamentale des compilateurs dans le cadre de la
+certification d'un logiciel est d'assurer la traçabilité entre le code source
+et le code binaire, ce qu'exige la norme DO-178/ED-12. Cette exigence pour les
+compilateurs et générateurs de code est généralisable à toutes les
+transformations, donc aux transformations de modèles à partir desquelles les
+logiciels sont produits. Assurer cette traçabilité permet aussi de respecter la
+contrainte de séparation de le spécification, de l'implémentation et de la
+vérification tout en étant capable de relier les unes aux autres.
+
+% ? ex de B2llvm : générateur B vers le langage intermédiaire de LLVM
+% spéc B -> code intermédiaire ; activation de la traçabilité génère des
+% commentaires lisibles humainement. mais rien de réutilisable automatiquement
+% pour vérifier des propriétés.
+
+\begin{definition}[Traçabilité]
+  La norme DO-330~\cite{DO-330} définit la traçabilité comme une association
+  entre objets telle qu'entre des sorties de processus, entre une sortie et son
+  processus d'origine, ou entre une spécification et son implémentation.
+\end{definition}
+
+L'{\idm} plaidant pour l'automatisation maximale des tâches répétitives et
+l'utilisation de générateurs de code pour produire le logiciel à partir de
+modèles, il est nécessaire de vérifier les transformations qui en sont le cœur.
+L'un des angles d'attaque du problème de la qualification est de fournir des
+outils de transformations qualifiables, qui assurent la traçabilité des
+transformations. 
+
+Dans le cas d'une transformation de modèle, le métamodèle source fait partie de
+la spécification et le modèle source la donnée d'entrée. Il convient donc de
+conserver une trace de la transformation en maintenant un lien entre la source
+et la cible. On retrouve souvent deux situations :
+
+\begin{itemize}
+
+  \item la trace se fait au niveau macroscopique (modèle d'entrée et modèle de
+    sortie) et la granularité est extrêmement faible, ce qui rend la trace peu
+    informative ;
+
+  \item la trace s'opère de manière très détaillée (comme un \emph{debug}) ce
+    qui génère une trace importante de tout ce qui s'est produit durant la
+    transformation. Si toutes les informations sont présentes, se pose le
+    problème de la pertinence des données recueillies : la quantité
+    d'informations peut rendre la trace inexploitable, les éléments
+    jugés intéressants risquant d'être noyés dans la trace.
+
+\end{itemize}
+
+Outre le respect strict des exigences de qualification, les informations de
+trace peuvent être très utiles pour des tâches telles que le \emph{debugging}
+ou l'analyse d'impact (conséquences d'une modification).
+
+La traçabilité des transformations de modèle est un aspect important que la
+plupart des outils traitent en apportant un support dédié, comme pour les
+outils {\qvt}, {\atl}, {\tefkat} ou {\kermeta}~\cite{Falleri2006}.
+D'autres outils tels que {\agg}, {\viatra} et {\great} n'ont pas de support
+dédié à cette traçabilité, cependant les informations de trace peuvent être
+créées comme des éléments cibles.
+
+Généralement, la traçabilité est classée en deux catégories : \emph{explicite}
+et \emph{implicite}. La première signifie que les liens de trace sont
+directement capturés en utilisant explicitement une syntaxe concrète adéquate.
+La traçabilité \emph{implicite} est quant à elle le résultat d'une opération de
+gestion des modèles (une requête sur des artefacts générés par exemple).
+
+Un problème récurrent de l'implémentation de la traçabilité est qu'elle est
+souvent fortement liée à l'implémentation de la transformation, ce qui est
+problématique dans le cadre de la qualification qui impose de préserver une
+séparation entre l'implémentation et la spécification. 
+
+%ou que son usage (traçabilité \emph{interne} ou \emph{technique})
+
+Pour la qualification, il faut donc fournir des informations pertinentes sans
+qu'elles soient perdues dans la masse de données, tout en ayant une traçabilité
+qui soit suffisamment découplée à l'implémentation, mais donnant une granularité
+intermédiaire. C'est dans ce contexte que nous nous proposons de travailler, et
+nous proposons de fournir des outils permettant d'aider à la qualification de
+transformations de modèles.
+
+
+
+% vim:spell spelllang=fr

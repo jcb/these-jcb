@@ -1,0 +1,25 @@
+static class JNat { }
+static class JNatList { }
+
+static class Jzero extends JNat {
+  public Jzero() {}
+  public boolean equals(Object o) {
+    if(o instanceof Jzero) {
+      return true;
+    }
+    return false;
+  }
+}
+
+static class Jsuc extends JNat {
+  public JNat n;
+  public Jsuc() { }
+  public Jsuc(JNat n) { this.n = n; }
+  public boolean equals(Object o) {
+    if(o instanceof Jsuc) {
+      Jsuc obj = (Jsuc) o;
+      return n.equals(obj.n);
+    }
+    return false;
+  }
+} 

@@ -1,0 +1,866 @@
+% vim:spell spelllang=fr
+\chapter{Études de cas : illustration et utilisation du langage}
+\label{ch:usecase}
+%15p
+
+%\ttodo{Ici on donne des cas d'utilisation :
+%\begin{itemize}
+%\item SimplePDLToPetrinet : exemple jouet que tout le monde connait et qui est
+%facile
+%\item SysML2Vhdlams ? Family2Person ? Class2Relational ?
+%\item autre ?
+%\end{itemize}}
+
+%\todo{refaire, il n'y avait pas encore le deuxième cas (aplatissement de
+%packages), et l'orga était légèrement différente}
+
+Dans ce chapitre, nous présentons un cas d'étude et expliquons le processus
+complet ainsi que son implémentation, depuis les métamodèles jusqu'au code
+de la transformation.
+
+Dans la section~\ref{sec:simplepdl2pn}, nous présentons le cas d'étude
+\emph{SimplePDLToPetriNet} tandis que dans la section~\ref{sec:aplatissement}
+nous présentons le cas de la transformation de l'aplatissement d'une hiérarchie
+de classes.
+
+\section{Cas \emph{SimplePDLToPetriNet}}
+\label{sec:simplepdl2pn}
+
+
+Dans cette section, nous présentons la transformation
+\emph{SimplePDLToPetriNet} introduite dans les chapitres précédents. Elle a été
+présentée et traitée par Benoît Combemale~\cite{combemale08}. Son principe est de
+transformer la représentation d'un processus exprimé avec le langage SimplePDL
+en sa représentation exprimée dans le formalisme des réseaux de Petri.
+L'intérêt de cette transformation dans la communauté est de travailler sur la
+vérification : dans le formalisme SimplePDL, il n'est pas possible de vérifier
+directement le processus décrit tandis que sous forme de réseau de Petri
+---~qui est un modèle mathématique~---, il est tout à fait possible de
+l'utiliser avec un \emph{model-checker} pour en vérifier des propriétés.
+%\todo{[nécessaire de définir mathématiquement le réseau de Petri
+%(6-uplet places/transitions/arcs/marquage initial/arcs primaires/limite de
+%capacité, etc.) ou alors le MM suffira ?]}
+
+%Dans un premier temps, nous rappelons les métamodèles 
+Nous rappelons d'abord les métamodèles permettant d'exprimer un processus que
+nous avons déjà présentés et expliqués précédemment, 
+%Nous décrivons tout d'abord les métamodèles permettant d'exprimer un processus,
+puis nous donnons un exemple de processus décrit en SimplePDL ainsi que sa
+version sous forme de réseau de Petri.
+
+\subsection{Métamodèles}
+
+\subsubsection{Métamodèle source : formalisme SimplePDL}
+
+Nous reprenons le métamodèle~\ref{fig:simplesimplepdlmmodel} que nous
+complétons afin de pouvoir représenter des processus hiérarchiques.  Nous
+ajoutons deux relations \emph{opposite} entre les métaclasses
+\emph{WorkDefinition} et \emph{Process}, les autres éléments restant identiques. Une \emph{WorkDefinition} peut ainsi
+être elle-même définie par un processus imbriqué (référence \emph{process}),
+qui conserve un lien vers l'activité qu'il décrit (référence \emph{from}). Nous
+obtenons le métamodèle illustré par la figure~\ref{fig:simplepdlmmodel}.
+
+\begin{figure}[h]%[fig:simplepdlmmodel]{Métamodèle SimplePDL.}%[H] %[!h]
+  \begin{center}
+    \input{figures/simplepdlmmodel}
+    \caption{Métamodèle SimplePDL.}
+    \label{fig:simplepdlmmodel}
+  \end{center}
+\end{figure}
+
+%Le langage SimplePDL dont le métamodèle est donné
+%figure~\ref{fig:simplepdlmmodel} permet d'exprimer simplement des processus
+%génériques. Un processus (\emph{Process}) est composé d'éléments
+%(\emph{ProcessElement}). Chaque \emph{ProcessElement} référence son processus
+%\emph{parent} et peut être soit une \emph{WorkDefinition}, soit une
+%\emph{WorkSequence}. Une \emph{WorkDefinition} définit une activité qui doit
+%être effectuée durant le processus (un calcul, une action, {\etc}). Une
+%\emph{WorkSequence} définit quant à elle une relation de dépendance entre deux
+%activités. La deuxième (\emph{successor}) peut être démarrée ---~ou
+%terminée~--- uniquement lorsque la première (\emph{predecessor}) est déjà
+%démarrée ---~ou terminée~--- selon la valeur de l'attribut \emph{linkType} qui
+%peut donc prendre quatre valeurs : \emph{startToStart}, \emph{finishToStart},
+%\emph{startToFinish} ou \emph{finishToFinish}. Afin de pouvoir représenter des
+%processus hiérarchiques, une \emph{WorkDefinition} peut elle-même être définie
+%par un processus imbriqué (référence \emph{process}), qui conserve un lien vers
+%l'activité qu'il décrit (référence \emph{from}).
+
+\FloatBarrier
+
+\subsubsection{Métamodèle cible : formalisme des réseaux de Petri}
+
+Nous reprenons le métamodèle des réseaux de Petri proposé dans le
+chapitre~\ref{ch:traceability}, sans aucune modification additionnelle. 
+La figure~\ref{fig:petrinetmmodel} est un rappel du métamodèle des réseaux
+de Petri que nous utilisons.
+
+%Le métamodèle donné par la figure~\ref{fig:petrinetmmodel} permet d'exprimer
+%les réseaux de Petri. Un tel réseau se définit par un ensemble de nœuds
+%(\emph{Node}) qui sont soit des places de type \emph{Place}, soit des
+%transitions de type \emph{Transition}, ainsi que par des arcs (\emph{Arc}). Un
+%arc (orienté) relie deux nœuds de types différents (le réseau de Petri est un
+%graphe biparti) et peut être de type \emph{normal} ou \emph{read-arc}. Il
+%spécifie le nombre de jetons (\emph{weight} ---~poids~---) consommés dans la
+%place source ou produits dans la place cible lorsqu'une transition est tirée. Un
+%\emph{read-arc} vérifie uniquement la disponibilité des jetons sans pour autant
+%les consommer (test de franchissement). Le marquage d'un réseau de Petri est
+%défini par le nombre de jetons dans chaque place (\emph{marking}).
+
+\begin{figure}[h]%[fig:petrinetmmodel]{Métamodèle PetriNet.}%[H] %[!h]
+  \begin{center}
+    \input{figures/petrinetmmodel}
+    \caption{Métamodèle des réseaux de Petri.}
+    \label{fig:petrinetmmodel}
+  \end{center}
+\end{figure}
+
+\FloatBarrier
+
+\subsection{Exemple de processus et de réseau de Petri résultant}
+
+Nous décidons de traiter l'instance de SimplePDL suivante : le processus
+hiérarchique composé d'activités et de contraintes de précédence illustré par
+la figure~\ref{fig:simplepdlusecase}.
+
+\begin{figure}[h]
+  \begin{center}
+    \input{figures/simplepdlusecase}
+    \caption{Exemple de processus décrit dans le formalisme SimplePDL.}
+    \label{fig:simplepdlusecase}
+  \end{center}
+\end{figure}
+
+Dans cet exemple, le processus \texttt{root} est composé de deux activités,
+\texttt{A} et \texttt{B}, reliées par une séquence \emph{start2start} notée
+\emph{s2s}, ce qui signifie que \texttt{B} peut démarrer uniquement si
+\texttt{A} a déjà démarré. \texttt{B} est elle-même décrite par un processus
+(\texttt{child}) composé de deux activités, \texttt{C} et \texttt{D} reliées
+par une séquence \emph{finish2start} notée \emph{f2s}. Ainsi, \texttt{C} doit
+être terminée pour que \texttt{D} puisse démarrer. Ce processus est
+conforme au métamodèle SimplePDL donné par la figure~\ref{fig:simplepdlmmodel}.
+
+Notre but est de transformer sa représentation actuelle en sa représentation
+sous forme d'un réseau de Petri. La figure~\ref{fig:petrinetusecase} est le
+résultat attendu pour cette transformation.
+
+\begin{figure}[h]
+  \begin{center}
+    %\begingroup
+    %\tikzset{every picture/.style={scale=0.9}}%
+    %\tikzset{global scale/.style={scale=0.9,every node/.style={scale=0.9}}}
+    %\input{figures/petrinetusecase}
+    %\scalebox{0.9}{\input{figures/petrinetusecase}}
+    \resizebox{1.0\linewidth}{!}{\input{figures/petrinetusecase}}
+    \caption{Réseau de Petri équivalent au processus décrit par la
+    figure~\ref{fig:simplepdlusecase}.}
+    \label{fig:petrinetusecase}
+    %\endgroup
+  \end{center}
+\end{figure}
+
+Dans cette figure ainsi que dans la suite du document, nous représentons les
+places par des cercles rouges, et les transitions par des carrés bleus. Les
+arcs de type \emph{normal} sont matérialisés par des flèches en trait plein
+noires, ou vertes dans le cas du résultat de la transformation d'une
+\emph{WorkSequence}. Ceux en pointillés correspondent aux synchronisations
+entre éléments, c'est-à-dire aux arcs de type \emph{read\_arc}.
+
+
+\FloatBarrier
+
+\subsection{Implémentation en utilisant les outils développés}
+
+%\ttodo{décomposition, explication des trois transformations, snippets de code,
+%code complet en annexe ; puis version optimale ? Transfos élémentaires : P2PN,
+%WD2PN et WS2PN.}
+
+Les métamodèles ainsi qu'un exemple de modèle d'entrée et son résultat attendu
+ayant été présentés, détaillons la transformation, ainsi que sa mise en œuvre
+avec nos outils. Pour améliorer la lisibilité ---~et donc la compréhension~---,
+les extraits de code apparaissant dans cette section sont légèrement simplifiés
+par rapport à l'implémentation réelle qui est donnée en
+annexe~\ref{annexe:pdl2pn}. Nous avons notamment supprimé certains paramètres
+et modifié des noms de variables (ajouts de préfixes $P$ et $WD$ par exemple)
+afin d'extraire l'essentiel du code en tâchant d'éviter toute confusion au
+lecteur.  Nous avons aussi conservé une cohérence entre les schémas et les
+extraits de code.
+
+Pour transformer le processus décrit par la figure~\ref{fig:simplepdlusecase},
+on peut aisément isoler trois transformations élémentaires qui composent la
+transformation globale. Chacune d'entre elles transforme un type d'élément du
+modèle source : respectivement \emph{Process2PetriNet},
+\emph{WorkDefinition2PetriNet} et \emph{WorkSequence2PetriNet} pour les
+éléments \emph{Process}, \emph{WorkDefinition} et \emph{WorkSequence}. Ces
+transformations élémentaires sont implémentées par des sous-constructions
+\texttt{definition}.
+
+\paragraph{ProcessToPetriNet.} Un \emph{Process} SimplePDL est traduit par un
+réseau de Petri de la forme de celui donné par la
+figure~\ref{fig:PNProcess}. Cette transformation élémentaire est
+implémentée par la \emph{définition} \texttt{P2PN} donnée par le
+listing~\ref{code:p2pn}.
+
+\begin{figure}[h]
+  \begin{center}
+    \input{figures/PNProcess}
+  \end{center}
+  \caption{Réseau de Petri résultant de la transformation d'un \emph{Process}.}
+  \label{fig:PNProcess}
+\end{figure}
+
+L'image d'un processus est donc constituée de trois places ($P_{p_{ready}}$,
+$P_{p_{running}}$ et $P_{p_{finished}}$), deux transitions ($P_{t_{start}}$ et
+$P_{t_{finish}}$) et quatre arcs. Dans le cas où il s’agit d'un processus
+hiérarchique, il peut y avoir un arc de synchronisation pointant vers la
+première place ($P_{p_{ready}}$) et un autre partant de la dernière place
+($P_{p_{finished}}$).
+
+Techniquement, nous implémentons cette transformation élémentaire par une
+\emph{définition} comprenant une seule règle filtrant tous les éléments
+\emph{Process} du modèle source (ligne 2). Dans cette règle, seul le nom du
+processus nous importe, nous n'instancions donc que la variable \texttt{name}.
+Dans le membre droit de la règle, les places et arcs de l'image d'un
+\texttt{Process} sont créés comme tout terme {\tom}, en utilisant la
+construction \lex{backquote} (lignes 3 à 5, et 9 à 12). En revanche, pour créer
+les deux transitions \texttt{Pt\_start} et \texttt{Pt\_finish}, nous utilisons
+la construction \lex{\%tracelink} afin de \emph{tracer} ces deux éléments
+(lignes 6 et 7).  Notons que ces transitions nouvellement créées et tracées
+sont immédiatement utilisées dans la construction des arcs du réseau de Petri.
+
+Le bloc de code des lignes 14 à 23 sert à la gestion des processus
+hiérarchiques : dans un tel cas, un processus possède un processus père qui est
+une \emph{WorkDefinition} non \texttt{null}, et il existe un traitement
+particulier. Il s'agit de créer des éléments \emph{resolve} par la construction
+\lex{\%resolve} (lignes 16 et 20) pour jouer le rôle de transitions créées dans
+une autre \emph{définition}. En effet, ces deux nœuds sont censés être créés
+par la transformation de \emph{WorkDefinitions} en réseaux de Petri. Ils sont
+représentés par les deux carrés bleus aux bords pointillés sur la
+figure~\ref{fig:PNProcess}. Les deux éléments \emph{resolve} peuvent être
+immédiatement utilisés dans la construction d'autres termes (lignes 18 et 22,
+arcs en pointillés sur la figure~\ref{fig:PNProcess}) ou avec {\java} (lignes
+17 et 21).
+
+\begin{figure}[h]
+  \begin{center}
+    \input{code/defP2PN}
+  \end{center}
+%  \caption{\texttt{P2PN :} Code de la définition \emph{ProcessToPetriNet}.}
+%  \label{code:p2pn}
+\end{figure}
+
+
+\FloatBarrier
+
+\paragraph{WorkDefinitionToPetriNet.} Une \emph{WorkDefinition} SimplePDL est
+traduite par un réseau de Petri de la forme de celui donné par la
+figure~\ref{fig:PNWorkDefinition}. Cette transformation élémentaire est
+implémentée par la \emph{définition} \texttt{WD2PN} donnée dans le
+listing~\ref{code:wd2pn}.
+
+\begin{figure}[h]
+  \begin{center}
+    \input{figures/PNWorkDefinition}
+  \end{center}
+  \caption{Réseau de Petri résultant de la transformation d'une \emph{WorkDefinition}.}
+  \label{fig:PNWorkDefinition}
+\end{figure}
+
+Le réseau de Petri résultant de cette transformation élémentaire ressemble
+beaucoup à celui obtenu par transformation d'un \emph{Process}. Il se
+différencie par un arc et une place supplémentaires $WD_{p_{started}}$ après
+la transition $WD_{t_{start}}$. Ces éléments additionnels par rapport à l'image
+d'un \emph{Process} permettent l'ajout d'une séquence entre deux
+\emph{WorkDefinitions}.  L'image d'une activité est donc constituée de quatre
+places ($WD_{p_{ready}}$, $WD_{p_{running}}$ et $WD_{p_{finished}}$,
+$WD_{p_{started}}$), deux transitions ($WD_{t_{start}}$ et $WD_{t_{finish}}$)
+et cinq arcs.  Dans le cas où il s'agit d'un processus hiérarchique, deux arcs
+de synchronisation avec le processus parent sont présents : l'un venant de la
+transition $P_{t_{start}}$ de l'image du processus parent et pointant sur la
+place $WD_{p_{ready}}$, l'autre partant de $WD_{p_{finished}}$ et pointant sur
+la transition $P_{t_{finish}}$ de l'image du \emph{Process} parent.
+
+Cette \emph{définition} est implémentée par le bloc \texttt{definition}
+\texttt{WD2PN}, comprenant une règle similaire à celle de la \emph{définition}
+\texttt{P2PN}, la différence étant que nous filtrons des éléments de type
+\emph{WorkDefinition} et non plus \emph{Process} (ligne 2). Les places et les
+transitions sont créées grâce à la construction \lex{backquote} (lignes 3 et 5)
+ou {\via} \lex{\%tracelink} (lignes 4, 6, 7 et 8). Tous ces termes ---~tracés ou non~--- sont immédiatement
+utilisés pour construire les arcs du réseau de Petri résultant (lignes 10 à
+14).
+
+En fin de bloc \texttt{definition} (lignes 16 à 25), les éléments
+intermédiaires \emph{resolve} représentés dans la
+figure~\ref{fig:PNWorkDefinition} par les deux carrés bleus avec les bords
+pointillés sont créés (lignes 19 et 23). Ils sont utilisés respectivement comme
+source et destination des arcs de synchronisation avec le processus parent
+créés lignes 23 et 27.
+
+\begin{figure}[h]
+  \begin{center}
+    \input{code/defWD2PN}
+  \end{center}
+%  \caption{\texttt{WD2PN :} Code de la définition \emph{WorkDefinitionToPetriNet}.}
+%  \label{code:wd2pn}
+\end{figure}
+
+Le fait de tracer quatre éléments dans cette \emph{définition} aura pour
+conséquence de générer à la compilation une \emph{ReferenceClass} ayant quatre
+champs correspondants.
+
+\FloatBarrier
+
+\paragraph{WorkSequenceToPetriNet.} Une \emph{WorkSequence} SimplePDL est
+traduite par un réseau de Petri constitué d'un arc, comme illustré par la
+figure~\ref{fig:PNWorkSequence}. Cette transformation élémentaire est
+implémentée par la \emph{définition} \texttt{WS2PN} donnée par le
+listing~\ref{code:ws2pn}. 
+
+\begin{figure}[h]
+  \begin{center}
+    \input{figures/PNWorkSequence}
+  \end{center}
+  \caption{Réseau de Petri résultant de la transformation d'une \emph{WorkSequence}.}
+  \label{fig:PNWorkSequence}
+\end{figure}
+
+Dans cette \emph{définition}, seul un arc est créé à partir de l'élément source
+filtré (\emph{WorkSequence}). Cependant, tout arc ayant deux extrémités et ces
+deux extrémités étant des éléments obtenus lors de l'application d'autres
+transformations élémentaires, il est nécessaire de construire des éléments
+\emph{resolve}. Les extrémités de l'arc image dépendent du type de la
+\emph{WorkSequence} filtrée. Nous filtrons donc sur \texttt{linkType} (ligne 5)
+et, compte tenu des règles écrites et du fait que {\tom} donne toutes les
+solutions possibles du filtrage, nous avons la garantie que pour un type de
+contrainte de précédence donné, deux règles seront déclenchées (une parmi
+celles des lignes 6 et 9, l'autre parmi celles des lignes 13 et 16). Après
+exécution de ce bloc, les variables \texttt{source} et \texttt{target} sont
+bien initialisées et peuvent être utilisées pour construire l'arc image
+\texttt{wsImage} (ligne 23) de la séquence filtrée.
+
+\begin{figure}[h]
+  \begin{center}
+    \input{code/defWS2PN}
+  \end{center}
+%  \caption{\texttt{WS2PN :} code de la définition \emph{WorkSequenceToPetriNet}.}
+%  \label{code:ws2pn}
+\end{figure}
+
+\FloatBarrier
+
+\paragraph{Transformation globale.}Ces blocs \texttt{definition} s'intègrent
+dans une transformation {\tom}+ {\java}
+dont la forme générale du code est donnée par le
+listing~\ref{code:transfoLightSimplePDL2PN}. Le code complet de la
+transformation est quant à lui donné dans l'annexe~\ref{annexe:pdl2pn} et est
+directement accessible dans le dépôt du
+projet\footnote{\url{https://gforge.inria.fr/scm/?group_id=78}}. Notons que
+cette transformation sert aussi de support pour la documentation sur le site
+officiel de
+{\tom}\footnote{\url{http://tom.loria.fr/wiki/index.php5/Documentation:Playing_with_EMF}}. Expliquons le reste du code de la transformation dans ses grandes lignes :
+\begin{itemize}
+
+  \item[\textbf{début :}] Les points de suspension de la ligne 1 représentent
+    du code java classique (\texttt{package} et \texttt{import}).
+
+  \item[\textbf{ancrages :}] Au sein de la classe \texttt{SimplePDLToPetriNet},
+    nous notons l'usage de plusieurs constructions \texttt{\%include}. Celle de
+    la ligne 3 sert à charger les ancrages formels de la bibliothèque de
+    stratégies, celle de la ligne 4 charge l'ancrage du modèle de lien (fourni
+    comme bibliothèque) et celle de la ligne 5 permet de charger les types
+    {\ecore}, eux aussi fournis sous la forme d'une bibliothèque. Les deux
+    ancrages chargés lignes 7 et 8 ont été générés par {\tomemf}. Le bloc de
+    code suivant montre des déclarations de variables et l'écriture d'un
+    \emph{mapping} minimal permettant d'utiliser la classe
+    \texttt{SimplePDLToPetriNet} comme un type {\tom}. Les points de suspension
+    suivants représentent du code {\java} (déclarations de variables, {\etc}).
+
+  \item[\textbf{transformation :}] Les trois \emph{définitions} constituent le
+    corps d'un bloc \texttt{\%transformation} (lignes 18 à 29). Nous avons
+    choisi de les écrire dans l'ordre dans lequel nous les avons présentées,
+    cependant nous rappelons que \textbf{cet ordre n'a aucune importance} avec
+    notre approche. 
+  
+  
+  \item[\textbf{main :}] Nous avons extrait une partie de \texttt{main()}.
+    Avant l'extrait, il s'agit de contrôles ainsi que du code permettant de
+    charger un modèle ou créer un modèle en {\tom} dans le cas où aucun fichier
+    n'est passé en paramètre. L'extrait comprend quant à lui la création de la
+    stratégie de transformation (ligne 38) ainsi que son appel (ligne 40). La
+    \emph{stratégie de résolution} est appelée à la ligne 42. Étant générée, son
+    nom est construit de manière prédictible pour l'utilisateur, à partir du
+    nom de la transformation ainsi que d'un préfixe explicite
+    (\texttt{tom\_StratResolve\_}). La stratégie appelée à la ligne 44 sert
+    pour l'affichage du résultat de la transformation.
+
+  \item[\textbf{fin :}] Le reste du code qui n'est pas montré dans le
+    listing~\ref{code:transfoLightSimplePDL2PN} consiste en des méthodes
+    d'affichage et de sérialisation pour obtenir un réseau de Petri compatible
+    avec le format d'entrée du \emph{model-checker}
+    {\tina}\footnote{\url{http://projects.laas.fr/tina}}~\cite{Berthomieu2004}.
+
+\end{itemize}
+
+\begin{figure}[h]
+  \begin{center}
+    \input{code/transfoLightSimplePDL2PN}
+  \end{center}
+%  \caption{Forme générale du code de la transformation \emph{SimplePDLToPetriNet}.}
+%  \label{code:transfoLightSimplePDL2PN}
+\end{figure}
+
+\paragraph{Usage de cette transformation.}Cette transformation étant bien
+connue, elle nous a servi de support pour le développement de nos outils. Son
+intérêt étant de pouvoir vérifier formellement des propriétés de son résultat,
+nous avons dépassé le simple développement de la transformation pour vérifier
+nos résultats. C'est pour cette raison que le modèle cible est généré par
+défaut au format d'entrée de {\tina}. Cela nous permet de le visualiser et d'en
+vérifier des propriétés avec le \emph{model-checker}. 
+
+Ainsi, nous avons pu exprimer une formule ainsi que des propriétés en logique
+temporelle linéaire (LTL) telles que la terminaison. Nous les avons ensuite
+vérifiées avec {\tina} sur le réseau de Petri résultant de la transformation.
+La formule, les propriétés ainsi que les résultats sont donnés en
+annexe~\ref{annexe:pdl2pn:mc} de ce document.
+
+
+\FloatBarrier
+
+\section{Aplatissement d'une hiérarchie de classes}
+\label{sec:aplatissement}
+
+Cette deuxième étude de cas avait pour but d'évaluer l'intérêt et les limites
+éventuelles des nouvelles constructions intégrées au langage {\tom}. Il s'agit
+d'une transformation endogène très simple : l'aplatissement d'une hiérarchie de
+classes. Nous disposons de classes, dont certaines héritent d'autres. Nous
+souhaitons aplatir cette hiérarchie en reportant les attributs des surclasses
+dans les classes qui sont les feuilles de l'arbre hiérarchique. Nous
+choisissons aussi de nommer les nouvelles classes reprenant tous les attributs
+hérités. Les classes qui ne sont pas impliquées dans une relation d'héritage ne
+changent pas.
+
+%\todo{Cet exemple a été implémenté, quelques remarques :
+%\begin{itemize}
+%  \item implémentations : v1, v2, v3, v4
+%%    \begin{enumerate}
+%%      \item version récursive triviale (c'est tout de même en Tom+Java pour des
+%%        raisons pratiques, mais sans \lex{\%transfo} et avec les mappings EMF)
+%%      \item version avec une stratégie Tom, adaptation de la version
+%%        précédente, mini-gain de lisibilité, je fais toujours appel à une
+%%        fonction récursive écrite précédemment)
+%%      \item version \lex{\%transfo} : pas intéressante dans le sens où elle est
+%%          plus compliquée que les versions précédentes. Plus de code, pas de
+%%          resolve nécessaire
+%%    \end{enumerate}
+%  \item Mais ce n'est pas pour autant que l'implémentation a été inutile, elle
+%    m'a permis de faire plusieurs constats :
+%    \begin{enumerate}
+%      \item du point de vue du développeur, actuellement les constructions
+%        haut-niveau ne sont vraiment utiles que si la transformation est
+%        suffisamment complexe (comprendre « s'il faut du \emph{resolve} »).
+%        Sans \emph{resolve}, je déconseille \lex{\%transformation}
+%      \item Tom-EMF reste utile  et intéressant même sans
+%        \lex{\%transformation}. En fait j'ai peur que ce soit la partie là plus
+%          utile et intéressante du code lié à ma thèse :$\backslash$ Finalement,
+%          peut-être qu'il mériterait bien d'être vraiment revu et écrit
+%          proprement.
+%       \item Comment trouver de l'intérêt à ces constructions haut-niveau pour
+%         une transfo peu complexe ? La traçabilité ! C'est un point intéressant
+%         si j'arrive à l'implémenter.
+%       \item il y a un gros problème d'implémentation dans mon transformer. Je
+%         suis tombé sur des erreurs que je pensais
+%         impossibles/absentes/corrigées.
+%    \end{enumerate}
+%\end{itemize}
+%}
+
+Nous présentons un exemple de transformation dans la
+section~\ref{flattening:subsec:model} et le métamodèle dans la
+section~\ref{flattening:subsec:mm}.  Pour évaluer et comparer, nous avons écrit
+plusieurs implémentations de cet exemple, que nous décrivons dans la
+section~\ref{flattening:subsec:impl}.
+
+\subsection{Exemple de transformation}
+\label{flattening:subsec:model}
+
+Nous considérons comme modèle source la hiérarchie de classes donnée par le
+membre gauche de la figure~\ref{fig:transfohierarchieclasses}. La classe
+\emph{C} possède un attribut \emph{attrC} de type \emph{C} et n'est dans aucune
+hiérarchie de classes. La classe \emph{B} est quant à elle dans une hiérarchie
+de classes : elle hérite de \emph{A} qui hérite elle-même de \emph{D},
+surclasse de toute la hiérarchie. La classe \emph{B} a deux attributs
+\emph{attrB1} et \emph{attrB2} de types \emph{C}. Cette transformation aplatit
+la hiérarchie et doit donc produire le modèle cible illustré par le membre
+droit de la figure~\ref{fig:transfohierarchieclasses}. Il s'agit d'un modèle
+constitué de deux classes : la classe \emph{C} ---~qui reste inchangée par
+rapport au modèle source~--- ainsi qu'une classe \emph{DAB} qui rassemble tous
+les attributs de la hiérarchie de classe aplatie. 
+
+
+%figure~\ref{fig:hierarchieclassesIN}.
+
+%\begin{figure}[!h]
+%  \begin{center}
+%    \input{figures/hierarchieclassesIN}
+%    \caption{Hiérarchie de classes.}
+%    \label{fig:hierarchieclassesIN}
+%  \end{center}
+%\end{figure}
+%
+%\begin{figure}[!h]
+%  \begin{center}
+%    \input{figures/hierarchieclassesOUT}
+%    \caption{Hiérarchie de classes aplatie.}
+%    \label{fig:hierarchieclassesOUT}
+%  \end{center}
+%\end{figure}
+
+\begin{figure}[h]
+  \begin{center}
+  \begin{tabular}{m{0.4\linewidth}m{0.1\linewidth}m{0.4\linewidth}}
+    \input{figures/hierarchieclassesIN} & \textbf{$\longrightarrow$} &
+    \input{figures/hierarchieclassesOUT}\\
+    \centering{(a)} && \centering{(b)}\\
+    \end{tabular}
+    \caption{Aplatissement d'une hiérarchie de classes.}
+    \label{fig:transfohierarchieclasses}
+  \end{center}
+\end{figure}
+
+\FloatBarrier
+
+
+\subsection{Métamodèle}
+\label{flattening:subsec:mm}
+
+S'agissant d'une transformation endogène, le métamodèle source est identique au
+métamodèle cible. Pour cette transformation, nous utilisons le métamodèle
+simplifié d'{\uml} donné par la figure~\ref{fig:simplifiedumlmmodel}.
+
+\begin{figure}[h]
+  \begin{center}
+    \input{figures/simplifiedumlmmodel}
+    \caption{Métamodèle d'{\uml} simplifié.}
+    \label{fig:simplifiedumlmmodel}
+  \end{center}
+\end{figure}
+
+Les \emph{Classifiers} sont des éléments ayant un nom et étant de type
+\emph{DataType} ou de type \emph{Class}. Un élément \emph{Class} peut avoir des
+attributs (\emph{Attribute}), qui sont eux-mêmes des \emph{Classifiers}. Dans
+notre contexte technique, nous avons besoin d'une racine afin d'obtenir un
+arbre de recouvrement. Nous avons donc ajouté une racine virtuelle dans le
+métamodèle ---~élément \emph{VirtualRoot}~--- qui contient tous les
+\emph{Classifiers} (relation de composition). 
+
+Pour les besoins de l'étude et afin de simplifier les explications et le
+développement, nous avons considéré une version épurée du métamodèle
+%extrait l'essentiel du métamodèle ce qui le réduit au métamodèle 
+illustré par la figure~\ref{fig:verysimplifiedumlmmodel}.% : dans ce
+%métamodèle, nous supprimons \emph{Classifier} et \emph{DataType}, nous obtenons
+%un métamodèle minimaliste suffisant pour notre exposé.
+%Il s'agit du métamodèle minimal pour notre exposé.
+
+%\todo{insert MM flatening.ecore}
+
+\begin{figure}[h]
+  \begin{center}
+    \input{figures/verysimplifiedumlmmodel}
+    \caption{Métamodèle considéré pour l'étude de cas.}
+    \label{fig:verysimplifiedumlmmodel}
+  \end{center}
+\end{figure}
+
+
+\FloatBarrier
+
+\subsection{Implémentation utilisant les outils développés}
+\label{flattening:subsec:impl}
+
+%\todo{Comparaison : Java récursif (avec un peu de Tom), Tom+Java stratégie +
+%récursion, Tom+Java \lex{\%transformation} $\rightarrow$ ok}
+
+Nous avons implémenté cet exemple de plusieurs manières afin de comparer
+l'intérêt d'utiliser les outils développés durant cette thèse pour la
+transformation de modèles :
+
+\begin{enumerate}
+
+%V1_notom_UMLClassesFlattening.java
+
+  \item La première version de cette implémentation est écrite en pur {\java}
+    (+{\emf}), sans l'aide de {\tom}, des nouvelles constructions et des outils
+    liés tels que {\tomemf}. Il s'agit d'une version mêlant récursivité et
+    itération ;
+
+%V2_nostrat_UMLClassesFlattening.t
+
+  \item la deuxième version est écrite en {\tomjava} mais sans user des
+    stratégies ni de la nouvelle construction \lex{\%transformation}. En
+    revanche, nous avons utilisé {\tomemf} pour générer les \emph{mappings} ;
+
+%V3_stratnotransfo_UMLClassesFlattening.t
+
+  \item la troisième implémentation est une application de la méthode présentée
+    dans~\cite{Bach2012}, à savoir l'écriture d'une transformation en utilisant
+    les stratégies de réécriture, mais sans la construction haut niveau
+    \lex{\%transformation} ;
+
+%V4_transfo_UMLClassesFlattening.t
+
+  \item la quatrième et dernière version utilise les outils développés dans le
+    cadre de cette thèse.
+
+\end{enumerate}
+
+Pour des raisons de lisibilité, nous faisons uniquement apparaître des extraits
+significatifs de code de cette transformation dans cette section. Le code
+complet des implémentations est donné dans l'annexe~\ref{annexe:flattening}.
+
+%\begin{description}
+%  \item[Version 0 :] transformation en Java EMF pur, de manière récursive
+%  \item[Version 1 :] intégration d'un peu de code Tom (\emph{mappings} et
+%  \lex{\%match})
+%  \item[Version 2 :] utilisation d'une stratégie Tom en plus du code Tom de la
+%  version précédente
+%  \item[Version 3 :] utilisation de la construction dédiée aux transformations
+%  de modèles \lex{\%transformation}
+%\end{description}
+
+\paragraph{Version 1 : {\java-\emf}.}
+L'implémentation en {\java}-{\emf} d'une telle transformation se révèle sans
+véritable difficulté. Le principe est de parcourir les classes du modèle source
+et d'appliquer un aplatissement récursif sur celles qui sont les feuilles de
+l'arbre d'héritage. Cette transformation peut être implémentée en environ 40
+lignes de code, comme le montre le listing~\ref{code:v1flattening} (code
+complet en annexe~\ref{annexe:flattening:v1}).
+
+\begin{figure}[h]
+  \begin{center}
+    \input{code/v1flattening}
+  \end{center}
+%  \caption{Implémentation de la transformation d'aplatissement de hiérarchie de classes en Java.}
+%  \label{code:v1flattening}
+\end{figure}
+
+Les pré-requis pour cette version de la transformation sont de maîtriser
+{\java} et de connaître un minimum {\emf} afin d'être en mesure d'écrire les
+appels adéquats pour créer un élément. Un défaut de cette implémentation est la
+lisibilité du code, le langage {\java} ainsi que le \emph{framework} {\emf}
+étant particulièrement verbeux. 
+
+
+\paragraph{Version 2 : {\tomjava-\emf}.}
+
+Pour remédier à ce désagrément ---~qui peut devenir un enjeu fort dans le cadre
+de la maintenance logicielle industrielle~--- nous avons modifié
+l'implémentation initiale avec {\tom}, afin d'user de ses facilités d'écriture.
+L'utilisation de la construction \lex{\%match} (filtrage de motif) ainsi que du
+\emph{backquote} (création et manipulation de termes) permettent notamment
+d'améliorer la lisibilité du programme. Le listing~\ref{code:v2flattening} est
+le code résultant de l'évolution du précédent listing, intégrant du code {\tom}
+simple (le code complet est donné dans l'annexe~\ref{annexe:flattening:v2}).
+
+
+\begin{figure}[h]
+  \begin{center}
+    \input{code/v2flattening}
+  \end{center}
+%  \caption{Implémentation de la transformation d'aplatissement de hiérarchie de classes en Tom+Java.}
+%  \label{code:v2flattening}
+\end{figure}
+
+Cet extrait de code est plus concis que la version en pur {\java} et
+{\emf} (moins de 25 lignes pour la transformation elle-même), mais il est
+surtout plus lisible. Pour utiliser la construction \lex{backquote} (\lex{`})
+comme nous le faisons dans ce listing, des ancrages algébriques sont
+nécessaires. Nous avons bien évidemment utilisé notre générateur d'ancrages
+formels {\tomemf} plutôt que de les écrire manuellement.  L'utilisateur n'a
+donc pas de travail additionnel à fournir par rapport à une transformation en
+pur {\java} et {\emf} autre que la commande de génération (dans la précédente
+version, l'utilisateur doit aussi écrire le métamodèle et générer le code
+{\emf} avec {\eclipse}).
+
+%\todo{(implémentation Tom+Java \%strategy)}
+
+\paragraph{Version 3 : {\tomjava-\emf} avec stratégies.}
+Les stratégies étant un aspect important de {\tom}, nous écrivons une autre
+version de cette transformation les utilisant. C'est l'occasion de mettre en
+œuvre la méthode présentée dans~\cite{Bach2012}. Dans cette nouvelle
+implémentation (extrait dans le listing~\ref{code:v3flattening}, code complet
+en annexe~\ref{annexe:flattening:v3}), nous utilisons toujours les ancrages
+algébriques générés par {\tomemf} et nous ajoutons une stratégie {\tom}.
+L'usage des stratégies avec des modèles {\emf \ecore} implique aussi
+l'utilisation de l'outil \emph{EcoreContainmentIntrospector} présenté
+dans~\ref{ch:outils:subsec:tomemf}. Pour rappel, il permet le parcours des
+modèles {\emf \ecore} vus sous leur forme de termes.
+
+\begin{figure}[h]
+  \begin{center}
+    \input{code/v3flattening}
+  \end{center}
+%  \caption{Version 3 : Implémentation de la transformation d'aplatissement de hiérarchie de classes en Tom+Java avec stratégies.}
+%  \label{code:v3flattening}
+\end{figure}
+
+Habituellement, l'utilisation des stratégies {\tom} simplifie systématiquement
+et grandement l'écriture de code ainsi que sa lisibilité, le parcours
+---~traité par les bibliothèques que nous fournissons~--- étant séparé du
+traitement. Cependant, après écriture et exécution de la transformation, nous
+nous apercevons que la transformation n'est ni véritablement plus courte, ni
+plus lisible, ni plus efficace que les implémentations précédentes. 
+
+C'est en observant plus précisément le métamodèle de notre exemple, la
+transformation attendue ainsi que l'outil permettant l'utilisation des
+stratégies que l'on identifie la raison. Un modèle {\emf} a une racine unique
+par la relation de composition et peut donc être représenté sous la forme d'un
+arbre, comme nous le faisons dans {\tom}. La figure~\ref{fig:treeexamples}
+illustre ce mécanisme appliqué aux modèles sources des deux exemples que nous
+présentons dans ce chapitre.
+
+%\begin{figure}[h!]
+%  \begin{center}
+%  \begin{tabular}{m{0.45\linewidth}m{0.45\linewidth}}
+%    \input{figures/treeexample1} & \input{figures/treeexample2} \\
+%    \centering{(a)} & \centering{(b)} \\
+%    \end{tabular}
+%    \caption{Arbres représentant les modèles source des exemples
+%    \emph{SimplePDLToPetriNet} (a) et \emph{ClassFlattening} (b).}
+%    \label{fig:treeexamples}
+%  \end{center}
+%\end{figure}
+
+\begin{figure}[!h]
+  \begin{center}
+        %\begin{subfigure}[]{0.45\textwidth}
+        \begin{subfigure}{0.45\linewidth}
+          \input{figures/treeexample1}
+                %\caption{Arbre représentant le modèle source de l'exemple \emph{SimplePDLToPetriNet}.}
+                \caption{\emph{SimplePDLToPetriNet}.}
+                \label{fig:treeexample1}
+        \end{subfigure}
+        \qquad %\qquad
+        \begin{subfigure}{0.45\linewidth}
+          \input{figures/treeexample2}
+                %\caption{Arbre représentant le modèle source de l'exemple \emph{ClassFlattening}.}
+                \caption{\emph{ClassFlattening}.}
+                \label{fig:treeexample2}
+        \end{subfigure}
+        \caption{Arbres représentant les modèles source des exemples \emph{SimplePDLToPetriNet} (a) et \emph{ClassFlattening} (b).}
+        \label{fig:treeexamples}
+  \end{center}
+\end{figure}
+
+Dans cette figure, les deux termes sont représentés de manière classique : la
+racine est en haut, les feuilles en bas. Un losange noir ---~le symbole de la
+relation de composition en modélisation~--- a été ajouté à chaque endroit où la
+relation est une relation de composition, c'est-à-dire à chaque relation
+père-fils. L'arbre est bien un arbre par la relation de composition.
+
+Si l'on examine la figure~\ref{fig:treeexample1}, nous nous apercevons que les
+relations de sa structure correspondent à celles qui nous intéressent dans
+l'exemple, à savoir les relations de composition. En revanche, dans le cas de
+l'exemple de l'aplatissement d'une hiérarchie de classes, la relation entre
+éléments qui nous intéresse véritablement est la relation d'héritage, modélisée
+par une relation bidirectionnelle \emph{subclass}--\emph{superclass} et non par
+une relation de composition. Nous représentons ces relations \og intéressantes
+\fg dans la figure~\ref{fig:treeexample2} par des flèches rouges. La seule
+relation de composition de cet exemple est une relation de composition
+artificielle que nous avons créée (ainsi que l'élément de type
+\emph{VirtualRoot}) afin d'avoir une racine et donc de pouvoir écrire ce modèle
+{\emf} {\ecore}. Notre outil \emph{EcoreContainmentIntrospector} descendra
+bien dans les arbres, mais dans le cas du second exemple, il ne servira qu'à
+obtenir tous les fils de cette racine virtuelle qui sont à plat. Ensuite, pour
+l'aplatissement en lui-même, nous faisons tout de même appel à une fonction
+\texttt{flattening()} récursive, que nous utilisions ou non des stratégies.
+
+%\todo{(implémentation Tom+Java \%transformation)}
+
+Passé ce constat, la dernière version de l'implémentation reposant elle aussi
+sur les stratégies de réécriture mais avec les nouvelles constructions, nous
+pouvons supposer qu'elle ne sera pas meilleure (plus lisible, plus concise et
+plus efficace). Nous constatons effectivement que l'implémentation est moins
+lisible et moins concise, avec une efficacité similaire. Différents facteurs
+permettent d'expliquer ce résultat : d'une part, comme pour la version
+précédente, les relations nous intéressant ne sont pas celles constituant
+l'arbre de recouvrement, d'autre part, cette transformation est trop simple pour
+tirer parti de nos outils. Expliquons plus en détail cet aspect. Dans cette
+transformation, nous ne pouvons extraire plusieurs transformations
+élémentaires. La transformation globale sera donc constituée d'une seule
+\emph{définition}, encodée par une stratégie de réécriture, comme dans la
+version précédente de l'implémentation. Ainsi, le gain habituellement apporté
+par la construction \lex{\%transformation} est complètement absent. Outre ce
+point, nous constatons qu'aucun élément en cours de transformation
+ne nécessite le résultat d'un autre élément devant être transformé. Il n'y a
+donc pas besoin d'introduire d'élément \emph{resolve} dans la transformation.
+L'un des apports de nos outils étant de gérer l'ordonnancement des pas
+d'exécution en générant une stratégie de résolution, son intérêt reste limité
+pour cette transformation.
+
+Finalement, nous pouvons donc déduire de cet exemple que nos outils ne sont pas
+pleinement adaptés à toutes les transformations. Dans ces quatre
+implémentations, la deuxième version semble être le compromis le plus
+judicieux. Le générateur de \emph{mappings} y joue un rôle majeur, nous
+utilisons une partie du langage {\tom}, en revanche nous nous passons des
+constructions plus complexes telles que les stratégies ainsi que les nouvelles
+constructions intégrées durant cette thèse. Cependant, les nouvelles
+constructions pour de tels exemples ne sont pas pour autant inintéressantes :
+en effet, si la résolution (et sa construction associée \lex{\%resolve})
+n'apporte pas de gain, il subsiste le second aspect de nos travaux, à savoir la
+traçabilité. L'utilisation de la construction \lex{\%tracelink} afin de générer
+un modèle de lien reste possible.
+
+Une autre conclusion de l'étude de cet exemple est que nous avons
+développé nos outils en visant la couverture d'un grand nombre de
+transformations, notamment celles où les relations de composition sont au cœur.
+Une perspective serait maintenant de travailler à l'élaboration d'outils gérant
+d'autres relations ou étant plus génériques. Nous pensons notamment à des
+stratégies de réécriture que nous pourrions paramétrer par des types de
+relations à suivre.
+
+%point, nous constatons que cette transformation ne nécessite pas du tout
+%d'éléments \emph{resolve}. En effet, aucun élément en cours de transformation
+
+
+\section{Synthèse}
+
+Dans ce chapitre, nous avons présenté deux cas d'étude pour deux objectifs
+distincts : \emph{SimplePDLToPetriNet} et \emph{UMLHierarchyFlattening}. La
+transformation \emph{SimplePDLToPetriNet} nous a permis de présenter
+l'utilisation des outils que nous avons développés durant cette thèse en
+déroulant complètement une transformation. La seconde étude de cas nous a
+permis de donner une première évaluation de nos outils dans un contexte où ils
+ne peuvent donner leur pleine mesure.
+
+L'objectif de cette seconde étude de cas était de repérer les points
+d'amélioration de nos outils, tant dans leur mise en œuvre actuelle
+qu'envisagée, et de nous donner de nouvelles perspectives techniques et
+scientifiques. En effet, si cette étude de cas nous a montré que nos outils
+n'étaient pas tous adaptés dans toutes les situations, elle nous a permis en
+revanche de relever un point intéressant. La relation de composition dans les
+modèles est centrale et se retrouve bien souvent au cœur des transformations de
+modèles. Dans notre contexte, elle nous permet d'avoir la vision arborescente
+des modèles que nous pouvons parcourir. Cependant, pour certaines
+transformations comme celle d'aplatissement d'une hiérarchie de classes, la
+relation d'intérêt n'est pas celle de composition. Partant de ce constat, il
+est intéressant de se poser la question de la généralisation des stratégies
+pour les transformations de modèles. Une piste est la paramétrisation des
+stratégies par le type de relation à suivre lors de la traversée des termes.
+Dans un premier temps, pour tester la validité de ce principe, on pourrait
+implémenter un \emph{introspecteur} dédié à d'autres types de relations
+(héritage notamment). Cette extension lèverait la limitation révélée par la
+seconde étude de cas. Ensuite, une seconde question d'intérêt serait de
+travailler sur la possibilité de paramétrer dynamiquement une stratégie :
+est-il possible de changer le type de lien à suivre en cours de parcours ? %,
+%et donc de changer de
+%stratégie de réécriture selon le contexte ?  cas d'application : réécriture
+%conditionnelle Un cas d'application serait alors la réécriture con
+Ce type de mécanisme permettrait de déclencher localement une stratégie avec un
+autre type de parcours, et donc d'adopter une stratégie de réécriture en
+fonction du contexte.
+
+Le premier exemple nous a aussi servi de support pour le développement de nos
+outils, et notre confiance en notre implémentation de cette transformation
+étant forte, nous nous en sommes aussi servi pour mener des expériences que
+nous présentons dans le chapitre suivant.%~\ref{ch:evaluation}.
+
+% vim:spell spelllang=fr

@@ -1,0 +1,22 @@
+\begin{tikzpicture}[node distance=1cm,>=stealth',scale=1,transform shape, on grid, auto]%>=latex 
+  \tikzstyle{every label}=[black]
+  \begin{scope}
+
+    \node (MMS) {$MM_s$};
+    \node (ms) [below of=MMS, yshift=-0.4cm] {$m_s$};
+    %\path[->] (ms) edge [dash pattern=on 2pt off 2pt] node {$conforme à$} (MMS);
+    \path[->] (ms) edge [dash pattern=on 2pt off 2pt] (MMS);
+    \node (ts) [above of=ms, xshift=-0.1cm, yshift=-0.2cm]
+    {\scriptsize{conforme à}};
+
+    \node (MMT) [right of=MMS, xshift=0.8cm] {$MM_t$};
+    \node (mt) [below of=MMT, yshift=-0.4cm] {$m_t$};
+    %\path[->] (mt) edge [dash pattern=on 2pt off 2pt] node {$conforme à$} (MMT);
+    \path[->] (mt) edge [dash pattern=on 2pt off 2pt] (MMT);
+    \node (tt) [above of=mt, xshift=-0.1cm, yshift=-0.2cm] {\scriptsize{conforme à}};
+
+    \path[->,thick] (ms) edge node [below,yshift=-0.2cm] {\scriptsize{Transformation exogène}} (mt);
+
+
+  \end{scope}
+\end{tikzpicture}

@@ -1,0 +1,24 @@
+\begin{tikzpicture}%[scale=1,transform shape]
+
+  \begin{class}{VirtualRoot}{-5,0}
+  \end{class}
+  
+  \begin{class}{Class}{0,0}
+  \attribute{name : String}
+  \end{class}
+  
+  \begin{class}{Attribute}{5,0}
+    \attribute{name : String}
+  \end{class}
+  
+  \composition{VirtualRoot}{children}{0..*}{Class}
+  \unidirectionalAssociation{Class}{root}{1}{VirtualRoot}
+  
+  \composition{Class}{attributes}{0..*}{Attribute}
+  \unidirectionalAssociation{Attribute}{type}{1}{Class}
+
+  %\myassociationtwo{Class}{subclass}{0..*}{Class}{0..*}{superclass}{-1,-3}{1,-3} %{210}
+  \myassociationthree{Class}{subclass}{0..*}{Class}{0..*}{superclass}{-0.8,-2.5}{0.8,-2.5} %{210}
+  %\association{Class}{subclass}{0..*}{Class}{superclass}{0..1} %{210}
+
+\end{tikzpicture}

@@ -1,0 +1,32 @@
+\begin{tikzpicture}[node distance=1cm,>=stealth',scale=1,transform shape, on grid, auto]%>=latex 
+  \tikzstyle{every label}=[black]
+  \begin{scope}
+
+    \node (m0) {M0};
+    \draw[yshift=0.5cm] (-0.5,0.5) -- (5.4,0.5);
+    \node (m1) [above of=m0,yshift=1cm] {M1};
+    \draw[dotted,yshift=1.5cm] (-0.5,1.5) -- (5.4,1.5);
+    \node (m2) [above of=m1,yshift=1cm] {M2};
+    \draw[dotted,yshift=2.5cm] (-0.5,2.5) -- (5.4,2.5);
+    \node (m3) [above of=m2,yshift=1cm] {M3};
+
+\node (t0) [left of=m0,rotate=90,align=center,xshift=0.1cm] {\scriptsize{monde réel}};
+\node (t1) [left of=m2,rotate=90,align=center] {\scriptsize{monde des modèles}};
+
+    \draw (1,-0.5) -- (1,7);
+
+    \node (n0) [right of=m0, xshift=2cm, yshift=0.1cm, text width=2.5cm] {\begin{center}système $S$\end{center}};
+    \node (n1) [right of=m1, xshift=2cm, yshift=0.2cm, text width=2.5cm] {\begin{center}modèle $m$\end{center}};
+    \node (n2) [right of=m2, xshift=2cm, yshift=0.2cm, text width=2.5cm] {\begin{center}métamodèle $MM$\end{center}};
+    \node (n3) [right of=m3, xshift=2cm, yshift=0.4cm, text width=2.5cm] {\begin{center}métamétamodèle $MMM$\end{center}};
+
+    \path[->] (3,0.5) edge node [xshift=2.5cm, yshift=-0.3cm] {\scriptsize{\textit{est représenté par}}} (3,1.5);
+    \path[->] (3,2.5) edge node [xshift=2.1cm, yshift=-0.3cm] {\scriptsize{\textit{est conforme à}}} (3,3.5);
+%    \draw[->] (3,2.5) -- node [] {\scriptsize{\textit{est conforme à}}} (3,3.5)
+    \path[->] (3,4.5) edge node [xshift=2.1cm, yshift=-0.3cm] {\scriptsize{\textit{est conforme à}}} (3,5.5);
+
+
+    \draw[->] (4.5,6) -- (5,6) -- (5,7) -- (3,7) -- node [yshift=0.4cm] {\scriptsize{\textit{est conforme à}}} (3,6.5);
+
+  \end{scope}
+\end{tikzpicture}
